@@ -78,7 +78,7 @@ const ChartAnalyzer = () => {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(20);
-    if (data) setHistory(data as SavedAnalysis[]);
+    if (data) setHistory(data as unknown as SavedAnalysis[]);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
