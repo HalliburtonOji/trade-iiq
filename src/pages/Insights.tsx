@@ -11,6 +11,7 @@ import TradingDNACard from "@/components/TradingDNACard";
 import Rulebook from "@/components/Rulebook";
 import WeeklyRecap from "@/components/WeeklyRecap";
 import BiasDetector from "@/components/BiasDetector";
+import MonthlyReport from "@/components/MonthlyReport";
 import StatCard from "@/components/StatCard";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -174,6 +175,7 @@ const Insights = () => {
             <TabsTrigger value="psychology" className="flex-1 text-xs">🧘 Psych</TabsTrigger>
             <TabsTrigger value="rules" className="flex-1 text-xs">📖 Rules</TabsTrigger>
             <TabsTrigger value="weekly" className="flex-1 text-xs">📅 Week</TabsTrigger>
+            <TabsTrigger value="monthly" className="flex-1 text-xs">📈 Month</TabsTrigger>
           </TabsList>
 
           {/* DNA TAB */}
@@ -348,6 +350,11 @@ const Insights = () => {
           {/* RULES TAB */}
           <TabsContent value="rules" className="mt-3">
             <Rulebook />
+          </TabsContent>
+
+          {/* MONTHLY TAB */}
+          <TabsContent value="monthly" className="mt-3">
+            <MonthlyReport />
           </TabsContent>
         </Tabs>
       </motion.div>
