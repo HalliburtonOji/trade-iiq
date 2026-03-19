@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Flame, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Flame, ArrowLeft, CheckCircle2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import PageShell from "@/components/PageShell";
@@ -37,6 +37,8 @@ const Learn = () => {
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState("All");
+  const [mistakes, setMistakes] = useState<string[]>([]);
+  const [weakAssets, setWeakAssets] = useState<string[]>([]);
 
   const fetchProgress = async () => {
     if (!user) return;
@@ -53,12 +55,69 @@ const Learn = () => {
 
   useEffect(() => { fetchProgress(); }, [user]);
 
+  // Fetch user mistakes for adaptive recommendations
+  useEffect(() => {
+    if (!user) return;
+    const fetchMistakes = async () => {
+      const [reviewsRes, tradesRes] = await Promise.all([
+        supabase.from("decision_reviews").select("mistake_type").eq("user_id", user.id),
+        supabase.from("trade_decisions").select("asset_type,outcome").eq("user_id", user.id),
+      ]);
+      if (reviewsRes.data) {
+        const m = reviewsRes.data.map(r => r.mistake_type).filter(Boolean) as string[];
+        setMistakes(m);
+      }
+      if (tradesRes.data) {
+        const byAsset: Record<string, { w: number; t: number }> = {};
+        tradesRes.data.filter(t => t.outcome === "WIN" || t.outcome === "LOSS").forEach(t => {
+          if (!byAsset[t.asset_type]) byAsset[t.asset_type] = { w: 0, t: 0 };
+          byAsset[t.asset_type].t++;
+          if (t.outcome === "WIN") byAsset[t.asset_type].w++;
+        });
+        const weak = Object.entries(byAsset).filter(([, v]) => v.t >= 2 && v.w / v.t < 0.4).map(([k]) => k);
+        setWeakAssets(weak);
+      }
+    };
+    fetchMistakes();
+  }, [user]);
+
   const level = getLevel(totalXp);
   const progress = ((totalXp - level.min) / (level.next - level.min)) * 100;
 
   const filteredLessons = lessonsData.filter(
     (l) => categoryFilter === "All" || l.category === categoryFilter
   );
+
+  // Adaptive recommendations based on mistakes and weak areas
+  const recommendedLessons = useMemo(() => {
+    const mistakeToCategory: Record<string, string[]> = {
+      fomo: ["Strategy", "Analysis"],
+      entered_early: ["Technical", "Strategy"],
+      oversizing: ["Strategy", "Beginner"],
+      no_stop: ["Strategy", "Technical"],
+      revenge_trade: ["Strategy"],
+      ignored_macro: ["Analysis", "Forex"],
+    };
+    const assetToCategory: Record<string, string[]> = {
+      forex: ["Forex"],
+      crypto: ["Technical", "Analysis"],
+      stock: ["Beginner", "Analysis"],
+    };
+
+    const priorityCategories = new Set<string>();
+    mistakes.forEach(m => {
+      (mistakeToCategory[m] || []).forEach(c => priorityCategories.add(c));
+    });
+    weakAssets.forEach(a => {
+      (assetToCategory[a] || []).forEach(c => priorityCategories.add(c));
+    });
+
+    if (priorityCategories.size === 0) return [];
+
+    return lessonsData
+      .filter(l => priorityCategories.has(l.category) && !completedLessons.includes(l.id))
+      .slice(0, 6);
+  }, [mistakes, weakAssets, completedLessons]);
 
   const handleQuizAnswer = async (idx: number, lesson: Lesson) => {
     setQuizAnswer(idx);
@@ -173,11 +232,46 @@ const Learn = () => {
           <p className="text-[10px] text-muted-foreground">{level.next - totalXp} XP to next level</p>
         </GlassCard>
 
-        <Tabs defaultValue="lessons">
+        <Tabs defaultValue={recommendedLessons.length > 0 ? "foryou" : "lessons"}>
           <TabsList className="w-full bg-secondary/50">
+            {recommendedLessons.length > 0 && (
+              <TabsTrigger value="foryou" className="flex-1 text-xs">✨ For You</TabsTrigger>
+            )}
             <TabsTrigger value="lessons" className="flex-1 text-xs">Lessons</TabsTrigger>
             <TabsTrigger value="badges" className="flex-1 text-xs">Badges</TabsTrigger>
           </TabsList>
+
+          {/* ADAPTIVE FOR YOU TAB */}
+          {recommendedLessons.length > 0 && (
+            <TabsContent value="foryou" className="mt-3 flex flex-col gap-3">
+              <GlassCard className="border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5 p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <span className="text-xs font-semibold">Recommended based on your trading</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  These lessons address your most common mistakes and weak areas
+                </p>
+              </GlassCard>
+              {recommendedLessons.map((lesson) => (
+                <GlassCard key={lesson.id} hoverable onClick={() => setSelectedLesson(lesson)}>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">{lesson.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold truncate">{lesson.title}</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{lesson.category}</span>
+                        <span className="text-[10px] text-muted-foreground">{lesson.duration}</span>
+                        <span className="text-[10px] text-muted-foreground font-mono">+{lesson.xp} XP</span>
+                      </div>
+                    </div>
+                  </div>
+                </GlassCard>
+              ))}
+            </TabsContent>
+          )}
 
           <TabsContent value="lessons" className="mt-3 flex flex-col gap-3">
             <div className="flex gap-1.5 overflow-x-auto no-scrollbar">

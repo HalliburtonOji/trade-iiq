@@ -10,6 +10,9 @@ import GlassCard from "@/components/GlassCard";
 import StatCard from "@/components/StatCard";
 import TickerMarquee from "@/components/TickerMarquee";
 import DailyMissions from "@/components/DailyMissions";
+import DQSWidget from "@/components/DQSWidget";
+import CoachCards from "@/components/CoachCards";
+import SmartAlerts from "@/components/SmartAlerts";
 
 const getGreeting = () => {
   const h = new Date().getHours();
@@ -121,6 +124,20 @@ const Index = () => {
         <motion.div variants={fadeUp}>
           <TickerMarquee />
         </motion.div>
+
+        {/* Coach Cards + DQS side by side on desktop */}
+        <div className={isMobile ? "space-y-4" : "grid grid-cols-2 gap-4"}>
+          <motion.div variants={fadeUp}>
+            <DQSWidget />
+            <div className="mt-3">
+              <SmartAlerts />
+            </div>
+          </motion.div>
+          <motion.div variants={fadeUp}>
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Coach Insights</h2>
+            <CoachCards />
+          </motion.div>
+        </div>
 
         {/* Daily Missions */}
         <motion.div variants={fadeUp}>
