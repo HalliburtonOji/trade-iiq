@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import CsvImport from "@/components/CsvImport";
 
 type Decision = "BUY" | "WAIT" | "AVOID";
 type Outcome = "PENDING" | "WIN" | "LOSS";
