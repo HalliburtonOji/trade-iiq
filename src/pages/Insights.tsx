@@ -168,6 +168,7 @@ const Insights = () => {
         <Tabs defaultValue="dna">
           <TabsList className="w-full bg-secondary/50 flex-wrap h-auto gap-0.5 p-1">
             <TabsTrigger value="dna" className="flex-1 text-xs">🧬 DNA</TabsTrigger>
+            <TabsTrigger value="bias" className="flex-1 text-xs">🛡️ Bias</TabsTrigger>
             <TabsTrigger value="ai" className="flex-1 text-xs">🧠 AI</TabsTrigger>
             <TabsTrigger value="performance" className="flex-1 text-xs">📊 Perf</TabsTrigger>
             <TabsTrigger value="psychology" className="flex-1 text-xs">🧘 Psych</TabsTrigger>
