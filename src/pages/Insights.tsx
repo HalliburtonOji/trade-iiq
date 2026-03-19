@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import PageShell from "@/components/PageShell";
 import GlassCard from "@/components/GlassCard";
+import AiPatternInsights from "@/components/AiPatternInsights";
 import StatCard from "@/components/StatCard";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
