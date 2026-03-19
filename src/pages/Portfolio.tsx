@@ -38,7 +38,8 @@ const Portfolio = () => {
   });
   const [ptForm, setPtForm] = useState({ symbol: "", units: "", price: "", stopLoss: "", takeProfit: "", thesis: "" });
   const [stats, setStats] = useState({ wins: 0, losses: 0, pending: 0, total: 0, winRate: 0, avgPnl: 0 });
-  const [pnlSparkline, setPnlSparkline] = useState<{ pnl: number }[]>([]);
+  const [pnlSparkline, setPnlSparkline] = useState<{ pnl: number; date: string }[]>([]);
+  const [sparkRange, setSparkRange] = useState<"7D" | "30D" | "90D">("30D");
   const [exporting, setExporting] = useState(false);
 
   const startingBalance = 10000;
