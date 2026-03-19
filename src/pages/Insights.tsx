@@ -195,6 +195,11 @@ const Insights = () => {
             <AiPatternInsights />
           </TabsContent>
 
+          {/* CHARTS TAB */}
+          <TabsContent value="charts" className="mt-3">
+            <PerformanceCharts trades={trades} reviews={reviews} />
+          </TabsContent>
+
           {/* PERFORMANCE TAB */}
           <TabsContent value="performance" className="mt-3 flex flex-col gap-3">
             {/* Best Strategy */}
