@@ -156,9 +156,22 @@ const Tracker = () => {
           <StatCard label="Pending" value={stats.pending} />
         </div>
 
-        <Button onClick={() => setShowForm(!showForm)} className="w-full gap-2">
-          <Plus className="h-4 w-4" /> Log New Decision
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowForm(!showForm)} className="flex-1 gap-2">
+            <Plus className="h-4 w-4" /> Log Decision
+          </Button>
+          <Button variant="outline" onClick={() => setShowImport(!showImport)} className="gap-2 text-xs">
+            <Upload className="h-4 w-4" /> CSV
+          </Button>
+        </div>
+
+        <AnimatePresence>
+          {showImport && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+              <CsvImport onComplete={() => { setShowImport(false); fetchTrades(); }} />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <AnimatePresence>
           {showForm && (

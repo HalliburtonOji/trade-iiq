@@ -1,1 +1,10 @@
 project_id = "zejebtpasghpevrpoubx"
+
+[functions.analyze-patterns]
+verify_jwt = false
+
+[functions.market-signals]
+verify_jwt = false
+
+[functions.weekly-digest]
+verify_jwt = false
