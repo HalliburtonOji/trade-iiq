@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TickerItem {
   symbol: string;
@@ -6,20 +8,53 @@ interface TickerItem {
 }
 
 const defaultTickers: TickerItem[] = [
-  { symbol: "NVDA", change: 4.2 },
-  { symbol: "BTC", change: 2.8 },
-  { symbol: "TSLA", change: -1.6 },
-  { symbol: "META", change: 3.1 },
-  { symbol: "ETH", change: -0.9 },
-  { symbol: "AAPL", change: 0.8 },
-  { symbol: "SOL", change: 4.1 },
+  { symbol: "NVDA", change: 0 },
+  { symbol: "BTC", change: 0 },
+  { symbol: "TSLA", change: 0 },
+  { symbol: "META", change: 0 },
+  { symbol: "ETH", change: 0 },
+  { symbol: "AAPL", change: 0 },
+  { symbol: "SOL", change: 0 },
 ];
 
 interface TickerMarqueeProps {
   tickers?: TickerItem[];
 }
 
-const TickerMarquee = ({ tickers = defaultTickers }: TickerMarqueeProps) => {
+const TickerMarquee = ({ tickers: initialTickers }: TickerMarqueeProps) => {
+  const [tickers, setTickers] = useState<TickerItem[]>(initialTickers || defaultTickers);
+
+  useEffect(() => {
+    if (initialTickers) return; // skip fetch if custom tickers provided
+    const fetchQuotes = async () => {
+      try {
+        const stockSymbols = ["NVDA", "TSLA", "META", "AAPL"];
+        const cryptoSymbols = ["BTC", "ETH", "SOL"];
+
+        const { data } = await supabase.functions.invoke("live-quote", {
+          body: { symbols: stockSymbols, asset_type: "stock" },
+        });
+
+        const { data: cryptoData } = await supabase.functions.invoke("live-quote", {
+          body: { symbols: cryptoSymbols, asset_type: "crypto" },
+        });
+
+        const allQuotes = { ...(data?.quotes || {}), ...(cryptoData?.quotes || {}) };
+
+        setTickers(prev => prev.map(t => {
+          const quote = allQuotes[t.symbol];
+          return quote?.change != null ? { ...t, change: quote.change } : t;
+        }));
+      } catch (e) {
+        console.error("Ticker fetch error:", e);
+      }
+    };
+
+    fetchQuotes();
+    const interval = setInterval(fetchQuotes, 5 * 60 * 1000); // refresh every 5 min
+    return () => clearInterval(interval);
+  }, [initialTickers]);
+
   const items = [...tickers, ...tickers]; // duplicate for seamless loop
 
   return (

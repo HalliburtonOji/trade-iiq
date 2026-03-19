@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash2, TrendingUp, TrendingDown, Target, FileText, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { LineChart, Line, ResponsiveContainer } from "recharts";
 
 interface PaperTrade {
   id: string;
