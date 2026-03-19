@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash2, TrendingUp, TrendingDown, Target, FileText, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { LineChart, Line, ResponsiveContainer } from "recharts";
 
 interface PaperTrade {
   id: string;
@@ -36,7 +37,7 @@ const Portfolio = () => {
   });
   const [ptForm, setPtForm] = useState({ symbol: "", units: "", price: "", stopLoss: "", takeProfit: "", thesis: "" });
   const [stats, setStats] = useState({ wins: 0, losses: 0, pending: 0, total: 0, winRate: 0, avgPnl: 0 });
-  const [showExport, setShowExport] = useState(false);
+  const [pnlSparkline, setPnlSparkline] = useState<{ pnl: number }[]>([]);
   const [exporting, setExporting] = useState(false);
 
   const startingBalance = 10000;
@@ -54,7 +55,7 @@ const Portfolio = () => {
   useEffect(() => {
     if (!user) return;
     const fetchStats = async () => {
-      const { data } = await supabase.from("trade_decisions").select("outcome,pnl_percent").eq("user_id", user.id);
+      const { data } = await supabase.from("trade_decisions").select("outcome,pnl_percent,date").eq("user_id", user.id).order("date", { ascending: true });
       if (data) {
         const wins = data.filter((d: any) => d.outcome === "WIN").length;
         const losses = data.filter((d: any) => d.outcome === "LOSS").length;
@@ -63,6 +64,10 @@ const Portfolio = () => {
         const pnls = data.filter((d: any) => d.pnl_percent != null).map((d: any) => d.pnl_percent);
         const avgPnl = pnls.length > 0 ? Math.round(pnls.reduce((s: number, v: number) => s + v, 0) / pnls.length * 10) / 10 : 0;
         setStats({ wins, losses, pending, total: data.length, winRate: completed > 0 ? Math.round((wins / completed) * 100) : 0, avgPnl });
+        // Build sparkline
+        const withPnl = data.filter((d: any) => d.pnl_percent != null && (d.outcome === "WIN" || d.outcome === "LOSS"));
+        let cum = 0;
+        setPnlSparkline(withPnl.map((d: any) => { cum += d.pnl_percent; return { pnl: Math.round(cum * 10) / 10 }; }));
       }
     };
     fetchStats();
@@ -199,6 +204,24 @@ const Portfolio = () => {
                 </div>
               </div>
             </GlassCard>
+
+            {/* P&L Sparkline */}
+            {pnlSparkline.length >= 2 && (
+              <GlassCard>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">P&L Curve</h3>
+                <ResponsiveContainer width="100%" height={80}>
+                  <LineChart data={pnlSparkline}>
+                    <Line
+                      type="monotone"
+                      dataKey="pnl"
+                      stroke={pnlSparkline[pnlSparkline.length - 1]?.pnl >= 0 ? "hsl(142, 71%, 45%)" : "hsl(0, 72%, 51%)"}
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </GlassCard>
+            )}
 
             {stats.total === 0 && (
               <GlassCard className="text-center py-6">

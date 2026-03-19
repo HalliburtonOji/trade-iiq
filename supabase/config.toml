@@ -14,3 +14,9 @@ verify_jwt = false
 
 [functions.bias-detector]
 verify_jwt = false
+
+[functions.live-quote]
+verify_jwt = false
+
+[functions.analyze-chart]
+verify_jwt = false

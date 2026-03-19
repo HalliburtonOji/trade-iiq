@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, ArrowRight, Plus, Star } from "lucide-react";
+import { Search, ArrowRight, Plus, Star, Camera } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,6 +8,7 @@ import PageShell from "@/components/PageShell";
 import GlassCard from "@/components/GlassCard";
 import VerdictBadge from "@/components/VerdictBadge";
 import SetupScoreMeter from "@/components/SetupScoreMeter";
+import ChartAnalyzer from "@/components/ChartAnalyzer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,6 +25,7 @@ const popularChips: Record<AssetType, string[]> = {
 };
 
 const Analysis = () => {
+  const [activeTab, setActiveTab] = useState<"search" | "chart">("search");
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -55,14 +57,28 @@ const Analysis = () => {
 
   return (
     <PageShell>
-      <div className="flex flex-col gap-4 px-4 pt-6">
+      <div className="flex flex-col gap-4 px-4 pt-6 pb-24">
         <h1 className="text-xl font-bold">Analysis</h1>
 
+        {/* Mode toggle */}
         <div className="flex gap-2">
-          {(["stock", "crypto", "forex"] as AssetType[]).map((t) => (
-            <button key={t} onClick={() => { setAssetType(t); setResult(null); }} className={`rounded-lg px-4 py-1.5 text-xs font-semibold capitalize transition-all ${assetType === t ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.3)]" : "glass-card text-muted-foreground hover:text-foreground"}`}>{t}</button>
-          ))}
+          <button onClick={() => setActiveTab("search")} className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === "search" ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.3)]" : "glass-card text-muted-foreground hover:text-foreground"}`}>
+            <Search className="h-3.5 w-3.5" /> Search
+          </button>
+          <button onClick={() => setActiveTab("chart")} className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === "chart" ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.3)]" : "glass-card text-muted-foreground hover:text-foreground"}`}>
+            <Camera className="h-3.5 w-3.5" /> 📸 Chart
+          </button>
         </div>
+
+        {activeTab === "chart" ? (
+          <ChartAnalyzer />
+        ) : (
+          <>
+            <div className="flex gap-2">
+              {(["stock", "crypto", "forex"] as AssetType[]).map((t) => (
+                <button key={t} onClick={() => { setAssetType(t); setResult(null); }} className={`rounded-lg px-4 py-1.5 text-xs font-semibold capitalize transition-all ${assetType === t ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.3)]" : "glass-card text-muted-foreground hover:text-foreground"}`}>{t}</button>
+              ))}
+            </div>
 
         <div className="flex gap-2">
           <div className="relative flex-1">
@@ -192,6 +208,8 @@ const Analysis = () => {
               </Button>
             </div>
           </motion.div>
+        )}
+          </>
         )}
       </div>
     </PageShell>

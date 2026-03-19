@@ -12,6 +12,7 @@ import Rulebook from "@/components/Rulebook";
 import WeeklyRecap from "@/components/WeeklyRecap";
 import BiasDetector from "@/components/BiasDetector";
 import MonthlyReport from "@/components/MonthlyReport";
+import PerformanceCharts from "@/components/PerformanceCharts";
 import StatCard from "@/components/StatCard";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -171,7 +172,8 @@ const Insights = () => {
             <TabsTrigger value="dna" className="flex-1 text-xs">🧬 DNA</TabsTrigger>
             <TabsTrigger value="bias" className="flex-1 text-xs">🛡️ Bias</TabsTrigger>
             <TabsTrigger value="ai" className="flex-1 text-xs">🧠 AI</TabsTrigger>
-            <TabsTrigger value="performance" className="flex-1 text-xs">📊 Perf</TabsTrigger>
+            <TabsTrigger value="charts" className="flex-1 text-xs">📊 Charts</TabsTrigger>
+            <TabsTrigger value="performance" className="flex-1 text-xs">🏆 Perf</TabsTrigger>
             <TabsTrigger value="psychology" className="flex-1 text-xs">🧘 Psych</TabsTrigger>
             <TabsTrigger value="rules" className="flex-1 text-xs">📖 Rules</TabsTrigger>
             <TabsTrigger value="weekly" className="flex-1 text-xs">📅 Week</TabsTrigger>
@@ -191,6 +193,11 @@ const Insights = () => {
           {/* AI TAB */}
           <TabsContent value="ai" className="mt-3">
             <AiPatternInsights />
+          </TabsContent>
+
+          {/* CHARTS TAB */}
+          <TabsContent value="charts" className="mt-3">
+            <PerformanceCharts trades={trades} reviews={reviews} />
           </TabsContent>
 
           {/* PERFORMANCE TAB */}
