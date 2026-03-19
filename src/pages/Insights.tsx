@@ -172,7 +172,8 @@ const Insights = () => {
             <TabsTrigger value="dna" className="flex-1 text-xs">🧬 DNA</TabsTrigger>
             <TabsTrigger value="bias" className="flex-1 text-xs">🛡️ Bias</TabsTrigger>
             <TabsTrigger value="ai" className="flex-1 text-xs">🧠 AI</TabsTrigger>
-            <TabsTrigger value="performance" className="flex-1 text-xs">📊 Perf</TabsTrigger>
+            <TabsTrigger value="charts" className="flex-1 text-xs">📊 Charts</TabsTrigger>
+            <TabsTrigger value="performance" className="flex-1 text-xs">🏆 Perf</TabsTrigger>
             <TabsTrigger value="psychology" className="flex-1 text-xs">🧘 Psych</TabsTrigger>
             <TabsTrigger value="rules" className="flex-1 text-xs">📖 Rules</TabsTrigger>
             <TabsTrigger value="weekly" className="flex-1 text-xs">📅 Week</TabsTrigger>
