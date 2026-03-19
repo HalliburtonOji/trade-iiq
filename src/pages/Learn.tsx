@@ -88,6 +88,37 @@ const Learn = () => {
     (l) => categoryFilter === "All" || l.category === categoryFilter
   );
 
+  // Adaptive recommendations based on mistakes and weak areas
+  const recommendedLessons = useMemo(() => {
+    const mistakeToCategory: Record<string, string[]> = {
+      fomo: ["Strategy", "Analysis"],
+      entered_early: ["Technical", "Strategy"],
+      oversizing: ["Strategy", "Beginner"],
+      no_stop: ["Strategy", "Technical"],
+      revenge_trade: ["Strategy"],
+      ignored_macro: ["Analysis", "Forex"],
+    };
+    const assetToCategory: Record<string, string[]> = {
+      forex: ["Forex"],
+      crypto: ["Technical", "Analysis"],
+      stock: ["Beginner", "Analysis"],
+    };
+
+    const priorityCategories = new Set<string>();
+    mistakes.forEach(m => {
+      (mistakeToCategory[m] || []).forEach(c => priorityCategories.add(c));
+    });
+    weakAssets.forEach(a => {
+      (assetToCategory[a] || []).forEach(c => priorityCategories.add(c));
+    });
+
+    if (priorityCategories.size === 0) return [];
+
+    return lessonsData
+      .filter(l => priorityCategories.has(l.category) && !completedLessons.includes(l.id))
+      .slice(0, 6);
+  }, [mistakes, weakAssets, completedLessons]);
+
   const handleQuizAnswer = async (idx: number, lesson: Lesson) => {
     setQuizAnswer(idx);
     setShowResult(true);
