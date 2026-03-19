@@ -9,6 +9,7 @@ import GlassCard from "@/components/GlassCard";
 import AiPatternInsights from "@/components/AiPatternInsights";
 import TradingDNACard from "@/components/TradingDNACard";
 import Rulebook from "@/components/Rulebook";
+import WeeklyRecap from "@/components/WeeklyRecap";
 import StatCard from "@/components/StatCard";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -333,59 +334,8 @@ const Insights = () => {
           </TabsContent>
 
           {/* WEEKLY TAB */}
-          <TabsContent value="weekly" className="mt-3 flex flex-col gap-3">
-            <motion.div variants={fadeUp}>
-              <GlassCard className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                  <Calendar className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">This Week</p>
-                  <p className="text-lg font-bold">{analysis.weekTrades} decisions</p>
-                  <p className="text-[10px] text-muted-foreground">
-                    {analysis.weekCompleted > 0 ? `${analysis.weekWins}W / ${analysis.weekCompleted - analysis.weekWins}L` : "No completed trades"} · {lessonsCount} lessons done
-                  </p>
-                </div>
-              </GlassCard>
-            </motion.div>
-
-            <motion.div variants={fadeUp}>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Streaks & Consistency</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <GlassCard className="text-center py-4">
-                  <Flame className="h-6 w-6 text-orange-400 mx-auto mb-1" />
-                  <p className="text-lg font-bold font-mono">{streak}</p>
-                  <p className="text-[10px] text-muted-foreground">Day Streak</p>
-                </GlassCard>
-                <GlassCard className="text-center py-4">
-                  <Zap className="h-6 w-6 text-primary mx-auto mb-1" />
-                  <p className="text-lg font-bold font-mono">{totalXp}</p>
-                  <p className="text-[10px] text-muted-foreground">Total XP</p>
-                </GlassCard>
-              </div>
-            </motion.div>
-
-            <motion.div variants={fadeUp}>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Activity Summary</h3>
-              <GlassCard className="flex flex-col gap-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Total Decisions</span>
-                  <span className="text-xs font-bold font-mono">{trades.length}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Completed Trades</span>
-                  <span className="text-xs font-bold font-mono">{analysis.total}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Reviews Written</span>
-                  <span className="text-xs font-bold font-mono">{reviews.length}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-muted-foreground">Lessons Completed</span>
-                  <span className="text-xs font-bold font-mono">{lessonsCount}</span>
-                </div>
-              </GlassCard>
-            </motion.div>
+          <TabsContent value="weekly" className="mt-3">
+            <WeeklyRecap />
           </TabsContent>
 
           {/* RULES TAB */}
