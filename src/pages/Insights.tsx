@@ -9,6 +9,7 @@ import GlassCard from "@/components/GlassCard";
 import AiPatternInsights from "@/components/AiPatternInsights";
 import TradingDNACard from "@/components/TradingDNACard";
 import Rulebook from "@/components/Rulebook";
+import WeeklyRecap from "@/components/WeeklyRecap";
 import StatCard from "@/components/StatCard";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
