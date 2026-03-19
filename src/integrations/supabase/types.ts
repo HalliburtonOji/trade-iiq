@@ -310,6 +310,75 @@ export type Database = {
         }
         Relationships: []
       }
+      trading_dna: {
+        Row: {
+          best_asset_class: string | null
+          best_confidence_range: string | null
+          dna_json: Json | null
+          favourite_strategy: string | null
+          id: string
+          most_common_mistake: string | null
+          overconfidence_score: number | null
+          updated_at: string
+          user_id: string
+          worst_asset_class: string | null
+          worst_emotional_trigger: string | null
+        }
+        Insert: {
+          best_asset_class?: string | null
+          best_confidence_range?: string | null
+          dna_json?: Json | null
+          favourite_strategy?: string | null
+          id?: string
+          most_common_mistake?: string | null
+          overconfidence_score?: number | null
+          updated_at?: string
+          user_id: string
+          worst_asset_class?: string | null
+          worst_emotional_trigger?: string | null
+        }
+        Update: {
+          best_asset_class?: string | null
+          best_confidence_range?: string | null
+          dna_json?: Json | null
+          favourite_strategy?: string | null
+          id?: string
+          most_common_mistake?: string | null
+          overconfidence_score?: number | null
+          updated_at?: string
+          user_id?: string
+          worst_asset_class?: string | null
+          worst_emotional_trigger?: string | null
+        }
+        Relationships: []
+      }
+      trading_rules: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          is_active: boolean
+          rule_text: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          rule_text: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          rule_text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       watchlist: {
         Row: {
           added_date: string
