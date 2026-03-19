@@ -205,6 +205,24 @@ const Portfolio = () => {
               </div>
             </GlassCard>
 
+            {/* P&L Sparkline */}
+            {pnlSparkline.length >= 2 && (
+              <GlassCard>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">P&L Curve</h3>
+                <ResponsiveContainer width="100%" height={80}>
+                  <LineChart data={pnlSparkline}>
+                    <Line
+                      type="monotone"
+                      dataKey="pnl"
+                      stroke={pnlSparkline[pnlSparkline.length - 1]?.pnl >= 0 ? "hsl(142, 71%, 45%)" : "hsl(0, 72%, 51%)"}
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </GlassCard>
+            )}
+
             {stats.total === 0 && (
               <GlassCard className="text-center py-6">
                 <p className="text-sm text-muted-foreground">Log decisions in the Tracker to see portfolio insights</p>
