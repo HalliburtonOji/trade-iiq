@@ -25,6 +25,7 @@ const popularChips: Record<AssetType, string[]> = {
 };
 
 const Analysis = () => {
+  const [activeTab, setActiveTab] = useState<"search" | "chart">("search");
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
