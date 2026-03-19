@@ -4,6 +4,7 @@ import { Search, BarChart3, ClipboardList, GraduationCap, Sparkles, ChevronRight
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import PageShell from "@/components/PageShell";
 import GlassCard from "@/components/GlassCard";
 import StatCard from "@/components/StatCard";
@@ -43,12 +44,13 @@ interface WatchlistItem {
 const Index = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const isMobile = useIsMobile();
   const [winRate, setWinRate] = useState<string>("—");
   const [totalDecisions, setTotalDecisions] = useState(0);
   const [lessonsCompleted, setLessonsCompleted] = useState(0);
   const [totalXp, setTotalXp] = useState(0);
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
-  const [marketData, setMarketData] = useState([
+  const [marketData] = useState([
     { label: "S&P 500", value: "—", change: "—", up: true },
     { label: "NASDAQ", value: "—", change: "—", up: true },
     { label: "BTC Dom.", value: "52.3%", change: "-0.4%", up: false },
@@ -86,23 +88,29 @@ const Index = () => {
 
   return (
     <PageShell>
-      <motion.div variants={stagger} initial="hidden" animate="show" className="flex flex-col gap-4 px-4 pt-6">
-        {/* Header */}
+      <motion.div variants={stagger} initial="hidden" animate="show" className="flex flex-col gap-4 pt-6">
+        {/* Header — hide sign-out on desktop (it's in sidebar) */}
         <motion.div variants={fadeUp} className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              Trade<span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">IQ</span>
-            </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">{getGreeting()}, {displayName}</p>
+            {isMobile && (
+              <h1 className="text-2xl font-bold tracking-tight">
+                Trade<span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">IQ</span>
+              </h1>
+            )}
+            <p className={`text-muted-foreground ${isMobile ? "text-sm mt-0.5" : "text-lg font-semibold text-foreground"}`}>
+              {getGreeting()}, {displayName}
+            </p>
             <p className="text-[10px] text-muted-foreground/60">{formatDate()}</p>
           </div>
-          <button onClick={signOut} className="text-muted-foreground hover:text-foreground transition-colors mt-1">
-            <LogOut className="h-4 w-4" />
-          </button>
+          {isMobile && (
+            <button onClick={signOut} className="text-muted-foreground hover:text-foreground transition-colors mt-1">
+              <LogOut className="h-4 w-4" />
+            </button>
+          )}
         </motion.div>
 
-        {/* Stats - REAL DATA */}
-        <motion.div variants={fadeUp} className="grid grid-cols-4 gap-2">
+        {/* Stats */}
+        <motion.div variants={fadeUp} className={`grid ${isMobile ? "grid-cols-4" : "grid-cols-4"} gap-2`}>
           <StatCard label="Win Rate" value={winRate} icon={<TrendingUp className="h-3.5 w-3.5" />} trend={winRate !== "—" && parseInt(winRate) >= 50 ? "up" : winRate !== "—" ? "down" : "neutral"} />
           <StatCard label="Decisions" value={totalDecisions} icon={<Activity className="h-3.5 w-3.5" />} />
           <StatCard label="Lessons" value={lessonsCompleted} icon={<GraduationCap className="h-3.5 w-3.5" />} />
@@ -119,92 +127,95 @@ const Index = () => {
           <DailyMissions />
         </motion.div>
 
-        {/* Market Overview */}
-        <motion.div variants={fadeUp}>
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Market Overview</h2>
-          <div className="grid grid-cols-2 gap-2">
-            {marketData.map((m) => (
-              <GlassCard key={m.label} className="flex flex-col gap-0.5 p-3">
-                <span className="text-[10px] text-muted-foreground font-medium">{m.label}</span>
-                <span className="text-sm font-bold font-mono">{m.value}</span>
-                <span className={`text-[10px] font-mono font-medium ${m.up ? "text-verdict-buy" : "text-verdict-avoid"}`}>{m.change}</span>
-              </GlassCard>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Quick Actions */}
-        <motion.div variants={fadeUp}>
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Quick Actions</h2>
-          <div className="grid grid-cols-2 gap-2">
-            {quickActions.map((a) => (
-              <GlassCard key={a.label} hoverable onClick={() => navigate(a.path)} className="flex items-center gap-3 p-3 cursor-pointer">
-                <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${a.gradient}`}>
-                  <a.icon className="h-4 w-4 text-foreground" />
-                </div>
-                <span className="text-xs font-medium text-foreground">{a.label}</span>
-              </GlassCard>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Watchlist - REAL DATA */}
-        <motion.div variants={fadeUp}>
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Watchlist</h2>
-          </div>
-          {watchlist.length === 0 ? (
-            <GlassCard className="flex flex-col items-center justify-center py-8 text-center">
-              <Gauge className="h-8 w-8 text-muted-foreground/20 mb-2" />
-              <p className="text-sm text-muted-foreground">No watchlist items yet</p>
-              <p className="text-xs text-muted-foreground/60 mt-1">Analyse a ticker to add it</p>
-            </GlassCard>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {watchlist.map((w) => (
-                <GlassCard key={w.id} hoverable onClick={() => navigate("/analysis")} className="flex items-center justify-between p-3 cursor-pointer">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold font-mono">{w.symbol}</span>
-                    <span className="text-[10px] text-muted-foreground capitalize">{w.type}</span>
-                  </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+        {/* Market Overview + Quick Actions side by side on desktop */}
+        <div className={isMobile ? "space-y-4" : "grid grid-cols-2 gap-4"}>
+          <motion.div variants={fadeUp}>
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Market Overview</h2>
+            <div className="grid grid-cols-2 gap-2">
+              {marketData.map((m) => (
+                <GlassCard key={m.label} className="flex flex-col gap-0.5 p-3">
+                  <span className="text-[10px] text-muted-foreground font-medium">{m.label}</span>
+                  <span className="text-sm font-bold font-mono">{m.value}</span>
+                  <span className={`text-[10px] font-mono font-medium ${m.up ? "text-verdict-buy" : "text-verdict-avoid"}`}>{m.change}</span>
                 </GlassCard>
               ))}
             </div>
-          )}
-        </motion.div>
+          </motion.div>
 
-        {/* Insights CTA */}
-        <motion.div variants={fadeUp}>
-          <GlassCard hoverable onClick={() => navigate("/insights")} className="flex items-center justify-between p-4 bg-gradient-to-r from-accent/5 to-primary/5 border-accent/10">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accent/20 to-primary/20">
-                <Lightbulb className="h-5 w-5 text-accent" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold">Your Insights</p>
-                <p className="text-[10px] text-muted-foreground">Strategy, habits & performance</p>
-              </div>
+          <motion.div variants={fadeUp}>
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Quick Actions</h2>
+            <div className="grid grid-cols-2 gap-2">
+              {quickActions.map((a) => (
+                <GlassCard key={a.label} hoverable onClick={() => navigate(a.path)} className="flex items-center gap-3 p-3 cursor-pointer">
+                  <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${a.gradient}`}>
+                    <a.icon className="h-4 w-4 text-foreground" />
+                  </div>
+                  <span className="text-xs font-medium text-foreground">{a.label}</span>
+                </GlassCard>
+              ))}
             </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </GlassCard>
-        </motion.div>
+          </motion.div>
+        </div>
 
-        {/* Daily Picks CTA */}
-        <motion.div variants={fadeUp}>
-          <GlassCard hoverable onClick={() => navigate("/daily-picks")} className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-accent/5 border-primary/10">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
-                <Sparkles className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold">Today's AI Picks</p>
-                <p className="text-[10px] text-muted-foreground">6 curated opportunities</p>
-              </div>
+        {/* Watchlist + CTAs */}
+        <div className={isMobile ? "space-y-4" : "grid grid-cols-3 gap-4"}>
+          <motion.div variants={fadeUp} className={isMobile ? "" : "col-span-2"}>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Watchlist</h2>
             </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </GlassCard>
-        </motion.div>
+            {watchlist.length === 0 ? (
+              <GlassCard className="flex flex-col items-center justify-center py-8 text-center">
+                <Gauge className="h-8 w-8 text-muted-foreground/20 mb-2" />
+                <p className="text-sm text-muted-foreground">No watchlist items yet</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">Analyse a ticker to add it</p>
+              </GlassCard>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {watchlist.map((w) => (
+                  <GlassCard key={w.id} hoverable onClick={() => navigate("/analysis")} className="flex items-center justify-between p-3 cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold font-mono">{w.symbol}</span>
+                      <span className="text-[10px] text-muted-foreground capitalize">{w.type}</span>
+                    </div>
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                  </GlassCard>
+                ))}
+              </div>
+            )}
+          </motion.div>
+
+          <div className="flex flex-col gap-4">
+            <motion.div variants={fadeUp}>
+              <GlassCard hoverable onClick={() => navigate("/insights")} className="flex items-center justify-between p-4 bg-gradient-to-r from-accent/5 to-primary/5 border-accent/10">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accent/20 to-primary/20">
+                    <Lightbulb className="h-5 w-5 text-accent" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">Your Insights</p>
+                    <p className="text-[10px] text-muted-foreground">Strategy & habits</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </GlassCard>
+            </motion.div>
+
+            <motion.div variants={fadeUp}>
+              <GlassCard hoverable onClick={() => navigate("/daily-picks")} className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-accent/5 border-primary/10">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">Today's AI Picks</p>
+                    <p className="text-[10px] text-muted-foreground">6 curated opportunities</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </GlassCard>
+            </motion.div>
+          </div>
+        </div>
       </motion.div>
     </PageShell>
   );

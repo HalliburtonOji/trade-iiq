@@ -3,9 +3,12 @@ import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, Brain, Flame, Target, BarChart3, AlertTriangle, Zap, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import PageShell from "@/components/PageShell";
 import GlassCard from "@/components/GlassCard";
 import AiPatternInsights from "@/components/AiPatternInsights";
+import TradingDNACard from "@/components/TradingDNACard";
+import Rulebook from "@/components/Rulebook";
 import StatCard from "@/components/StatCard";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -160,13 +163,20 @@ const Insights = () => {
           <StatCard label="XP" value={totalXp} icon={<Zap className="h-3.5 w-3.5" />} />
         </motion.div>
 
-        <Tabs defaultValue="ai">
-          <TabsList className="w-full bg-secondary/50">
+        <Tabs defaultValue="dna">
+          <TabsList className="w-full bg-secondary/50 flex-wrap h-auto gap-0.5 p-1">
+            <TabsTrigger value="dna" className="flex-1 text-xs">🧬 DNA</TabsTrigger>
             <TabsTrigger value="ai" className="flex-1 text-xs">🧠 AI</TabsTrigger>
-            <TabsTrigger value="performance" className="flex-1 text-xs">Performance</TabsTrigger>
-            <TabsTrigger value="psychology" className="flex-1 text-xs">Psychology</TabsTrigger>
-            <TabsTrigger value="weekly" className="flex-1 text-xs">Weekly</TabsTrigger>
+            <TabsTrigger value="performance" className="flex-1 text-xs">📊 Perf</TabsTrigger>
+            <TabsTrigger value="psychology" className="flex-1 text-xs">🧘 Psych</TabsTrigger>
+            <TabsTrigger value="rules" className="flex-1 text-xs">📖 Rules</TabsTrigger>
+            <TabsTrigger value="weekly" className="flex-1 text-xs">📅 Week</TabsTrigger>
           </TabsList>
+
+          {/* DNA TAB */}
+          <TabsContent value="dna" className="mt-3">
+            <TradingDNACard />
+          </TabsContent>
 
           {/* AI TAB */}
           <TabsContent value="ai" className="mt-3">
@@ -376,6 +386,11 @@ const Insights = () => {
                 </div>
               </GlassCard>
             </motion.div>
+          </TabsContent>
+
+          {/* RULES TAB */}
+          <TabsContent value="rules" className="mt-3">
+            <Rulebook />
           </TabsContent>
         </Tabs>
       </motion.div>
