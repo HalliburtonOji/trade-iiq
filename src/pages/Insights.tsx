@@ -160,12 +160,18 @@ const Insights = () => {
           <StatCard label="XP" value={totalXp} icon={<Zap className="h-3.5 w-3.5" />} />
         </motion.div>
 
-        <Tabs defaultValue="performance">
+        <Tabs defaultValue="ai">
           <TabsList className="w-full bg-secondary/50">
+            <TabsTrigger value="ai" className="flex-1 text-xs">🧠 AI</TabsTrigger>
             <TabsTrigger value="performance" className="flex-1 text-xs">Performance</TabsTrigger>
             <TabsTrigger value="psychology" className="flex-1 text-xs">Psychology</TabsTrigger>
             <TabsTrigger value="weekly" className="flex-1 text-xs">Weekly</TabsTrigger>
           </TabsList>
+
+          {/* AI TAB */}
+          <TabsContent value="ai" className="mt-3">
+            <AiPatternInsights />
+          </TabsContent>
 
           {/* PERFORMANCE TAB */}
           <TabsContent value="performance" className="mt-3 flex flex-col gap-3">
