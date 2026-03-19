@@ -37,6 +37,8 @@ const Learn = () => {
   const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState("All");
+  const [mistakes, setMistakes] = useState<string[]>([]);
+  const [weakAssets, setWeakAssets] = useState<string[]>([]);
 
   const fetchProgress = async () => {
     if (!user) return;
