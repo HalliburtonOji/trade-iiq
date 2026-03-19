@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, Plus, Star } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import PageShell from "@/components/PageShell";
 import GlassCard from "@/components/GlassCard";
 import VerdictBadge from "@/components/VerdictBadge";
@@ -8,6 +11,7 @@ import SetupScoreMeter from "@/components/SetupScoreMeter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 import { analysisData, type AnalysisResult } from "@/data/analysisData";
 
 type AssetType = "stock" | "crypto" | "forex";
@@ -19,9 +23,15 @@ const popularChips: Record<AssetType, string[]> = {
 };
 
 const Analysis = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [assetType, setAssetType] = useState<AssetType>("stock");
-  const [query, setQuery] = useState("");
-  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [query, setQuery] = useState(searchParams.get("symbol") || "");
+  const [result, setResult] = useState<AnalysisResult | null>(
+    searchParams.get("symbol") ? { ...(analysisData[searchParams.get("symbol")!.toUpperCase()] || analysisData["DEFAULT"]), symbol: searchParams.get("symbol")!.toUpperCase() } : null
+  );
 
   const handleSearch = (symbol?: string) => {
     const s = (symbol || query).toUpperCase().trim();
@@ -30,88 +40,66 @@ const Analysis = () => {
     setResult({ ...data, symbol: analysisData[s] ? s : s });
   };
 
+  const addToWatchlist = async () => {
+    if (!result || !user) return;
+    const { error } = await supabase.from("watchlist").upsert({
+      user_id: user.id,
+      symbol: result.symbol,
+      name: result.symbol,
+      type: assetType,
+    }, { onConflict: "user_id,symbol" });
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else toast({ title: "Added to watchlist", description: `${result.symbol} is now on your watchlist.` });
+  };
+
   return (
     <PageShell>
       <div className="flex flex-col gap-4 px-4 pt-6">
         <h1 className="text-xl font-bold">Analysis</h1>
 
-        {/* Asset type toggle */}
         <div className="flex gap-2">
           {(["stock", "crypto", "forex"] as AssetType[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => { setAssetType(t); setResult(null); }}
-              className={`rounded-lg px-4 py-1.5 text-xs font-semibold capitalize transition-all ${
-                assetType === t
-                  ? "bg-primary text-primary-foreground"
-                  : "glass-card text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t}
-            </button>
+            <button key={t} onClick={() => { setAssetType(t); setResult(null); }} className={`rounded-lg px-4 py-1.5 text-xs font-semibold capitalize transition-all ${assetType === t ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.3)]" : "glass-card text-muted-foreground hover:text-foreground"}`}>{t}</button>
           ))}
         </div>
 
-        {/* Search */}
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              placeholder="Search symbol..."
-              className="pl-9 bg-secondary/50 border-border/50"
-            />
+            <Input value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSearch()} placeholder="Search symbol..." className="pl-9 bg-secondary/50 border-border/50" />
           </div>
-          <Button onClick={() => handleSearch()} size="sm">
-            Go <ArrowRight className="h-3.5 w-3.5 ml-1" />
+          <Button onClick={() => handleSearch()} size="sm" className="gap-1">
+            Go <ArrowRight className="h-3.5 w-3.5" />
           </Button>
         </div>
 
-        {/* Popular chips */}
         <div className="flex flex-wrap gap-1.5">
           {popularChips[assetType].map((s) => (
-            <button
-              key={s}
-              onClick={() => { setQuery(s); handleSearch(s); }}
-              className="rounded-full px-3 py-1 text-[11px] font-mono font-medium glass-card glass-card-hover text-muted-foreground hover:text-foreground"
-            >
-              {s}
-            </button>
+            <button key={s} onClick={() => { setQuery(s); handleSearch(s); }} className="rounded-full px-3 py-1 text-[11px] font-mono font-medium glass-card glass-card-hover text-muted-foreground hover:text-foreground transition-all">{s}</button>
           ))}
         </div>
 
-        {/* Result */}
         {result && (
-          <motion.div
-            key={result.symbol}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: [0.2, 0.8, 0.2, 1] }}
-            className="flex flex-col gap-3"
-          >
-            {/* Price card */}
+          <motion.div key={result.symbol} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.2, 0.8, 0.2, 1] as const }} className="flex flex-col gap-3">
             <GlassCard className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-bold">{result.symbol}</h2>
-                <p className="text-2xl font-bold font-mono">${result.price.toFixed(2)}</p>
-                <p className={`text-sm font-mono ${result.change >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`}>
+                <p className="text-2xl font-bold font-mono">${result.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className={`text-sm font-mono font-medium ${result.change >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`}>
                   {result.change >= 0 ? "+" : ""}{result.change.toFixed(2)}%
                 </p>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <VerdictBadge verdict={result.verdict} size="lg" />
                 <SetupScoreMeter score={result.setupScore} size="sm" />
+                <span className="text-[10px] text-muted-foreground">Setup Score</span>
               </div>
             </GlassCard>
 
-            {/* Summary */}
-            <GlassCard>
-              <p className="text-sm text-muted-foreground leading-relaxed">{result.summary}</p>
+            <GlassCard className="bg-primary/3">
+              <p className="text-sm text-foreground/80 leading-relaxed">{result.summary}</p>
             </GlassCard>
 
-            {/* Tabs */}
             <Tabs defaultValue="verdict" className="w-full">
               <TabsList className="w-full bg-secondary/50">
                 <TabsTrigger value="verdict" className="flex-1 text-xs">Verdict</TabsTrigger>
@@ -126,13 +114,13 @@ const Analysis = () => {
                     <span className="text-xs text-muted-foreground">Risk Score</span>
                     <span className="text-sm font-bold font-mono">{result.riskScore}/10</span>
                   </div>
-                  <div className="h-2 rounded-full bg-secondary overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${result.riskScore * 10}%`,
-                        backgroundColor: result.riskScore <= 4 ? "hsl(var(--verdict-buy))" : result.riskScore <= 7 ? "hsl(var(--verdict-wait))" : "hsl(var(--verdict-avoid))",
-                      }}
+                  <div className="h-2.5 rounded-full bg-secondary overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${result.riskScore * 10}%` }}
+                      transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
+                      className="h-full rounded-full transition-all"
+                      style={{ backgroundColor: result.riskScore <= 4 ? "hsl(var(--verdict-buy))" : result.riskScore <= 7 ? "hsl(var(--verdict-wait))" : "hsl(var(--verdict-avoid))" }}
                     />
                   </div>
                 </GlassCard>
@@ -152,7 +140,7 @@ const Analysis = () => {
                 <div className="grid grid-cols-2 gap-2">
                   {Object.entries(result.technicals).map(([key, val]) => (
                     <GlassCard key={key} className="p-3">
-                      <span className="text-[10px] text-muted-foreground uppercase">{key}</span>
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{key}</span>
                       <p className="text-sm font-bold font-mono mt-0.5">{val}</p>
                     </GlassCard>
                   ))}
@@ -174,29 +162,28 @@ const Analysis = () => {
               <TabsContent value="targets" className="mt-3">
                 <GlassCard>
                   <div className="flex justify-between text-center">
-                    <div>
-                      <span className="text-[10px] text-verdict-avoid font-medium">Bear</span>
-                      <p className="text-sm font-bold font-mono">${result.targets.bear}</p>
+                    <div className="flex-1">
+                      <span className="text-[10px] text-verdict-avoid font-medium block">🐻 Bear</span>
+                      <p className="text-sm font-bold font-mono mt-1">${result.targets.bear.toLocaleString()}</p>
                     </div>
-                    <div>
-                      <span className="text-[10px] text-verdict-wait font-medium">Base</span>
-                      <p className="text-sm font-bold font-mono">${result.targets.base}</p>
+                    <div className="flex-1 border-x border-border/30">
+                      <span className="text-[10px] text-verdict-wait font-medium block">📊 Base</span>
+                      <p className="text-sm font-bold font-mono mt-1">${result.targets.base.toLocaleString()}</p>
                     </div>
-                    <div>
-                      <span className="text-[10px] text-verdict-buy font-medium">Bull</span>
-                      <p className="text-sm font-bold font-mono">${result.targets.bull}</p>
+                    <div className="flex-1">
+                      <span className="text-[10px] text-verdict-buy font-medium block">🐂 Bull</span>
+                      <p className="text-sm font-bold font-mono mt-1">${result.targets.bull.toLocaleString()}</p>
                     </div>
                   </div>
                 </GlassCard>
               </TabsContent>
             </Tabs>
 
-            {/* Action buttons */}
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1 text-xs" size="sm">
-                Add to Watchlist
+              <Button variant="outline" className="flex-1 text-xs gap-1.5" size="sm" onClick={addToWatchlist}>
+                <Star className="h-3.5 w-3.5" /> Watchlist
               </Button>
-              <Button className="flex-1 text-xs" size="sm" onClick={() => window.location.href = "/tracker"}>
+              <Button className="flex-1 text-xs" size="sm" onClick={() => navigate("/tracker")}>
                 Log Decision
               </Button>
             </div>
