@@ -54,6 +54,7 @@ const Tracker = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [showThesis, setShowThesis] = useState(false);
   const [trades, setTrades] = useState<TradeRecord[]>([]);
   const [filter, setFilter] = useState("ALL");
