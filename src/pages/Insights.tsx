@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TradeRow {
   id: string;
+  symbol: string;
   decision: string;
   outcome: string;
   confidence: number | null;
@@ -26,6 +27,8 @@ interface TradeRow {
   time_horizon: string | null;
   date: string;
   pnl_percent: number | null;
+  notes: string | null;
+  thesis_why: string | null;
 }
 
 interface ReviewRow {
