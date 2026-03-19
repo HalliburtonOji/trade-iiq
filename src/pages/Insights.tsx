@@ -175,6 +175,7 @@ const Insights = () => {
             <TabsTrigger value="psychology" className="flex-1 text-xs">🧘 Psych</TabsTrigger>
             <TabsTrigger value="rules" className="flex-1 text-xs">📖 Rules</TabsTrigger>
             <TabsTrigger value="weekly" className="flex-1 text-xs">📅 Week</TabsTrigger>
+            <TabsTrigger value="monthly" className="flex-1 text-xs">📈 Month</TabsTrigger>
           </TabsList>
 
           {/* DNA TAB */}
