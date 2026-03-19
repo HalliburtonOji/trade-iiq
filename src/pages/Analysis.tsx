@@ -57,14 +57,28 @@ const Analysis = () => {
 
   return (
     <PageShell>
-      <div className="flex flex-col gap-4 px-4 pt-6">
+      <div className="flex flex-col gap-4 px-4 pt-6 pb-24">
         <h1 className="text-xl font-bold">Analysis</h1>
 
+        {/* Mode toggle */}
         <div className="flex gap-2">
-          {(["stock", "crypto", "forex"] as AssetType[]).map((t) => (
-            <button key={t} onClick={() => { setAssetType(t); setResult(null); }} className={`rounded-lg px-4 py-1.5 text-xs font-semibold capitalize transition-all ${assetType === t ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.3)]" : "glass-card text-muted-foreground hover:text-foreground"}`}>{t}</button>
-          ))}
+          <button onClick={() => setActiveTab("search")} className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === "search" ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.3)]" : "glass-card text-muted-foreground hover:text-foreground"}`}>
+            <Search className="h-3.5 w-3.5" /> Search
+          </button>
+          <button onClick={() => setActiveTab("chart")} className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === "chart" ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.3)]" : "glass-card text-muted-foreground hover:text-foreground"}`}>
+            <Camera className="h-3.5 w-3.5" /> 📸 Chart
+          </button>
         </div>
+
+        {activeTab === "chart" ? (
+          <ChartAnalyzer />
+        ) : (
+          <>
+            <div className="flex gap-2">
+              {(["stock", "crypto", "forex"] as AssetType[]).map((t) => (
+                <button key={t} onClick={() => { setAssetType(t); setResult(null); }} className={`rounded-lg px-4 py-1.5 text-xs font-semibold capitalize transition-all ${assetType === t ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.3)]" : "glass-card text-muted-foreground hover:text-foreground"}`}>{t}</button>
+              ))}
+            </div>
 
         <div className="flex gap-2">
           <div className="relative flex-1">
