@@ -43,7 +43,7 @@ serve(async (req) => {
     const losses = completed.filter(t => t.outcome === "LOSS");
     const winRate = completed.length > 0 ? Math.round((wins.length / completed.length) * 100) : 0;
 
-    // Best trade (highest PnL or first win)
+    // Best trade (highest PnL)
     const bestTrade = trades
       .filter(t => t.outcome === "WIN")
       .sort((a, b) => (b.pnl_percent || 0) - (a.pnl_percent || 0))[0] || null;
@@ -57,9 +57,27 @@ serve(async (req) => {
     });
     const worstHabit = Object.entries(mistakeCounts).sort((a, b) => b[1] - a[1])[0];
 
-    // XP earned this week
+    // Confidence accuracy
+    const confGroups: Record<number, { wins: number; total: number }> = {};
+    completed.forEach(t => {
+      const c = t.confidence || 3;
+      if (!confGroups[c]) confGroups[c] = { wins: 0, total: 0 };
+      confGroups[c].total++;
+      if (t.outcome === "WIN") confGroups[c].wins++;
+    });
+    const calibration = [1, 2, 3, 4, 5].map(c => ({
+      level: c,
+      rate: confGroups[c] ? Math.round((confGroups[c].wins / confGroups[c].total) * 100) : 0,
+      count: confGroups[c]?.total || 0,
+    }));
+    const highConfRate = confGroups[5] ? Math.round((confGroups[5].wins / confGroups[5].total) * 100) : null;
+    const lowConfRate = confGroups[1] || confGroups[2]
+      ? Math.round(((confGroups[1]?.wins || 0) + (confGroups[2]?.wins || 0)) / ((confGroups[1]?.total || 0) + (confGroups[2]?.total || 0)) * 100)
+      : null;
+
     const weekXp = lessons.reduce((sum, l) => sum + (l.xp_earned || 0), 0);
 
+    // Build digest object
     const digest = {
       period: {
         from: weekAgo.toISOString().split("T")[0],
@@ -79,10 +97,8 @@ serve(async (req) => {
         pnl_percent: bestTrade.pnl_percent,
         date: bestTrade.date,
       } : null,
-      worst_habit: worstHabit ? {
-        type: worstHabit[0],
-        count: worstHabit[1],
-      } : null,
+      worst_habit: worstHabit ? { type: worstHabit[0], count: worstHabit[1] } : null,
+      confidence_accuracy: { calibration, high_conf_rate: highConfRate, low_conf_rate: lowConfRate },
       xp: {
         earned_this_week: weekXp,
         total: profile?.xp_total || 0,
@@ -92,7 +108,46 @@ serve(async (req) => {
       lessons_completed: lessons.length,
       reviews_written: reviews.length,
       top_symbols: [...new Set(trades.map(t => t.symbol))].slice(0, 5),
+      ai_focus: null as string | null,
     };
+
+    // Generate AI personalised focus for next week
+    if (trades.length >= 1) {
+      try {
+        const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+        if (LOVABLE_API_KEY) {
+          const prompt = `You are a trading coach. Based on this trader's weekly performance, write a short, personalised 2-3 sentence focus for next week. Be specific and actionable.
+
+Stats: ${winRate}% win rate, ${wins.length}W/${losses.length}L, ${trades.length} decisions.
+Best trade: ${bestTrade ? `${bestTrade.symbol} ${bestTrade.decision} (+${bestTrade.pnl_percent}%)` : "None"}
+Worst habit: ${worstHabit ? `${worstHabit[0]} (${worstHabit[1]}x this week)` : "None identified"}
+High-confidence accuracy: ${highConfRate !== null ? `${highConfRate}%` : "N/A"}
+Reviews written: ${reviews.length}
+Lessons completed: ${lessons.length}
+
+Give a direct, motivating focus. No fluff. Start with "Next week:"`;
+
+          const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${LOVABLE_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "google/gemini-2.5-flash-lite",
+              messages: [{ role: "user", content: prompt }],
+            }),
+          });
+
+          if (aiRes.ok) {
+            const aiData = await aiRes.json();
+            digest.ai_focus = aiData.choices?.[0]?.message?.content || null;
+          }
+        }
+      } catch (e) {
+        console.error("AI focus generation failed:", e);
+      }
+    }
 
     return new Response(JSON.stringify(digest), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
