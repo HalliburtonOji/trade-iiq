@@ -181,6 +181,11 @@ const Insights = () => {
             <TradingDNACard />
           </TabsContent>
 
+          {/* BIAS TAB */}
+          <TabsContent value="bias" className="mt-3">
+            <BiasDetector />
+          </TabsContent>
+
           {/* AI TAB */}
           <TabsContent value="ai" className="mt-3">
             <AiPatternInsights />

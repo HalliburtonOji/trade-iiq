@@ -123,6 +123,11 @@ const Index = () => {
           <TickerMarquee />
         </motion.div>
 
+        {/* Decision Quality Score */}
+        <motion.div variants={fadeUp}>
+          <DQSWidget />
+        </motion.div>
+
         {/* Daily Missions */}
         <motion.div variants={fadeUp}>
           <DailyMissions />
