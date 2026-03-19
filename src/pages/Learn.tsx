@@ -232,11 +232,46 @@ const Learn = () => {
           <p className="text-[10px] text-muted-foreground">{level.next - totalXp} XP to next level</p>
         </GlassCard>
 
-        <Tabs defaultValue="lessons">
+        <Tabs defaultValue={recommendedLessons.length > 0 ? "foryou" : "lessons"}>
           <TabsList className="w-full bg-secondary/50">
+            {recommendedLessons.length > 0 && (
+              <TabsTrigger value="foryou" className="flex-1 text-xs">✨ For You</TabsTrigger>
+            )}
             <TabsTrigger value="lessons" className="flex-1 text-xs">Lessons</TabsTrigger>
             <TabsTrigger value="badges" className="flex-1 text-xs">Badges</TabsTrigger>
           </TabsList>
+
+          {/* ADAPTIVE FOR YOU TAB */}
+          {recommendedLessons.length > 0 && (
+            <TabsContent value="foryou" className="mt-3 flex flex-col gap-3">
+              <GlassCard className="border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5 p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <span className="text-xs font-semibold">Recommended based on your trading</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  These lessons address your most common mistakes and weak areas
+                </p>
+              </GlassCard>
+              {recommendedLessons.map((lesson) => (
+                <GlassCard key={lesson.id} hoverable onClick={() => setSelectedLesson(lesson)}>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">{lesson.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold truncate">{lesson.title}</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{lesson.category}</span>
+                        <span className="text-[10px] text-muted-foreground">{lesson.duration}</span>
+                        <span className="text-[10px] text-muted-foreground font-mono">+{lesson.xp} XP</span>
+                      </div>
+                    </div>
+                  </div>
+                </GlassCard>
+              ))}
+            </TabsContent>
+          )}
 
           <TabsContent value="lessons" className="mt-3 flex flex-col gap-3">
             <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
