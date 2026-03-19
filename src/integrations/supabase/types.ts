@@ -14,7 +14,329 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analysis_cache: {
+        Row: {
+          asset_type: string
+          confidence: number | null
+          id: string
+          last_updated: string
+          live_price: number | null
+          macro_json: Json | null
+          price_change: number | null
+          risk_score: number | null
+          setup_score: number | null
+          summary: string | null
+          symbol: string
+          targets_json: Json | null
+          technicals_json: Json | null
+          verdict: string | null
+        }
+        Insert: {
+          asset_type: string
+          confidence?: number | null
+          id?: string
+          last_updated?: string
+          live_price?: number | null
+          macro_json?: Json | null
+          price_change?: number | null
+          risk_score?: number | null
+          setup_score?: number | null
+          summary?: string | null
+          symbol: string
+          targets_json?: Json | null
+          technicals_json?: Json | null
+          verdict?: string | null
+        }
+        Update: {
+          asset_type?: string
+          confidence?: number | null
+          id?: string
+          last_updated?: string
+          live_price?: number | null
+          macro_json?: Json | null
+          price_change?: number | null
+          risk_score?: number | null
+          setup_score?: number | null
+          summary?: string | null
+          symbol?: string
+          targets_json?: Json | null
+          technicals_json?: Json | null
+          verdict?: string | null
+        }
+        Relationships: []
+      }
+      daily_missions: {
+        Row: {
+          completed_count: number
+          created_at: string
+          date: string
+          id: string
+          missions: Json
+          total_count: number
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          completed_count?: number
+          created_at?: string
+          date?: string
+          id?: string
+          missions?: Json
+          total_count?: number
+          user_id: string
+          xp_earned?: number
+        }
+        Update: {
+          completed_count?: number
+          created_at?: string
+          date?: string
+          id?: string
+          missions?: Json
+          total_count?: number
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: []
+      }
+      daily_picks_cache: {
+        Row: {
+          created_at: string
+          crypto: Json
+          date: string
+          forex: Json
+          id: string
+          stocks: Json
+        }
+        Insert: {
+          created_at?: string
+          crypto?: Json
+          date: string
+          forex?: Json
+          id?: string
+          stocks?: Json
+        }
+        Update: {
+          created_at?: string
+          crypto?: Json
+          date?: string
+          forex?: Json
+          id?: string
+          stocks?: Json
+        }
+        Relationships: []
+      }
+      decision_reviews: {
+        Row: {
+          emotion: string | null
+          execution_quality: string | null
+          followed_plan: boolean | null
+          id: string
+          lesson_learned: string | null
+          mistake_type: string | null
+          reviewed_date: string
+          timing_correct: boolean | null
+          trade_decision_id: string
+          user_id: string
+          verdict_correct: boolean | null
+        }
+        Insert: {
+          emotion?: string | null
+          execution_quality?: string | null
+          followed_plan?: boolean | null
+          id?: string
+          lesson_learned?: string | null
+          mistake_type?: string | null
+          reviewed_date?: string
+          timing_correct?: boolean | null
+          trade_decision_id: string
+          user_id: string
+          verdict_correct?: boolean | null
+        }
+        Update: {
+          emotion?: string | null
+          execution_quality?: string | null
+          followed_plan?: boolean | null
+          id?: string
+          lesson_learned?: string | null
+          mistake_type?: string | null
+          reviewed_date?: string
+          timing_correct?: boolean | null
+          trade_decision_id?: string
+          user_id?: string
+          verdict_correct?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decision_reviews_trade_decision_id_fkey"
+            columns: ["trade_decision_id"]
+            isOneToOne: true
+            referencedRelation: "trade_decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_progress: {
+        Row: {
+          category: string
+          completed: boolean
+          completed_date: string | null
+          id: string
+          lesson_id: string
+          lesson_title: string
+          streak_day: number
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          category?: string
+          completed?: boolean
+          completed_date?: string | null
+          id?: string
+          lesson_id: string
+          lesson_title?: string
+          streak_day?: number
+          user_id: string
+          xp_earned?: number
+        }
+        Update: {
+          category?: string
+          completed?: boolean
+          completed_date?: string | null
+          id?: string
+          lesson_id?: string
+          lesson_title?: string
+          streak_day?: number
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          last_active_date: string | null
+          level: string
+          streak_count: number
+          updated_at: string
+          user_id: string
+          xp_total: number
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          last_active_date?: string | null
+          level?: string
+          streak_count?: number
+          updated_at?: string
+          user_id: string
+          xp_total?: number
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          last_active_date?: string | null
+          level?: string
+          streak_count?: number
+          updated_at?: string
+          user_id?: string
+          xp_total?: number
+        }
+        Relationships: []
+      }
+      trade_decisions: {
+        Row: {
+          asset_type: string
+          catalyst_date: string | null
+          catalyst_note: string | null
+          confidence: number | null
+          created_at: string
+          date: string
+          decision: string
+          entry_price: number | null
+          id: string
+          invalidation_point: number | null
+          notes: string | null
+          outcome: string
+          pnl_percent: number | null
+          symbol: string
+          thesis_why: string | null
+          time_horizon: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          asset_type: string
+          catalyst_date?: string | null
+          catalyst_note?: string | null
+          confidence?: number | null
+          created_at?: string
+          date?: string
+          decision: string
+          entry_price?: number | null
+          id?: string
+          invalidation_point?: number | null
+          notes?: string | null
+          outcome?: string
+          pnl_percent?: number | null
+          symbol: string
+          thesis_why?: string | null
+          time_horizon?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          asset_type?: string
+          catalyst_date?: string | null
+          catalyst_note?: string | null
+          confidence?: number | null
+          created_at?: string
+          date?: string
+          decision?: string
+          entry_price?: number | null
+          id?: string
+          invalidation_point?: number | null
+          notes?: string | null
+          outcome?: string
+          pnl_percent?: number | null
+          symbol?: string
+          thesis_why?: string | null
+          time_horizon?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      watchlist: {
+        Row: {
+          added_date: string
+          id: string
+          name: string
+          symbol: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          added_date?: string
+          id?: string
+          name?: string
+          symbol: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          added_date?: string
+          id?: string
+          name?: string
+          symbol?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
