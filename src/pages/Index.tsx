@@ -1,10 +1,13 @@
 import { motion } from "framer-motion";
-import { Search, BarChart3, ClipboardList, GraduationCap, Sparkles, ChevronRight, TrendingUp, Activity, Shield, Gauge } from "lucide-react";
+import { Search, BarChart3, ClipboardList, GraduationCap, Sparkles, ChevronRight, TrendingUp, Activity, Shield, Gauge, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import PageShell from "@/components/PageShell";
 import GlassCard from "@/components/GlassCard";
 import StatCard from "@/components/StatCard";
 import TickerMarquee from "@/components/TickerMarquee";
+import DailyMissions from "@/components/DailyMissions";
+import { Button } from "@/components/ui/button";
 
 const getGreeting = () => {
   const h = new Date().getHours();
@@ -24,10 +27,10 @@ const marketData = [
 ];
 
 const quickActions = [
-  { label: "Analyse a ticker", icon: Search, path: "/analysis" },
-  { label: "Screen the market", icon: BarChart3, path: "/screener" },
-  { label: "Log a decision", icon: ClipboardList, path: "/tracker" },
-  { label: "Daily lesson", icon: GraduationCap, path: "/learn" },
+  { label: "Analyse a ticker", icon: Search, path: "/analysis", gradient: "from-primary/20 to-primary/5" },
+  { label: "Screen the market", icon: BarChart3, path: "/screener", gradient: "from-accent/20 to-accent/5" },
+  { label: "Log a decision", icon: ClipboardList, path: "/tracker", gradient: "from-verdict-buy/20 to-verdict-buy/5" },
+  { label: "Daily lesson", icon: GraduationCap, path: "/learn", gradient: "from-verdict-wait/20 to-verdict-wait/5" },
 ];
 
 const stagger = {
@@ -42,6 +45,9 @@ const fadeUp = {
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Trader";
 
   return (
     <PageShell>
@@ -55,13 +61,16 @@ const Index = () => {
         <motion.div variants={fadeUp} className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              Trade<span className="text-primary">IQ</span>
+              Trade<span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">IQ</span>
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {getGreeting()} — {formatDate()}
+              {getGreeting()}, {displayName}
             </p>
+            <p className="text-[10px] text-muted-foreground/60">{formatDate()}</p>
           </div>
-          <Sparkles className="h-5 w-5 text-primary mt-1" />
+          <button onClick={signOut} className="text-muted-foreground hover:text-foreground transition-colors mt-1">
+            <LogOut className="h-4 w-4" />
+          </button>
         </motion.div>
 
         {/* Stats */}
@@ -75,6 +84,11 @@ const Index = () => {
         {/* Ticker */}
         <motion.div variants={fadeUp}>
           <TickerMarquee />
+        </motion.div>
+
+        {/* Daily Missions */}
+        <motion.div variants={fadeUp}>
+          <DailyMissions />
         </motion.div>
 
         {/* Market Overview */}
@@ -108,8 +122,8 @@ const Index = () => {
                 onClick={() => navigate(a.path)}
                 className="flex items-center gap-3 p-3 cursor-pointer"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                  <a.icon className="h-4 w-4 text-primary" />
+                <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${a.gradient}`}>
+                  <a.icon className="h-4 w-4 text-foreground" />
                 </div>
                 <span className="text-xs font-medium text-foreground">{a.label}</span>
               </GlassCard>
@@ -125,7 +139,7 @@ const Index = () => {
             </h2>
           </div>
           <GlassCard className="flex flex-col items-center justify-center py-8 text-center">
-            <Gauge className="h-8 w-8 text-muted-foreground/40 mb-2" />
+            <Gauge className="h-8 w-8 text-muted-foreground/20 mb-2" />
             <p className="text-sm text-muted-foreground">No watchlist items yet</p>
             <p className="text-xs text-muted-foreground/60 mt-1">Analyse a ticker to add it</p>
           </GlassCard>
@@ -136,10 +150,10 @@ const Index = () => {
           <GlassCard
             hoverable
             onClick={() => navigate("/daily-picks")}
-            className="flex items-center justify-between p-4"
+            className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-accent/5 border-primary/10"
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
                 <Sparkles className="h-5 w-5 text-primary" />
               </div>
               <div>
