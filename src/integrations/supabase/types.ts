@@ -218,7 +218,9 @@ export type Database = {
           id: string
           last_active_date: string | null
           level: string
+          paper_balance: number
           streak_count: number
+          trading_personality: string
           updated_at: string
           user_id: string
           xp_total: number
@@ -229,7 +231,9 @@ export type Database = {
           id?: string
           last_active_date?: string | null
           level?: string
+          paper_balance?: number
           streak_count?: number
+          trading_personality?: string
           updated_at?: string
           user_id: string
           xp_total?: number
@@ -240,7 +244,9 @@ export type Database = {
           id?: string
           last_active_date?: string | null
           level?: string
+          paper_balance?: number
           streak_count?: number
+          trading_personality?: string
           updated_at?: string
           user_id?: string
           xp_total?: number
