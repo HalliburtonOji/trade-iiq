@@ -11,6 +11,8 @@ import StatCard from "@/components/StatCard";
 import TickerMarquee from "@/components/TickerMarquee";
 import DailyMissions from "@/components/DailyMissions";
 import DQSWidget from "@/components/DQSWidget";
+import CoachCards from "@/components/CoachCards";
+import SmartAlerts from "@/components/SmartAlerts";
 
 const getGreeting = () => {
   const h = new Date().getHours();
