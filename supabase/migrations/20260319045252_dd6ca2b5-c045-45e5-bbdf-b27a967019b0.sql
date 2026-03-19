@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS analysis_cache_symbol_idx ON public.analysis_cache (symbol);

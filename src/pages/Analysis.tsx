@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { analysisData, type AnalysisResult } from "@/data/analysisData";
+import MarketSignals from "@/components/MarketSignals";
 
 type AssetType = "stock" | "crypto" | "forex";
 
@@ -178,6 +179,9 @@ const Analysis = () => {
                 </GlassCard>
               </TabsContent>
             </Tabs>
+
+            {/* AI Market Signals */}
+            <MarketSignals symbol={result.symbol} assetType={assetType} livePrice={result.price} />
 
             <div className="flex gap-2">
               <Button variant="outline" className="flex-1 text-xs gap-1.5" size="sm" onClick={addToWatchlist}>

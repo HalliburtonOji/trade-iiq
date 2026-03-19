@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, TrendingUp, TrendingDown, Clock, Trash2, MessageSquare, Target, Zap, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Clock, Trash2, MessageSquare, Target, Zap, ChevronDown, ChevronUp, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import CsvImport from "@/components/CsvImport";
 
 type Decision = "BUY" | "WAIT" | "AVOID";
 type Outcome = "PENDING" | "WIN" | "LOSS";
@@ -53,6 +54,7 @@ const Tracker = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [showThesis, setShowThesis] = useState(false);
   const [trades, setTrades] = useState<TradeRecord[]>([]);
   const [filter, setFilter] = useState("ALL");
@@ -154,9 +156,22 @@ const Tracker = () => {
           <StatCard label="Pending" value={stats.pending} />
         </div>
 
-        <Button onClick={() => setShowForm(!showForm)} className="w-full gap-2">
-          <Plus className="h-4 w-4" /> Log New Decision
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowForm(!showForm)} className="flex-1 gap-2">
+            <Plus className="h-4 w-4" /> Log Decision
+          </Button>
+          <Button variant="outline" onClick={() => setShowImport(!showImport)} className="gap-2 text-xs">
+            <Upload className="h-4 w-4" /> CSV
+          </Button>
+        </div>
+
+        <AnimatePresence>
+          {showImport && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+              <CsvImport onComplete={() => { setShowImport(false); fetchTrades(); }} />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <AnimatePresence>
           {showForm && (
