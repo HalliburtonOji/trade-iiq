@@ -55,6 +55,32 @@ const Learn = () => {
 
   useEffect(() => { fetchProgress(); }, [user]);
 
+  // Fetch user mistakes for adaptive recommendations
+  useEffect(() => {
+    if (!user) return;
+    const fetchMistakes = async () => {
+      const [reviewsRes, tradesRes] = await Promise.all([
+        supabase.from("decision_reviews").select("mistake_type").eq("user_id", user.id),
+        supabase.from("trade_decisions").select("asset_type,outcome").eq("user_id", user.id),
+      ]);
+      if (reviewsRes.data) {
+        const m = reviewsRes.data.map(r => r.mistake_type).filter(Boolean) as string[];
+        setMistakes(m);
+      }
+      if (tradesRes.data) {
+        const byAsset: Record<string, { w: number; t: number }> = {};
+        tradesRes.data.filter(t => t.outcome === "WIN" || t.outcome === "LOSS").forEach(t => {
+          if (!byAsset[t.asset_type]) byAsset[t.asset_type] = { w: 0, t: 0 };
+          byAsset[t.asset_type].t++;
+          if (t.outcome === "WIN") byAsset[t.asset_type].w++;
+        });
+        const weak = Object.entries(byAsset).filter(([, v]) => v.t >= 2 && v.w / v.t < 0.4).map(([k]) => k);
+        setWeakAssets(weak);
+      }
+    };
+    fetchMistakes();
+  }, [user]);
+
   const level = getLevel(totalXp);
   const progress = ((totalXp - level.min) / (level.next - level.min)) * 100;
 
