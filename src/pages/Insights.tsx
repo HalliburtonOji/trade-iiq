@@ -387,6 +387,11 @@ const Insights = () => {
               </GlassCard>
             </motion.div>
           </TabsContent>
+
+          {/* RULES TAB */}
+          <TabsContent value="rules" className="mt-3">
+            <Rulebook />
+          </TabsContent>
         </Tabs>
       </motion.div>
     </PageShell>
