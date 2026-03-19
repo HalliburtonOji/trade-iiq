@@ -125,10 +125,19 @@ const Index = () => {
           <TickerMarquee />
         </motion.div>
 
-        {/* Decision Quality Score */}
-        <motion.div variants={fadeUp}>
-          <DQSWidget />
-        </motion.div>
+        {/* Coach Cards + DQS side by side on desktop */}
+        <div className={isMobile ? "space-y-4" : "grid grid-cols-2 gap-4"}>
+          <motion.div variants={fadeUp}>
+            <DQSWidget />
+            <div className="mt-3">
+              <SmartAlerts />
+            </div>
+          </motion.div>
+          <motion.div variants={fadeUp}>
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Coach Insights</h2>
+            <CoachCards />
+          </motion.div>
+        </div>
 
         {/* Daily Missions */}
         <motion.div variants={fadeUp}>
