@@ -55,7 +55,7 @@ const Portfolio = () => {
   useEffect(() => {
     if (!user) return;
     const fetchStats = async () => {
-      const { data } = await supabase.from("trade_decisions").select("outcome,pnl_percent").eq("user_id", user.id);
+      const { data } = await supabase.from("trade_decisions").select("outcome,pnl_percent,date").eq("user_id", user.id).order("date", { ascending: true });
       if (data) {
         const wins = data.filter((d: any) => d.outcome === "WIN").length;
         const losses = data.filter((d: any) => d.outcome === "LOSS").length;
