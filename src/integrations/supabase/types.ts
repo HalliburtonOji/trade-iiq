@@ -65,6 +65,33 @@ export type Database = {
         }
         Relationships: []
       }
+      chart_analyses: {
+        Row: {
+          analysis_json: Json | null
+          created_at: string
+          id: string
+          image_url: string
+          symbol: string | null
+          user_id: string
+        }
+        Insert: {
+          analysis_json?: Json | null
+          created_at?: string
+          id?: string
+          image_url: string
+          symbol?: string | null
+          user_id: string
+        }
+        Update: {
+          analysis_json?: Json | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          symbol?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_missions: {
         Row: {
           completed_count: number
