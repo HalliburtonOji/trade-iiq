@@ -69,7 +69,7 @@ const Portfolio = () => {
         // Build sparkline
         const withPnl = data.filter((d: any) => d.pnl_percent != null && (d.outcome === "WIN" || d.outcome === "LOSS"));
         let cum = 0;
-        setPnlSparkline(withPnl.map((d: any) => { cum += d.pnl_percent; return { pnl: Math.round(cum * 10) / 10 }; }));
+        setPnlSparkline(withPnl.map((d: any) => { cum += d.pnl_percent; return { pnl: Math.round(cum * 10) / 10, date: d.date }; }));
       }
     };
     fetchStats();
