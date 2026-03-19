@@ -11,6 +11,7 @@ import Learn from "./pages/Learn";
 import Portfolio from "./pages/Portfolio";
 import Screener from "./pages/Screener";
 import DailyPicks from "./pages/DailyPicks";
+import Insights from "./pages/Insights";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
