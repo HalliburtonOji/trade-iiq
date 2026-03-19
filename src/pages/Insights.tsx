@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TradeRow {
   id: string;
+  symbol: string;
   decision: string;
   outcome: string;
   confidence: number | null;
@@ -26,6 +27,8 @@ interface TradeRow {
   time_horizon: string | null;
   date: string;
   pnl_percent: number | null;
+  notes: string | null;
+  thesis_why: string | null;
 }
 
 interface ReviewRow {
@@ -56,7 +59,7 @@ const Insights = () => {
     if (!user) return;
     const load = async () => {
       const [tRes, rRes, lRes, pRes] = await Promise.all([
-        supabase.from("trade_decisions").select("id,decision,outcome,confidence,asset_type,time_horizon,date,pnl_percent").eq("user_id", user.id),
+        supabase.from("trade_decisions").select("id,symbol,decision,outcome,confidence,asset_type,time_horizon,date,pnl_percent,notes,thesis_why").eq("user_id", user.id),
         supabase.from("decision_reviews").select("emotion,mistake_type,verdict_correct,timing_correct,followed_plan,trade_decision_id").eq("user_id", user.id),
         supabase.from("learning_progress").select("lesson_id,xp_earned").eq("user_id", user.id).eq("completed", true),
         supabase.from("profiles").select("streak_count,xp_total").eq("user_id", user.id).single(),
