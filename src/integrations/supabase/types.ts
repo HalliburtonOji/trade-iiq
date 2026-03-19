@@ -280,6 +280,39 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_attempts: {
+        Row: {
+          completed_at: string
+          id: string
+          lesson_id: string
+          passed: boolean
+          score: number
+          total_questions: number
+          user_id: string
+          weak_tags: string[] | null
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          lesson_id: string
+          passed?: boolean
+          score?: number
+          total_questions?: number
+          user_id: string
+          weak_tags?: string[] | null
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          lesson_id?: string
+          passed?: boolean
+          score?: number
+          total_questions?: number
+          user_id?: string
+          weak_tags?: string[] | null
+        }
+        Relationships: []
+      }
       trade_decisions: {
         Row: {
           asset_type: string

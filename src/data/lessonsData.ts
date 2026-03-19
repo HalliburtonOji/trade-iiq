@@ -1,365 +1,78 @@
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
+  tags: string[];
+}
+
+export interface ContentSection {
+  heading: string;
+  body: string[];
+}
+
 export interface Lesson {
   id: string;
+  slug: string;
   title: string;
   icon: string;
-  category: string;
-  duration: string;
-  xp: number;
-  content: string[];
+  category: "Beginner" | "Technical" | "Risk" | "Psychology" | "Strategy";
+  difficulty: "Easy" | "Medium" | "Hard";
+  duration_minutes: number;
+  xp_reward: number;
+  summary: string;
+  why_it_matters: string;
+  content: ContentSection[];
+  common_mistake: string;
+  practical_example: string;
   takeaways: string[];
-  quiz: {
-    question: string;
-    options: string[];
-    correctAnswer: number;
-  };
+  quiz: QuizQuestion[];
+  related_lessons: string[];
 }
 
 export const lessonsData: Lesson[] = [
-  {
-    id: "stock-market",
-    title: "What is the Stock Market?",
-    icon: "📈",
-    category: "Beginner",
-    duration: "5 min",
-    xp: 25,
-    content: [
-      "The stock market is a collection of exchanges where shares of publicly traded companies are bought and sold. When you buy a share, you're purchasing a small ownership stake in that company. The price of shares fluctuates based on supply, demand, company performance, and broader economic conditions.",
-      "Major stock exchanges include the New York Stock Exchange (NYSE) and NASDAQ. These markets operate during set hours — typically 9:30 AM to 4:00 PM Eastern Time on weekdays. After-hours and pre-market trading exists but with lower liquidity.",
-      "Understanding the stock market is fundamental to becoming a successful trader. Whether you're investing for the long term or trading short-term price movements, knowing how markets function gives you the foundation for every decision you'll make.",
-    ],
-    takeaways: [
-      "Stocks represent ownership in a company",
-      "Prices are driven by supply, demand, and fundamentals",
-      "Major exchanges: NYSE and NASDAQ",
-      "Markets have set trading hours with pre/after-hours sessions",
-    ],
-    quiz: {
-      question: "What does buying a stock represent?",
-      options: [
-        "Lending money to a company",
-        "Owning a small part of a company",
-        "Betting against a company",
-        "Buying company debt",
-      ],
-      correctAnswer: 1,
-    },
-  },
-  {
-    id: "rsi",
-    title: "Understanding RSI",
-    icon: "📊",
-    category: "Technical",
-    duration: "6 min",
-    xp: 30,
-    content: [
-      "The Relative Strength Index (RSI) is a momentum oscillator that measures the speed and magnitude of recent price changes. It ranges from 0 to 100 and is typically used to identify overbought or oversold conditions in a security.",
-      "An RSI above 70 generally indicates overbought conditions — the price may have risen too fast and could be due for a pullback. An RSI below 30 suggests oversold conditions — the price may have dropped too aggressively and could be due for a bounce.",
-      "However, RSI should never be used in isolation. In strong trends, RSI can remain overbought or oversold for extended periods. Combining RSI with other indicators like MACD, support/resistance levels, and volume gives you a much more reliable trading signal.",
-    ],
-    takeaways: [
-      "RSI measures momentum on a 0–100 scale",
-      "Above 70 = overbought, below 30 = oversold",
-      "RSI can stay extreme during strong trends",
-      "Always combine RSI with other indicators",
-    ],
-    quiz: {
-      question: "What does an RSI reading above 70 typically indicate?",
-      options: [
-        "The stock is undervalued",
-        "The stock is overbought",
-        "The stock will definitely drop",
-        "Volume is increasing",
-      ],
-      correctAnswer: 1,
-    },
-  },
-  {
-    id: "macd",
-    title: "What is MACD?",
-    icon: "📉",
-    category: "Technical",
-    duration: "6 min",
-    xp: 30,
-    content: [
-      "MACD (Moving Average Convergence Divergence) is a trend-following momentum indicator that shows the relationship between two moving averages of a security's price. It consists of the MACD line, signal line, and histogram.",
-      "The MACD line is calculated by subtracting the 26-period EMA from the 12-period EMA. The signal line is a 9-period EMA of the MACD line. When the MACD crosses above the signal line, it's a bullish signal. When it crosses below, it's bearish.",
-      "The histogram visualises the distance between the MACD and signal lines. Growing histogram bars indicate strengthening momentum, while shrinking bars suggest momentum is fading. MACD divergences — when price makes new highs/lows but MACD doesn't — are powerful reversal signals.",
-    ],
-    takeaways: [
-      "MACD shows relationship between two moving averages",
-      "Bullish when MACD crosses above signal line",
-      "Histogram shows momentum strength",
-      "Divergences between price and MACD signal reversals",
-    ],
-    quiz: {
-      question: "A bullish MACD signal occurs when:",
-      options: [
-        "MACD crosses below the signal line",
-        "MACD crosses above the signal line",
-        "The histogram turns red",
-        "RSI goes above 70",
-      ],
-      correctAnswer: 1,
-    },
-  },
-  {
-    id: "crypto-vs-stocks",
-    title: "Crypto vs Stocks",
-    icon: "🪙",
-    category: "Beginner",
-    duration: "5 min",
-    xp: 25,
-    content: [
-      "Cryptocurrency and stock markets share some similarities — both involve buying assets with the expectation of future gains — but they differ significantly in structure, regulation, volatility, and trading hours.",
-      "Stocks trade during market hours on regulated exchanges with circuit breakers and oversight. Crypto markets are open 24/7/365 with no circuit breakers, meaning prices can move dramatically at any time. Crypto volatility is typically 3-5x higher than stock markets.",
-      "From an analysis perspective, crypto responds more to narrative, on-chain data, and macro liquidity than traditional earnings metrics. Stock analysis benefits from decades of financial reporting, while crypto projects often have limited financial transparency.",
-    ],
-    takeaways: [
-      "Crypto trades 24/7, stocks have set hours",
-      "Crypto volatility is 3-5x higher than stocks",
-      "Crypto is driven by narrative and liquidity",
-      "Stock analysis uses earnings; crypto uses on-chain data",
-    ],
-    quiz: {
-      question: "What is a key difference between crypto and stock markets?",
-      options: [
-        "Stocks are more volatile",
-        "Crypto markets close on weekends",
-        "Crypto trades 24/7 with no circuit breakers",
-        "Stocks have no regulation",
-      ],
-      correctAnswer: 2,
-    },
-  },
-  {
-    id: "forex-basics",
-    title: "Understanding Forex",
-    icon: "💱",
-    category: "Forex",
-    duration: "7 min",
-    xp: 35,
-    content: [
-      "Foreign exchange (Forex or FX) is the largest financial market in the world, with over $7 trillion in daily trading volume. Unlike stocks, forex involves trading currency pairs — you're simultaneously buying one currency and selling another.",
-      "Major pairs include EUR/USD, GBP/USD, USD/JPY, and AUD/USD. These pairs have the tightest spreads and most liquidity. Exotic pairs involve emerging market currencies and carry higher spreads and risk.",
-      "Forex markets are open 24 hours from Sunday evening to Friday evening, rotating through Asian, European, and American sessions. Key drivers include interest rate differentials, economic data releases (CPI, NFP, GDP), central bank policy, and geopolitical events.",
-    ],
-    takeaways: [
-      "Forex is the world's largest market at $7T daily volume",
-      "You trade currency pairs, not individual currencies",
-      "Major pairs have tightest spreads and most liquidity",
-      "Interest rates and central bank policy are key drivers",
-    ],
-    quiz: {
-      question: "In forex trading, what are you doing when you buy EUR/USD?",
-      options: [
-        "Buying US dollars",
-        "Selling euros",
-        "Buying euros and selling US dollars",
-        "Buying both euros and US dollars",
-      ],
-      correctAnswer: 2,
-    },
-  },
-  {
-    id: "risk-management",
-    title: "Risk Management",
-    icon: "🛡️",
-    category: "Strategy",
-    duration: "7 min",
-    xp: 35,
-    content: [
-      "Risk management is the single most important skill in trading. No analysis, no indicator, and no strategy matters if you don't manage risk properly. Professional traders survive not because they're always right, but because their losses are controlled.",
-      "The core principles: never risk more than 1-2% of your portfolio on a single trade, always use stop losses, and ensure your risk-to-reward ratio is at least 1:2. This means for every £1 you risk, you should be targeting at least £2 in profit.",
-      "Position sizing ties everything together. Calculate your position size based on your stop loss distance and maximum risk per trade. If your account is £10,000 and you risk 1%, your maximum loss per trade is £100. If your stop loss is £2 away from entry, you can buy 50 shares.",
-    ],
-    takeaways: [
-      "Never risk more than 1-2% per trade",
-      "Always use stop losses on every position",
-      "Target minimum 1:2 risk-to-reward ratio",
-      "Position sizing should be based on stop loss distance",
-    ],
-    quiz: {
-      question: "If your account is £10,000 and you risk 1% per trade, what is your max loss?",
-      options: ["£10", "£100", "£1,000", "£500"],
-      correctAnswer: 1,
-    },
-  },
-  {
-    id: "sentiment",
-    title: "Market Sentiment",
-    icon: "🧠",
-    category: "Analysis",
-    duration: "5 min",
-    xp: 25,
-    content: [
-      "Market sentiment measures the overall attitude of investors toward a particular market or asset. It's the collective mood — fear or greed — that drives buying and selling decisions beyond pure fundamentals.",
-      "Key sentiment indicators include the Fear & Greed Index, put/call ratio, VIX (volatility index), and social media sentiment. Extreme fear often creates buying opportunities, while extreme greed can signal overextension.",
-      "Contrarian traders specifically look for sentiment extremes. When everyone is euphoric, smart money is often selling. When panic sets in, experienced traders look for quality assets at discounted prices. 'Be fearful when others are greedy, and greedy when others are fearful.'",
-    ],
-    takeaways: [
-      "Sentiment measures collective investor mood",
-      "Fear & Greed Index and VIX are key indicators",
-      "Extreme fear often creates buying opportunities",
-      "Contrarian thinking: go against the crowd at extremes",
-    ],
-    quiz: {
-      question: "What does extreme fear in the market typically signal for contrarian traders?",
-      options: [
-        "Time to sell everything",
-        "A potential buying opportunity",
-        "Markets will crash further",
-        "Sentiment doesn't matter",
-      ],
-      correctAnswer: 1,
-    },
-  },
-  {
-    id: "bull-bear",
-    title: "Bull vs Bear Markets",
-    icon: "🐂",
-    category: "Beginner",
-    duration: "5 min",
-    xp: 25,
-    content: [
-      "A bull market is characterised by rising prices, optimism, and strong investor confidence. Officially, a bull market begins when prices rise 20% from a recent low. During bull markets, the prevailing sentiment is 'buy the dip' — every pullback is seen as an opportunity.",
-      "A bear market is the opposite: prices fall 20% or more from recent highs, fear dominates, and investors rush to sell. Bear markets test emotional discipline. Many traders make their worst decisions during bear markets — panic selling at lows or refusing to cut losses.",
-      "Understanding which regime you're in changes everything about your strategy. Bull markets reward momentum and breakout strategies. Bear markets reward patience, defensive positioning, and counter-trend trades at key support levels.",
-    ],
-    takeaways: [
-      "Bull market: 20%+ rise from lows, driven by optimism",
-      "Bear market: 20%+ decline from highs, driven by fear",
-      "Your strategy should adapt to market regime",
-      "Bear markets test emotional discipline the most",
-    ],
-    quiz: {
-      question: "What officially defines a bear market?",
-      options: [
-        "Any day the market goes down",
-        "A 10% decline from highs",
-        "A 20% or more decline from recent highs",
-        "When the VIX goes above 30",
-      ],
-      correctAnswer: 2,
-    },
-  },
-  {
-    id: "support-resistance",
-    title: "Support & Resistance",
-    icon: "📐",
-    category: "Technical",
-    duration: "6 min",
-    xp: 30,
-    content: [
-      "Support and resistance are price levels where buying or selling pressure historically concentrates. Support is a price floor — a level where demand is strong enough to prevent further decline. Resistance is a ceiling — where selling pressure stops prices from rising further.",
-      "These levels form because of psychological anchoring and institutional order flow. Round numbers (£100, £500, £1000) often act as natural support/resistance. Previous highs and lows create horizontal levels that traders watch closely.",
-      "The key concept: when support breaks, it often becomes resistance, and vice versa. This 'role reversal' is one of the most reliable patterns in technical analysis. Trading bounces off support and rejections at resistance is a foundational strategy.",
-    ],
-    takeaways: [
-      "Support = price floor, Resistance = price ceiling",
-      "Round numbers act as natural S/R levels",
-      "Broken support becomes resistance (and vice versa)",
-      "Previous highs and lows create key horizontal levels",
-    ],
-    quiz: {
-      question: "What happens when a support level breaks?",
-      options: [
-        "It disappears completely",
-        "It often becomes a new resistance level",
-        "It always leads to a crash",
-        "Volume always decreases",
-      ],
-      correctAnswer: 1,
-    },
-  },
-  {
-    id: "position-sizing",
-    title: "Position Sizing",
-    icon: "📏",
-    category: "Strategy",
-    duration: "6 min",
-    xp: 30,
-    content: [
-      "Position sizing determines how much of your capital to allocate to each trade. It's the bridge between your risk tolerance and your actual trade execution. Get this wrong and even a winning strategy can blow up your account.",
-      "The formula is simple: Position Size = Risk Amount ÷ Distance to Stop Loss. If you're willing to risk £200 and your stop loss is £5 below entry, you can buy 40 shares. This ensures your maximum loss is predefined.",
-      "Advanced traders adjust position size based on conviction level and setup quality. Higher conviction setups with better risk/reward ratios may warrant larger positions (within your max risk rules), while lower conviction trades should be smaller. Never let a single trade risk more than your predefined maximum.",
-    ],
-    takeaways: [
-      "Position Size = Risk Amount ÷ Stop Loss Distance",
-      "Always predetermine maximum loss before entering",
-      "Adjust size based on conviction and setup quality",
-      "Never exceed your maximum risk per trade rule",
-    ],
-    quiz: {
-      question: "If you risk £200 and your stop loss is £4 away, how many shares can you buy?",
-      options: ["25", "40", "50", "100"],
-      correctAnswer: 2,
-    },
-  },
+  { id: "what-is-stock-market", slug: "what-is-stock-market", title: "What is the Stock Market", icon: "📈", category: "Beginner", difficulty: "Easy", duration_minutes: 6, xp_reward: 20, summary: "Understand what the stock market actually is, how it works, and why it exists.", why_it_matters: "Every asset you trade passes through some form of market. Understanding the mechanics gives you a structural edge.", content: [{ heading: "The basics", body: ["The stock market is a network where buyers and sellers trade shares of publicly listed companies.", "Prices move based on supply and demand."] }, { heading: "How it actually works", body: ["Modern stock markets are electronic. Orders are routed to exchanges like NYSE or NASDAQ.", "Market makers provide liquidity by always being willing to buy or sell, profiting from the spread."] }, { heading: "Why it matters for you", body: ["The stock market is the primary mechanism for building long-term wealth. But it's also where fortunes are lost when people treat it like a casino.", "Understanding structure helps you make better decisions."] }, { heading: "When this fails", body: ["Markets can behave irrationally for extended periods. Understanding mechanics doesn't guarantee logical price movements."] }], common_mistake: "Treating the stock market like gambling — buying based on tips without understanding you're buying ownership in a real business.", practical_example: "Apple releases a new iPhone, buyers flood in pushing the stock up. But if sales disappoint, sellers take over and price drops.", takeaways: ["The stock market is a supply-and-demand auction", "Prices move from collective buying/selling pressure", "Market makers provide liquidity via the bid-ask spread", "Understanding structure gives you an edge"], quiz: [{ question: "What fundamentally drives stock prices?", options: ["Company revenue", "Supply and demand", "Government regulation", "Broker fees"], correctAnswer: 1, explanation: "The immediate driver of price is the balance of supply and demand.", tags: ["Beginner"] }, { question: "What do market makers do?", options: ["Set prices for government", "Provide liquidity by buying and selling", "Block retail traders", "Prevent stocks from falling"], correctAnswer: 1, explanation: "Market makers provide liquidity by quoting both buy and sell prices.", tags: ["Beginner"] }, { question: "When you buy a share, what do you own?", options: ["A loan to the company", "Future dividends", "Partial ownership in a business", "A bet on price"], correctAnswer: 2, explanation: "A share represents fractional ownership in the company.", tags: ["Beginner"] }], related_lessons: ["crypto-vs-stocks-forex", "market-sessions"] },
+  { id: "crypto-vs-stocks-forex", slug: "crypto-vs-stocks-forex", title: "Crypto vs Stocks vs Forex", icon: "🔄", category: "Beginner", difficulty: "Easy", duration_minutes: 7, xp_reward: 20, summary: "Compare the three most popular asset classes.", why_it_matters: "Each market has different rules, hours, volatility, and risk. Trading crypto like stocks will cost you.", content: [{ heading: "Stocks", body: ["Trade during set hours (9:30 AM–4 PM EST). Represent real company ownership.", "Regulated, less volatile than crypto, driven by earnings and macro."] }, { heading: "Cryptocurrency", body: ["24/7 markets, highly volatile. A 10% daily move is normal.", "Fewer regulations, more scams, sentiment-driven."] }, { heading: "Forex", body: ["The largest market. Trade currency pairs nearly 24 hours on weekdays.", "Highly liquid, smaller moves, often uses significant leverage."] }, { heading: "Choosing your focus", body: ["No 'best' market. Specialise in one before spreading thin."] }], common_mistake: "Applying the same strategy across all markets without adapting to different volatility and drivers.", practical_example: "AAPL moves 2-3% on earnings. Bitcoin drops 8% from a tweet. EUR/USD moves 0.5%. Same skill, very different volatility.", takeaways: ["Stocks: set hours. Crypto: 24/7. Forex: near 24h weekdays", "Crypto is most volatile; forex has smallest daily moves", "Each market has different drivers", "Specialise before diversifying"], quiz: [{ question: "Which market operates 24/7?", options: ["Stocks", "Forex", "Cryptocurrency", "All"], correctAnswer: 2, explanation: "Crypto never closes.", tags: ["Beginner"] }, { question: "Which has the smallest daily moves?", options: ["Crypto", "Stocks", "Forex", "All equal"], correctAnswer: 2, explanation: "Forex pairs typically move less than 1% per day.", tags: ["Beginner"] }, { question: "Why not use one strategy for all markets?", options: ["Brokers won't allow it", "Different volatility, hours, and drivers", "Need different accounts", "Strategies always work everywhere"], correctAnswer: 1, explanation: "Each market has fundamentally different characteristics.", tags: ["Beginner"] }], related_lessons: ["what-is-stock-market", "market-sessions"] },
+  { id: "market-sessions", slug: "market-sessions", title: "Market Sessions & Timing", icon: "🕐", category: "Beginner", difficulty: "Easy", duration_minutes: 5, xp_reward: 20, summary: "Learn about global trading sessions and how timing affects price action.", why_it_matters: "Trading during the wrong session means low liquidity, wide spreads, and false signals.", content: [{ heading: "Three major sessions", body: ["Asia (Tokyo), Europe (London), North America (New York).", "Asia is quieter. London spikes volume. New York is most active for US stocks."] }, { heading: "Session overlaps", body: ["London-New York overlap (8 AM–12 PM EST) is the most active period globally.", "Asia-London overlap is significant for JPY and EUR pairs."] }, { heading: "Impact on your strategy", body: ["Scalping needs active sessions. Low-volume hours produce choppy, unpredictable action."] }], common_mistake: "Trading low-liquidity hours and wondering why signals fail and spreads eat profits.", practical_example: "A GBP/USD breakout at 3 AM EST fakes out in quiet Asia session. The same setup at 9 AM during London-NY overlap has real follow-through.", takeaways: ["Three sessions: Asia, London, New York", "London-NY overlap has deepest liquidity", "Low-liquidity sessions produce false signals", "Match your schedule to the right session"], quiz: [{ question: "Which overlap is most active?", options: ["Asia-London", "London-New York", "NY-Asia", "All equal"], correctAnswer: 1, explanation: "London-NY combines the two largest financial centres.", tags: ["Beginner"] }, { question: "What happens in low-liquidity hours?", options: ["Better prices", "Wider spreads and chop", "More predictable trends", "Higher profits"], correctAnswer: 1, explanation: "Fewer participants means wider spreads and erratic movements.", tags: ["Beginner"] }, { question: "Which session has smallest moves?", options: ["New York", "London", "Asia", "Identical"], correctAnswer: 2, explanation: "Asia generally sees lower volume and smaller ranges.", tags: ["Beginner"] }], related_lessons: ["what-is-stock-market", "crypto-vs-stocks-forex"] },
+  { id: "bull-bear-markets", slug: "bull-bear-markets", title: "Bull vs Bear Markets", icon: "🐂", category: "Beginner", difficulty: "Easy", duration_minutes: 5, xp_reward: 20, summary: "Understand market cycles and how to adapt your approach.", why_it_matters: "Trading bearish markets with bullish strategies is swimming against the current.", content: [{ heading: "Definitions", body: ["Bull = 20%+ rise from a low. Bear = 20%+ decline from a high.", "These reflect shifts in sentiment and risk appetite."] }, { heading: "Identifying the trend", body: ["Higher highs and higher lows = uptrend. Lower highs and lower lows = downtrend.", "Price above the 200-day MA = generally bullish."] }, { heading: "Adapting strategy", body: ["Bull: buying dips and breakouts work. Bear: rallies fail, cash is king.", "Worst trades come from fighting the trend."] }], common_mistake: "Buying every dip in a bear market. Bear markets can last months or years.", practical_example: "2022 crypto winter: Bitcoin from $69k to $15k. Buying dips at $50k, $40k, $30k = massive losses.", takeaways: ["Bull = sustained rising; Bear = sustained falling", "HH + HL confirm uptrends", "Adapt strategy to market regime", "Fighting the trend is expensive"], quiz: [{ question: "What defines a bear market?", options: ["5% daily drop", "20%+ decline from a high", "Low volume", "All-time low"], correctAnswer: 1, explanation: "Bear = 20%+ decline from peak.", tags: ["Beginner"] }, { question: "What confirms an uptrend?", options: ["LH + LL", "HH + HL", "Flat + volume", "Random movement"], correctAnswer: 1, explanation: "Each peak higher and each dip higher than the last.", tags: ["Beginner"] }, { question: "Risk of buying every dip in a bear market?", options: ["Fees add up", "Each bounce may be a trap", "Run out of watchlist space", "Dips don't exist"], correctAnswer: 1, explanation: "Dead-cat bounces trap buyers before the next leg down.", tags: ["Beginner"] }], related_lessons: ["support-resistance", "trend-market-structure"] },
+  { id: "support-resistance", slug: "support-resistance", title: "Support & Resistance", icon: "📊", category: "Technical", difficulty: "Medium", duration_minutes: 8, xp_reward: 30, summary: "Identify price levels where buying or selling pressure clusters.", why_it_matters: "S&R is the foundation of technical analysis. Every strategy relies on these levels.", content: [{ heading: "What are S&R?", body: ["Support = buying pressure zone. Resistance = selling pressure zone.", "They form because traders remember previous price points — a self-fulfilling prophecy."] }, { heading: "Zones, not lines", body: ["S&R are zones, not exact lines. Price rarely reverses at a pixel-perfect level.", "Drawing them too precisely leads to premature entries/exits."] }, { heading: "How to use them", body: ["Buy near support with tight stops below. Sell near resistance.", "Broken resistance often becomes support (role reversal). More tests = more significant but closer to breaking."] }, { heading: "When this fails", body: ["In strong trends, S&R levels get steamrolled."] }], common_mistake: "Drawing exact lines and getting stopped out when price wicks through before reversing. Use zones.", practical_example: "Tesla bounced off $180 three times. Buy at $182, stop at $175. Price dips to $179, reverses to $210. The zone held.", takeaways: ["Support = buying zone; Resistance = selling zone", "Think in zones, not lines", "Broken resistance becomes support", "More tests = significant but fragile"], quiz: [{ question: "Why think of S&R as zones?", options: ["Looks better", "Price rarely reverses at exact levels", "Brokers require it", "Lines aren't on mobile"], correctAnswer: 1, explanation: "Price action is messy — zones account for natural variation.", tags: ["Technical"] }, { question: "What is role reversal?", options: ["Market opens opposite", "Broken resistance becomes support", "Bulls become bears", "Ticker change"], correctAnswer: 1, explanation: "Broken levels often reverse their role — resistance becomes support.", tags: ["Technical"] }, { question: "What happens when support is tested many times?", options: ["Unbreakable", "More significant but more likely to break", "Stops being relevant", "Delisted"], correctAnswer: 1, explanation: "Each test depletes the buyer pool, making an eventual break more likely.", tags: ["Technical"] }, { question: "S&R in strong trends?", options: ["More reliable", "Get broken easily", "Disappear", "Double in width"], correctAnswer: 1, explanation: "Strong trends overwhelm levels that would normally hold.", tags: ["Technical"] }], related_lessons: ["trend-market-structure", "understanding-rsi"] },
+  { id: "understanding-rsi", slug: "understanding-rsi", title: "Understanding RSI", icon: "📉", category: "Technical", difficulty: "Medium", duration_minutes: 7, xp_reward: 30, summary: "Learn what RSI measures, how to read it, and when it lies.", why_it_matters: "RSI is widely used but widely misused. Learning what it actually tells you prevents false signals.", content: [{ heading: "What RSI measures", body: ["RSI measures speed and magnitude of recent price changes (0–100).", "Above 70 = 'overbought', below 30 = 'oversold'. But these labels mislead beginners."] }, { heading: "The overbought/oversold trap", body: ["RSI 70+ does NOT mean sell. In strong uptrends, RSI stays above 70 for weeks.", "RSI below 30 in a bear market doesn't mean buy the dip."] }, { heading: "How to use RSI", body: ["Use divergences: price makes a new high but RSI makes a lower high = fading momentum.", "Use context: in an uptrend, RSI at 40-50 = buying opportunity."] }, { heading: "When this fails", body: ["RSI divergences can persist before reversing. It's a confirmation tool, not standalone."] }], common_mistake: "Automatically selling at RSI 70 or buying at 30. This means selling strong trends early and buying falling knives.", practical_example: "NVIDIA's RSI stayed above 70 for three weeks during its AI rally. Selling at 70 missed a 40% move.", takeaways: ["RSI measures momentum, not buy/sell signals", "Overbought ≠ sell; Oversold ≠ buy", "Divergences are more useful than absolute levels", "Always use RSI with trend context"], quiz: [{ question: "RSI above 70 means...", options: ["Sell immediately", "Strong momentum — not automatic sell", "Buy more", "Close platform"], correctAnswer: 1, explanation: "RSI 70+ shows strong momentum. In uptrends, this is normal.", tags: ["Technical"] }, { question: "What is bearish RSI divergence?", options: ["RSI below 30", "Price new high but RSI lower high", "RSI crosses 50", "Both falling"], correctAnswer: 1, explanation: "Price reaches new high but RSI doesn't match = weakening momentum.", tags: ["Technical"] }, { question: "Best way to use RSI?", options: ["Only signal", "Confirmation alongside trend analysis", "Only daily charts", "Ignore it"], correctAnswer: 1, explanation: "RSI works best combined with other analysis.", tags: ["Technical"] }], related_lessons: ["understanding-macd", "support-resistance"] },
+  { id: "understanding-macd", slug: "understanding-macd", title: "Understanding MACD", icon: "📶", category: "Technical", difficulty: "Medium", duration_minutes: 7, xp_reward: 30, summary: "Learn how MACD tracks momentum shifts via crossovers, histogram, and divergences.", why_it_matters: "MACD identifies trend changes early, showing when momentum direction is shifting.", content: [{ heading: "How MACD works", body: ["MACD = 26-period EMA minus 12-period EMA. Above zero = bullish, below = bearish.", "Signal line (9-period EMA of MACD) creates crossover signals."] }, { heading: "Reading signals", body: ["Bullish crossover: MACD crosses above signal line. Bearish = opposite.", "Histogram shows gap between MACD and signal. Shrinking = crossover approaching."] }, { heading: "Divergences", body: ["Price new low but MACD higher low = selling fading. Potential reversal.", "Higher timeframe divergences are more reliable."] }, { heading: "When this fails", body: ["MACD is lagging. In choppy sideways markets, it whipsaws with false crossovers."] }], common_mistake: "Trading every crossover without considering the broader trend.", practical_example: "Bitcoin's daily MACD crossed bullish in Jan 2023 near $16k and stayed bullish as price rallied to $25k.", takeaways: ["MACD measures relationship between two MAs", "Crossovers signal momentum shifts", "Histogram shows momentum strength", "Best in trending markets; avoid in chop"], quiz: [{ question: "What is a bullish MACD crossover?", options: ["Price at ATH", "MACD crosses above signal line", "Volume increased", "Stock split"], correctAnswer: 1, explanation: "MACD crossing above the signal line indicates positive momentum.", tags: ["Technical"] }, { question: "Where does MACD perform worst?", options: ["Strong uptrends", "Strong downtrends", "Choppy sideways markets", "High volume"], correctAnswer: 2, explanation: "Moving averages create false crossovers in ranging markets.", tags: ["Technical"] }, { question: "Shrinking histogram means?", options: ["Accelerating momentum", "Crossover approaching", "Market closed", "Volume dropping"], correctAnswer: 1, explanation: "Shrinking gap between lines = convergence = crossover likely.", tags: ["Technical"] }], related_lessons: ["understanding-rsi", "trend-market-structure"] },
+  { id: "trend-market-structure", slug: "trend-market-structure", title: "Trend & Market Structure", icon: "🏗️", category: "Technical", difficulty: "Medium", duration_minutes: 8, xp_reward: 30, summary: "How trends form, how to read structure, and how to spot trend endings.", why_it_matters: "Market structure makes all other technical analysis work. Without it, every indicator is unreliable.", content: [{ heading: "Trend basics", body: ["Uptrend = higher highs (HH) + higher lows (HL). Downtrend = lower highs (LH) + lower lows (LL)."] }, { heading: "Break of structure", body: ["BOS: when the HH/HL or LH/LL pattern breaks. In an uptrend, price breaking the last HL = structure shift.", "One of the most important signals in trading."] }, { heading: "Ranging markets", body: ["Price bouncing between S&R without trending. Recognise this to avoid forcing trend strategies.", "Ranges eventually break, starting the next trend."] }, { heading: "Multi-timeframe", body: ["Your 5-min can be bearish while daily is bullish. Higher timeframe usually wins."] }], common_mistake: "Trying to call exact tops and bottoms. Structure breaks tell you after the fact — trying to predict is gambling.", practical_example: "A stock makes HH/HL for two months. Then it makes a lower high and breaks the last HL. Uptrend may be done.", takeaways: ["Uptrend = HH + HL; Downtrend = LH + LL", "BOS signals potential trend change", "Ranges need different strategies", "Higher timeframes override lower ones"], quiz: [{ question: "What defines an uptrend?", options: ["Fast price rise", "Higher highs and higher lows", "RSI above 50", "Positive news"], correctAnswer: 1, explanation: "Structurally: each peak higher, each pullback higher.", tags: ["Technical"] }, { question: "What is break of structure?", options: ["Market close", "HH/HL or LH/LL pattern violated", "Stock split", "Volume at zero"], correctAnswer: 1, explanation: "When price violates the established structural pattern.", tags: ["Technical"] }, { question: "Daily vs 5-min trend conflict?", options: ["5-min wins", "Daily wins", "Cancel out", "More volume wins"], correctAnswer: 1, explanation: "Higher timeframes represent larger flows and longer-term sentiment.", tags: ["Technical"] }], related_lessons: ["support-resistance", "bull-bear-markets"] },
+  { id: "risk-management", slug: "risk-management", title: "Risk Management", icon: "🛡️", category: "Risk", difficulty: "Medium", duration_minutes: 8, xp_reward: 35, summary: "The most important trading skill: protecting your capital.", why_it_matters: "70% win rate still blows accounts if losses are too large. Risk management is everything.", content: [{ heading: "Core principle", body: ["Never risk more than 1-2% per trade.", "With $10,000 at 2%: max $200 loss per trade. 10 losses in a row = still $8,000."] }, { heading: "Risk-reward ratio", body: ["Define risk (stop) and reward (target) before entering. 1:2 = risk $100 to make $200.", "At 1:2, you only need 40% win rate to profit."] }, { heading: "Stop losses", body: ["Every trade must have a stop loss. No exceptions.", "Mental stops fail — your brain rationalises holding. Use hard stops."] }, { heading: "When this fails", body: ["Flash crashes and gaps can skip stops (slippage). Never risk catastrophic amounts."] }], common_mistake: "No stop loss, hoping a loser comes back. Small losses become account-ending disasters.", practical_example: "Buy $100, stop $97 (risk $3), target $106 (gain $6). 1:2 R:R. Win 5/10 = net +$15.", takeaways: ["Never risk more than 1-2% per trade", "R:R matters more than win rate", "Always use hard stops", "Surviving > winning any single trade"], quiz: [{ question: "$10k account, 2% rule — max risk per trade?", options: ["$1,000", "$500", "$200", "$50"], correctAnswer: 2, explanation: "2% of $10,000 = $200.", tags: ["Risk"] }, { question: "At 1:2 R:R, min win rate to profit?", options: ["50%+", "70%+", "33%+", "90%+"], correctAnswer: 2, explanation: "At 34%: 34 wins × $2 = $68, 66 losses × $1 = $66. Net positive.", tags: ["Risk"] }, { question: "Why are mental stops unreliable?", options: ["Brokers block them", "Your brain rationalises holding", "Illegal", "Only work in bull markets"], correctAnswer: 1, explanation: "Cognitive biases make you find reasons to hold losers.", tags: ["Risk"] }, { question: "What is slippage?", options: ["Extra fees", "Stop executes at worse price due to gaps", "RSI below 20", "Wrong order"], correctAnswer: 1, explanation: "Fast moves can cause stops to fill at worse prices.", tags: ["Risk"] }], related_lessons: ["position-sizing", "fomo-and-chasing"] },
+  { id: "position-sizing", slug: "position-sizing", title: "Position Sizing", icon: "⚖️", category: "Risk", difficulty: "Medium", duration_minutes: 6, xp_reward: 30, summary: "Calculate exactly how many shares to buy based on risk and stop loss.", why_it_matters: "Position sizing translates risk rules into action. Without it, your 1% rule is meaningless.", content: [{ heading: "The formula", body: ["Position size = Risk amount ÷ Stop loss distance per share.", "With $10k, 1% risk ($100), $2 stop = 50 shares. Dollar risk stays constant."] }, { heading: "Consistent sizing", body: ["Random sizing makes results unpredictable. Consistency makes your edge work over time."] }, { heading: "Adjusting for volatility", body: ["High volatility = wider stops = smaller positions. Low volatility = tighter stops = more shares.", "Professionals adapt. They don't buy 100 shares of everything."] }], common_mistake: "Fixed 100 shares regardless of volatility. Some trades become 5x riskier without you knowing.", practical_example: "Trade A: $50 entry, $48 stop, $100 risk → 50 shares. Trade B: $200 entry, $190 stop, $100 risk → 10 shares. Same risk.", takeaways: ["Size = Risk ÷ Stop distance", "Keep dollar risk consistent", "Wider stops = smaller positions", "Never use fixed share counts"], quiz: [{ question: "$20k, 1% risk, $5 stop. How many shares?", options: ["100", "40", "200", "20"], correctAnswer: 1, explanation: "1% of $20k = $200. $200 ÷ $5 = 40 shares.", tags: ["Risk"] }, { question: "Why is fixed 100 shares bad?", options: ["Too many", "Makes some trades much riskier", "Brokers block it", "Penny stocks only"], correctAnswer: 1, explanation: "100 shares of $10 with $1 stop = $100 risk. 100 of $300 with $15 stop = $1,500. 15x difference.", tags: ["Risk"] }, { question: "How to size a volatile stock?", options: ["More shares for bigger moves", "Wider stop, fewer shares", "Same amount", "Don't trade it"], correctAnswer: 1, explanation: "Wider stops keep you in trade but mean fewer shares to maintain constant dollar risk.", tags: ["Risk"] }], related_lessons: ["risk-management", "fomo-and-chasing"] },
+  { id: "fomo-and-chasing", slug: "fomo-and-chasing", title: "FOMO and Chasing", icon: "😰", category: "Psychology", difficulty: "Medium", duration_minutes: 6, xp_reward: 30, summary: "Why FOMO destroys accounts and how to stop chasing trades.", why_it_matters: "FOMO causes late entries, oversizing, and plan abandonment. It blows more accounts than bad analysis.", content: [{ heading: "What FOMO looks like", body: ["Seeing a stock up 30% and jumping in without a plan.", "Copying social media trades without realising they entered hours earlier."] }, { heading: "Why it's dangerous", body: ["You enter near the top when smart money is selling. R:R becomes terrible.", "FOMO causes oversizing — urgency overrides rules."] }, { heading: "How to manage it", body: ["Accept that you will miss trades. There's always another opportunity.", "Use a pre-trade checklist. If criteria aren't met, walk away.", "Wait for pullbacks instead of chasing the initial surge."] }], common_mistake: "Convincing yourself a late entry is 'fine' because the trend is strong. By the time FOMO hits, you're buying the last leg.", practical_example: "Stock gaps +20%. You chase at +25%. It hits +30%, reverses to +5%. You panic sell at a loss. Patient traders waited for the +10% pullback.", takeaways: ["FOMO = late entries at worst prices", "There is always another trade", "Pre-trade checklist filters emotion", "Wait for pullbacks, not parabolic moves"], quiz: [{ question: "Main risk of FOMO entries?", options: ["Broker rejection", "Bad price, terrible R:R", "Trading halt", "Always lose"], correctAnswer: 1, explanation: "FOMO pushes you near the top where R:R is poor.", tags: ["Psychology"] }, { question: "Best defence against FOMO?", options: ["No social media", "Pre-trade checklist and rules", "One stock only", "Tiny positions"], correctAnswer: 1, explanation: "Checklists force objective evaluation.", tags: ["Psychology"] }, { question: "Missed a big move — what to do?", options: ["Chase immediately", "Wait for a pullback", "Short it", "Switch stocks"], correctAnswer: 1, explanation: "Pullbacks after big moves often offer better entries.", tags: ["Psychology"] }], related_lessons: ["risk-management", "breakouts-vs-fakeouts"] },
+  { id: "breakouts-vs-fakeouts", slug: "breakouts-vs-fakeouts", title: "Breakouts vs Fake Breakouts", icon: "💥", category: "Strategy", difficulty: "Hard", duration_minutes: 9, xp_reward: 40, summary: "Distinguish real breakouts from traps and trade both profitably.", why_it_matters: "Breakout trading is popular but 60-70% of breakouts fail. Knowing how to confirm or avoid them is a serious edge.", content: [{ heading: "What is a breakout?", body: ["Price moves beyond a defined level with conviction — higher volume, wider candles, follow-through."] }, { heading: "What is a fakeout?", body: ["Price briefly passes a level then reverses, trapping traders.", "Institutions push through levels to trigger stops before reversing."] }, { heading: "Confirming real breakouts", body: ["Volume: real breakouts have significantly higher volume.", "Candle close: wait for the candle to close beyond the level.", "Retest: best entries come when price breaks out, pulls back to the level, and bounces."] }, { heading: "Trading fakeouts", body: ["Trapped traders provide fuel for the reversal. Identify fakeouts early and trade the reverse with a tight stop."] }], common_mistake: "Entering every breakout without confirmation. This leads to repeated fakeout traps.", practical_example: "Stock consolidates below $50 for two weeks. Breaks above on heavy volume, closes $51. Retests $50 next day, holds, rallies to $58. Patient trader enters at $50.50 on retest.", takeaways: ["Real breakouts need volume + candle close", "60-70% of breakouts fail", "Retests offer best R:R entries", "Fakeouts create opportunities for patient traders"], quiz: [{ question: "What confirms a real breakout?", options: ["Wick above resistance", "Volume + candle close beyond level", "News headline", "RSI above 50"], correctAnswer: 1, explanation: "Close beyond the level with higher volume = genuine breakout.", tags: ["Strategy", "Technical"] }, { question: "What is a retest?", options: ["Same trade twice", "Price breaks out, pulls back to level, bounces", "Stop hit + re-entry", "Retaking ATH"], correctAnswer: 1, explanation: "Retests confirm the broken level now acts as support.", tags: ["Strategy"] }, { question: "Why are fakeouts opportunities?", options: ["Always lead to bigger breakouts", "Trapped traders fuel the reversal", "Easier to spot", "Broker rebates"], correctAnswer: 1, explanation: "Trapped traders' forced exits add momentum to the reversal.", tags: ["Strategy"] }, { question: "Breakout failure rate?", options: ["10-20%", "30-40%", "60-70%", "90-95%"], correctAnswer: 2, explanation: "Studies suggest 60-70% failure, making confirmation essential.", tags: ["Strategy"] }], related_lessons: ["support-resistance", "fomo-and-chasing"] }
 ];
 
-export interface Badge {
-  id: string;
-  name: string;
-  icon: string;
-  description: string;
-  condition: (completed: string[], lessons: Lesson[]) => boolean;
-}
+export interface Badge { id: string; name: string; icon: string; description: string; requirement: string; condition: (completed: string[], lessons: Lesson[]) => boolean; }
 
 export const badges: Badge[] = [
-  {
-    id: "first-steps",
-    name: "First Steps",
-    icon: "👣",
-    description: "Complete your first lesson",
-    condition: (c) => c.length >= 1,
-  },
-  {
-    id: "bookworm",
-    name: "Bookworm",
-    icon: "📖",
-    description: "Complete 3 lessons",
-    condition: (c) => c.length >= 3,
-  },
-  {
-    id: "rising-trader",
-    name: "Rising Trader",
-    icon: "🚀",
-    description: "Complete 5 lessons",
-    condition: (c) => c.length >= 5,
-  },
-  {
-    id: "foundations",
-    name: "Foundations Set",
-    icon: "🏗️",
-    description: "Complete all Beginner lessons",
-    condition: (c, l) => l.filter((x) => x.category === "Beginner").every((x) => c.includes(x.id)),
-  },
-  {
-    id: "chart-master",
-    name: "Chart Master",
-    icon: "📊",
-    description: "Complete all Technical lessons",
-    condition: (c, l) => l.filter((x) => x.category === "Technical").every((x) => c.includes(x.id)),
-  },
-  {
-    id: "strategist",
-    name: "Strategist",
-    icon: "♟️",
-    description: "Complete all Strategy lessons",
-    condition: (c, l) => l.filter((x) => x.category === "Strategy").every((x) => c.includes(x.id)),
-  },
-  {
-    id: "forex-expert",
-    name: "Forex Expert",
-    icon: "💱",
-    description: "Complete all Forex lessons",
-    condition: (c, l) => l.filter((x) => x.category === "Forex").every((x) => c.includes(x.id)),
-  },
-  {
-    id: "graduate",
-    name: "TradeIQ Graduate",
-    icon: "🎓",
-    description: "Complete all 10 lessons",
-    condition: (c) => c.length >= 10,
-  },
+  { id: "first-steps", name: "First Steps", icon: "🎯", description: "Started your trading education", requirement: "Complete 1 lesson", condition: (c) => c.length >= 1 },
+  { id: "bookworm", name: "Bookworm", icon: "📚", description: "Committed to learning", requirement: "Complete 3 lessons", condition: (c) => c.length >= 3 },
+  { id: "beginner-foundations", name: "Beginner Foundations", icon: "🏠", description: "Mastered the fundamentals", requirement: "Complete all Beginner lessons", condition: (c, l) => l.filter(x => x.category === "Beginner").every(x => c.includes(x.id)) },
+  { id: "quiz-starter", name: "Quiz Starter", icon: "✅", description: "Proved your knowledge", requirement: "Pass 3 quizzes", condition: (c) => c.length >= 3 },
+  { id: "risk-aware", name: "Risk Aware", icon: "🛡️", description: "Understands capital protection", requirement: "Complete all Risk lessons", condition: (c, l) => l.filter(x => x.category === "Risk").every(x => c.includes(x.id)) },
+  { id: "technician", name: "Technician", icon: "📊", description: "Fluent in technical analysis", requirement: "Complete all Technical lessons", condition: (c, l) => l.filter(x => x.category === "Technical").every(x => c.includes(x.id)) },
+  { id: "half-way", name: "Half Way", icon: "🌗", description: "Halfway through the curriculum", requirement: "Complete 6 lessons", condition: (c) => c.length >= 6 },
+  { id: "academy-grad", name: "Academy Graduate", icon: "🎓", description: "Completed the full curriculum", requirement: "Complete all 12 lessons", condition: (c) => c.length >= 12 },
 ];
+
+export const microLessons = [
+  { id: "micro-1", text: "RSI above 70 doesn't automatically mean sell. It means momentum is strong — which is actually bullish in an uptrend.", category: "Technical" },
+  { id: "micro-2", text: "Support is usually a zone, not a single perfect line. Give your trades room to breathe within the zone.", category: "Technical" },
+  { id: "micro-3", text: "A strong breakout without volume confirmation can turn into a trap fast. Always check the volume.", category: "Strategy" },
+  { id: "micro-4", text: "A high win rate means little if your losses are much larger than your wins. Risk-reward ratio matters more.", category: "Risk" },
+  { id: "micro-5", text: "Market timing matters more in stocks and forex than many beginners realise. Trade during active sessions.", category: "Beginner" },
+  { id: "micro-6", text: "The best trade you'll ever make might be the one you didn't take. Discipline beats excitement every time.", category: "Psychology" },
+  { id: "micro-7", text: "Never risk more than 1-2% of your account on a single trade. Survival is the first rule of trading.", category: "Risk" },
+  { id: "micro-8", text: "A moving average crossover in a choppy market will whipsaw you. Context matters more than the signal.", category: "Technical" },
+  { id: "micro-9", text: "If you can't explain your trade thesis in one sentence, you probably shouldn't be in the trade.", category: "Strategy" },
+  { id: "micro-10", text: "Trading without a stop loss is like driving without a seatbelt. It works until it doesn't.", category: "Risk" },
+];
+
+export const difficultyColors: Record<string, string> = {
+  Easy: "bg-verdict-buy/15 text-verdict-buy border-verdict-buy/20",
+  Medium: "bg-amber-500/15 text-amber-400 border-amber-500/20",
+  Hard: "bg-verdict-avoid/15 text-verdict-avoid border-verdict-avoid/20",
+};
