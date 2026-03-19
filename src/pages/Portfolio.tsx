@@ -37,7 +37,7 @@ const Portfolio = () => {
   });
   const [ptForm, setPtForm] = useState({ symbol: "", units: "", price: "", stopLoss: "", takeProfit: "", thesis: "" });
   const [stats, setStats] = useState({ wins: 0, losses: 0, pending: 0, total: 0, winRate: 0, avgPnl: 0 });
-  const [showExport, setShowExport] = useState(false);
+  const [pnlSparkline, setPnlSparkline] = useState<{ pnl: number }[]>([]);
   const [exporting, setExporting] = useState(false);
 
   const startingBalance = 10000;
