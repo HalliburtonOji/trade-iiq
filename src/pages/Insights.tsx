@@ -12,6 +12,7 @@ import Rulebook from "@/components/Rulebook";
 import WeeklyRecap from "@/components/WeeklyRecap";
 import BiasDetector from "@/components/BiasDetector";
 import MonthlyReport from "@/components/MonthlyReport";
+import PerformanceCharts from "@/components/PerformanceCharts";
 import StatCard from "@/components/StatCard";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
