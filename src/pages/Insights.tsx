@@ -351,6 +351,11 @@ const Insights = () => {
           <TabsContent value="rules" className="mt-3">
             <Rulebook />
           </TabsContent>
+
+          {/* MONTHLY TAB */}
+          <TabsContent value="monthly" className="mt-3">
+            <MonthlyReport />
+          </TabsContent>
         </Tabs>
       </motion.div>
     </PageShell>
