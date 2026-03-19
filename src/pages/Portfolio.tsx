@@ -208,22 +208,62 @@ const Portfolio = () => {
             </GlassCard>
 
             {/* P&L Sparkline */}
-            {pnlSparkline.length >= 2 && (
-              <GlassCard>
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">P&L Curve</h3>
-                <ResponsiveContainer width="100%" height={80}>
-                  <LineChart data={pnlSparkline}>
-                    <Line
-                      type="monotone"
-                      dataKey="pnl"
-                      stroke={pnlSparkline[pnlSparkline.length - 1]?.pnl >= 0 ? "hsl(142, 71%, 45%)" : "hsl(0, 72%, 51%)"}
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </GlassCard>
-            )}
+            {pnlSparkline.length >= 2 && (() => {
+              const now = new Date();
+              const cutoff = sparkRange === "7D" ? new Date(now.getTime() - 7 * 86400000)
+                : sparkRange === "30D" ? new Date(now.getTime() - 30 * 86400000)
+                : new Date(now.getTime() - 90 * 86400000);
+              const rangedData = pnlSparkline.filter(d => new Date(d.date) >= cutoff);
+              const displayData = rangedData.length >= 2 ? rangedData : pnlSparkline;
+              const lastVal = displayData[displayData.length - 1]?.pnl ?? 0;
+              const firstVal = displayData[0]?.pnl ?? 0;
+              const periodChange = Math.round((lastVal - firstVal) * 10) / 10;
+              const isUp = lastVal >= 0;
+              const trendLabel = periodChange > 1 ? "Uptrend" : periodChange < -1 ? "Deteriorating" : "Flat";
+              // Best / worst
+              const best = displayData.reduce((b, d) => d.pnl > b.pnl ? d : b, displayData[0]);
+              const worst = displayData.reduce((w, d) => d.pnl < w.pnl ? d : w, displayData[0]);
+              return (
+                <GlassCard>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">P&L Curve</h3>
+                    <ToggleGroup type="single" value={sparkRange} onValueChange={(v) => v && setSparkRange(v as any)} className="gap-0">
+                      {(["7D", "30D", "90D"] as const).map(r => (
+                        <ToggleGroupItem key={r} value={r} className="text-[9px] h-5 px-1.5 data-[state=on]:bg-primary/20 data-[state=on]:text-primary">{r}</ToggleGroupItem>
+                      ))}
+                    </ToggleGroup>
+                  </div>
+                  <ResponsiveContainer width="100%" height={80}>
+                    <LineChart data={displayData}>
+                      <RechartsTooltip
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null;
+                          return (
+                            <div className="glass-card px-2 py-1 text-[10px] font-mono">
+                              P&L: <span className={payload[0].value as number >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}>{payload[0].value as number > 0 ? "+" : ""}{(payload[0].value as number).toFixed(1)}%</span>
+                            </div>
+                          );
+                        }}
+                      />
+                      <Line type="monotone" dataKey="pnl" stroke={isUp ? "hsl(142, 71%, 45%)" : "hsl(0, 72%, 51%)"} strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                  <div className="flex items-center justify-between mt-1">
+                    <div className="flex items-center gap-1">
+                      {periodChange >= 0 ? <ChevronUp className="h-3 w-3 text-verdict-buy" /> : <ChevronDown className="h-3 w-3 text-verdict-avoid" />}
+                      <span className={`text-[10px] font-mono font-bold ${periodChange >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`}>
+                        {periodChange > 0 ? "+" : ""}{periodChange}%
+                      </span>
+                      <span className="text-[9px] text-muted-foreground ml-1">{trendLabel}</span>
+                    </div>
+                    <div className="flex gap-2 text-[9px] text-muted-foreground">
+                      <span>Best: <span className="text-verdict-buy font-mono">+{best.pnl}%</span></span>
+                      <span>Worst: <span className="text-verdict-avoid font-mono">{worst.pnl}%</span></span>
+                    </div>
+                  </div>
+                </GlassCard>
+              );
+            })()}
 
             {stats.total === 0 && (
               <GlassCard className="text-center py-6">
