@@ -10,6 +10,7 @@ import GlassCard from "@/components/GlassCard";
 import StatCard from "@/components/StatCard";
 import TickerMarquee from "@/components/TickerMarquee";
 import DailyMissions from "@/components/DailyMissions";
+import DQSWidget from "@/components/DQSWidget";
 
 const getGreeting = () => {
   const h = new Date().getHours();
