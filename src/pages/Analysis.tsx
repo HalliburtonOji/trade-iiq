@@ -209,7 +209,6 @@ const Analysis = () => {
             </div>
           </motion.div>
         )}
-        )}
           </>
         )}
       </div>
