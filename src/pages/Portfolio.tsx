@@ -64,6 +64,10 @@ const Portfolio = () => {
         const pnls = data.filter((d: any) => d.pnl_percent != null).map((d: any) => d.pnl_percent);
         const avgPnl = pnls.length > 0 ? Math.round(pnls.reduce((s: number, v: number) => s + v, 0) / pnls.length * 10) / 10 : 0;
         setStats({ wins, losses, pending, total: data.length, winRate: completed > 0 ? Math.round((wins / completed) * 100) : 0, avgPnl });
+        // Build sparkline
+        const withPnl = data.filter((d: any) => d.pnl_percent != null && (d.outcome === "WIN" || d.outcome === "LOSS"));
+        let cum = 0;
+        setPnlSparkline(withPnl.map((d: any) => { cum += d.pnl_percent; return { pnl: Math.round(cum * 10) / 10 }; }));
       }
     };
     fetchStats();
