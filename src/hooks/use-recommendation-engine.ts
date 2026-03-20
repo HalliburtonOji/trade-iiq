@@ -12,10 +12,16 @@ const CURRICULUM_ORDER = [
   "trend-market-structure",
   "understanding-rsi",
   "understanding-macd",
+  "volume-analysis",
+  "candlestick-patterns",
+  "moving-averages",
   "risk-management",
   "position-sizing",
   "fomo-and-chasing",
   "breakouts-vs-fakeouts",
+  "trade-journaling",
+  "building-trading-plan",
+  "correlation-trading",
 ];
 
 const FOUNDATION_IDS = [
@@ -96,7 +102,7 @@ function getWeakConcepts(attempts: QuizAttemptRecord[]): string[] {
 }
 
 function getCategoryStats(completed: string[]) {
-  const categories = ["Beginner", "Technical", "Risk", "Psychology", "Strategy"] as const;
+  const categories = ["Beginner", "Technical", "Risk", "Psychology", "Strategy", "Advanced"] as const;
   const stats: Record<string, { completed: number; total: number; weak: boolean; strong: boolean; label: string }> = {};
 
   categories.forEach(cat => {
