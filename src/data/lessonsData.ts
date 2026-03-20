@@ -55,6 +55,7 @@ export const lessonsData: Lesson[] = [
 export interface Badge { id: string; name: string; icon: string; description: string; requirement: string; condition: (completed: string[], lessons: Lesson[]) => boolean; }
 
 export const badges: Badge[] = [
+  // Progress badges
   { id: "first-steps", name: "First Steps", icon: "🎯", description: "Started your trading education", requirement: "Complete 1 lesson", condition: (c) => c.length >= 1 },
   { id: "bookworm", name: "Bookworm", icon: "📚", description: "Committed to learning", requirement: "Complete 3 lessons", condition: (c) => c.length >= 3 },
   { id: "beginner-foundations", name: "Beginner Foundations", icon: "🏠", description: "Mastered the fundamentals", requirement: "Complete all Beginner lessons", condition: (c, l) => l.filter(x => x.category === "Beginner").every(x => c.includes(x.id)) },
@@ -62,7 +63,17 @@ export const badges: Badge[] = [
   { id: "risk-aware", name: "Risk Aware", icon: "🛡️", description: "Understands capital protection", requirement: "Complete all Risk lessons", condition: (c, l) => l.filter(x => x.category === "Risk").every(x => c.includes(x.id)) },
   { id: "technician", name: "Technician", icon: "📊", description: "Fluent in technical analysis", requirement: "Complete all Technical lessons", condition: (c, l) => l.filter(x => x.category === "Technical").every(x => c.includes(x.id)) },
   { id: "half-way", name: "Half Way", icon: "🌗", description: "Halfway through the curriculum", requirement: "Complete 6 lessons", condition: (c) => c.length >= 6 },
-  { id: "academy-grad", name: "Academy Graduate", icon: "🎓", description: "Completed the full curriculum", requirement: "Complete all 12 lessons", condition: (c) => c.length >= 12 },
+  { id: "academy-grad", name: "Academy Graduate", icon: "🎓", description: "Completed the full curriculum", requirement: "Complete all lessons", condition: (c, l) => c.length >= l.length },
+  // Skill badges
+  { id: "rsi-ready", name: "RSI Ready", icon: "📉", description: "RSI mastery achieved", requirement: "Complete RSI lesson + pass quiz", condition: (c) => c.includes("understanding-rsi") },
+  { id: "structure-spotter", name: "Structure Spotter", icon: "🏗️", description: "Reads market structure", requirement: "Complete S&R + Trend lessons", condition: (c) => c.includes("support-resistance") && c.includes("trend-market-structure") },
+  { id: "risk-planner", name: "Risk Planner", icon: "⚖️", description: "Sizes positions properly", requirement: "Complete Risk + Position Sizing", condition: (c) => c.includes("risk-management") && c.includes("position-sizing") },
+  { id: "bias-catcher", name: "Bias Catcher", icon: "🧠", description: "Recognises emotional traps", requirement: "Complete FOMO lesson", condition: (c) => c.includes("fomo-and-chasing") },
+  { id: "breakout-reader", name: "Breakout Reader", icon: "💥", description: "Separates real from fake", requirement: "Complete Breakouts lesson", condition: (c) => c.includes("breakouts-vs-fakeouts") },
+  { id: "volume-reader", name: "Volume Reader", icon: "📢", description: "Reads conviction behind moves", requirement: "Complete Volume Analysis", condition: (c) => c.includes("volume-analysis") },
+  // Discipline badges
+  { id: "consistency-king", name: "Consistency Over Hype", icon: "👑", description: "Steady learner", requirement: "Complete 10+ lessons", condition: (c) => c.length >= 10 },
+  { id: "full-stack", name: "Full Stack Trader", icon: "🏆", description: "Mastered all categories", requirement: "Complete lessons across all categories", condition: (c, l) => ["Beginner", "Technical", "Risk", "Psychology", "Strategy"].every(cat => l.filter(x => x.category === cat).some(x => c.includes(x.id))) },
 ];
 
 export const microLessons = [
