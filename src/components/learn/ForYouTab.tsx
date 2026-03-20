@@ -1,9 +1,17 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, BookOpen, Sparkles, TrendingUp, Trophy, Zap, Target } from "lucide-react";
+import {
+  ArrowRight, BookOpen, Sparkles, TrendingUp, Trophy, Zap,
+  Target, RotateCcw, Compass, Award
+} from "lucide-react";
 import GlassCard from "@/components/GlassCard";
 import { lessonsData, microLessons } from "@/data/lessonsData";
-import { getLevel, getWeakCategories, type QuizAttemptRecord } from "@/hooks/use-learning-progress";
+import { getLevel, type QuizAttemptRecord } from "@/hooks/use-learning-progress";
+import {
+  useRecommendationEngine,
+  getStateLabel,
+  type UserLearningSignals,
+} from "@/hooks/use-recommendation-engine";
 
 interface Props {
   completedLessons: string[];
@@ -13,157 +21,236 @@ interface Props {
   onSelectLesson: (lessonId: string) => void;
 }
 
-const ForYouTab = ({ completedLessons, totalXp, streak, quizAttempts, onSelectLesson }: Props) => {
-  const level = getLevel(totalXp);
+const MAX_CARDS = 7;
 
-  // Daily micro lesson (rotate by day)
+const ForYouTab = ({ completedLessons, totalXp, streak, quizAttempts, onSelectLesson }: Props) => {
+  const signals = useRecommendationEngine(completedLessons, totalXp, streak, quizAttempts);
+  const level = getLevel(totalXp);
+  const stateLabel = getStateLabel(signals.learnerState);
+
+  // Daily micro lesson
   const dailyMicro = useMemo(() => {
     const day = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
     return microLessons[day % microLessons.length];
   }, []);
 
-  // Unfinished / first incomplete lesson
-  const nextLesson = useMemo(() => {
-    return lessonsData.find(l => !completedLessons.includes(l.id));
-  }, [completedLessons]);
+  // Build prioritised card list
+  const cards = useMemo(() => {
+    const result: React.ReactNode[] = [];
 
-  // Weak categories
-  const weakCats = useMemo(() => getWeakCategories(quizAttempts), [quizAttempts]);
-  const weakLesson = useMemo(() => {
-    if (weakCats.length === 0) return null;
-    return lessonsData.find(l => weakCats.includes(l.category) && !completedLessons.includes(l.id));
-  }, [weakCats, completedLessons]);
+    // P1: Continue Learning / Recommended Next
+    if (signals.recommendedNextLesson) {
+      const lesson = signals.recommendedNextLesson;
+      const isNewUser = completedLessons.length === 0;
+      const label = isNewUser
+        ? "Start here"
+        : signals.weakCategories.includes(lesson.category)
+          ? `Because you struggled in ${lesson.category}`
+          : signals.isBeginner
+            ? "Strong foundation builder"
+            : "Best next step";
 
-  // Progress milestone
-  const milestone = useMemo(() => {
-    const nextLvl = getLevel(totalXp);
-    if (totalXp >= 500) return null;
-    const xpNeeded = nextLvl.next - totalXp;
-    return `Earn ${xpNeeded} more XP to reach ${getLevel(nextLvl.next).name}`;
-  }, [totalXp]);
-
-  const cards: React.ReactNode[] = [];
-
-  // Continue learning / recommended starter
-  if (completedLessons.length === 0 && nextLesson) {
-    cards.push(
-      <GlassCard key="starter" hoverable onClick={() => onSelectLesson(nextLesson.id)}
-        className="border-primary/20 bg-gradient-to-br from-primary/10 to-accent/5">
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-xl bg-primary/15"><Sparkles className="h-5 w-5 text-primary" /></div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-primary mb-0.5">Recommended for you</p>
-            <p className="text-sm font-bold truncate">{nextLesson.title}</p>
-            <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{nextLesson.summary}</p>
-            <div className="flex items-center gap-1 mt-2 text-primary text-xs font-medium">
-              Start Lesson <ArrowRight className="h-3 w-3" />
+      result.push(
+        <GlassCard key="next" hoverable onClick={() => onSelectLesson(lesson.id)}
+          className="border-primary/20 bg-gradient-to-br from-primary/10 to-accent/5">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-xl bg-primary/15">
+              {isNewUser ? <Sparkles className="h-5 w-5 text-primary" /> : <BookOpen className="h-5 w-5 text-primary" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <p className="text-xs font-semibold text-primary">
+                  {isNewUser ? "Recommended for You" : "Continue Learning"}
+                </p>
+              </div>
+              <p className="text-sm font-bold truncate">{lesson.title}</p>
+              <p className="text-[10px] text-muted-foreground/60 mt-0.5 italic">{label}</p>
+              <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{lesson.summary}</p>
+              <div className="flex items-center gap-1 mt-2 text-primary text-xs font-medium">
+                {isNewUser ? "Start Lesson" : "Continue"} <ArrowRight className="h-3 w-3" />
+              </div>
             </div>
           </div>
-        </div>
-      </GlassCard>
-    );
-  } else if (nextLesson) {
-    cards.push(
-      <GlassCard key="continue" hoverable onClick={() => onSelectLesson(nextLesson.id)}
-        className="border-primary/20">
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-xl bg-primary/15"><BookOpen className="h-5 w-5 text-primary" /></div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-primary mb-0.5">Continue Learning</p>
-            <p className="text-sm font-bold truncate">{nextLesson.title}</p>
-            <p className="text-[11px] text-muted-foreground mt-1">{nextLesson.category} · {nextLesson.duration_minutes} min · +{nextLesson.xp_reward} XP</p>
-            <div className="flex items-center gap-1 mt-2 text-primary text-xs font-medium">
-              Continue <ArrowRight className="h-3 w-3" />
+        </GlassCard>
+      );
+    }
+
+    // P2: Weakest Category
+    if (signals.weakCategories.length > 0) {
+      const weakCat = signals.weakCategories[0];
+      const weakLesson = lessonsData.find(
+        l => l.category === weakCat && !completedLessons.includes(l.id)
+      );
+      result.push(
+        <GlassCard key="weak" hoverable={!!weakLesson}
+          onClick={weakLesson ? () => onSelectLesson(weakLesson.id) : undefined}
+          className="border-amber-500/20">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-xl bg-amber-500/15"><Target className="h-5 w-5 text-amber-400" /></div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-amber-400 mb-0.5">Weakest Area</p>
+              <p className="text-sm font-bold">{weakCat}</p>
+              <p className="text-[10px] text-muted-foreground/60 mt-0.5 italic">Based on recent quiz results</p>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                {weakCat} concepts need more work. {weakLesson ? `Try "${weakLesson.title}" next.` : "Review your completed lessons."}
+              </p>
+              {weakLesson && (
+                <div className="flex items-center gap-1 mt-2 text-amber-400 text-xs font-medium">
+                  Review Category <ArrowRight className="h-3 w-3" />
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      </GlassCard>
-    );
-  }
-
-  // Daily micro lesson
-  cards.push(
-    <GlassCard key="micro" className="border-accent/15 bg-gradient-to-br from-accent/5 to-transparent">
-      <div className="flex items-start gap-3">
-        <div className="p-2 rounded-xl bg-accent/15"><Zap className="h-5 w-5 text-accent" /></div>
-        <div className="flex-1">
-          <p className="text-xs font-semibold text-accent mb-1">Daily Concept</p>
-          <p className="text-sm text-foreground/85 leading-relaxed">{dailyMicro.text}</p>
-          <span className="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-full bg-accent/10 text-accent font-medium">{dailyMicro.category}</span>
-        </div>
-      </div>
-    </GlassCard>
-  );
-
-  // Weakest category
-  if (weakLesson) {
-    cards.push(
-      <GlassCard key="weak" hoverable onClick={() => onSelectLesson(weakLesson.id)}
-        className="border-amber-500/20">
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-xl bg-amber-500/15"><Target className="h-5 w-5 text-amber-400" /></div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-amber-400 mb-0.5">Improve Your Weak Area</p>
-            <p className="text-sm font-bold truncate">{weakLesson.title}</p>
-            <p className="text-[11px] text-muted-foreground mt-1">Your quiz results suggest reviewing {weakCats[0]}</p>
+        </GlassCard>
+      );
+    } else if (completedLessons.length === 0) {
+      result.push(
+        <GlassCard key="foundation" className="border-amber-500/20">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-xl bg-amber-500/15"><Target className="h-5 w-5 text-amber-400" /></div>
+            <div className="flex-1">
+              <p className="text-xs font-semibold text-amber-400 mb-0.5">Build Your Foundation</p>
+              <p className="text-[10px] text-muted-foreground/60 italic">Start here</p>
+              <p className="text-sm text-foreground/85 mt-1">
+                Start with Beginner lessons before the indicators start chatting nonsense.
+              </p>
+            </div>
           </div>
-        </div>
-      </GlassCard>
-    );
-  } else if (completedLessons.length === 0) {
-    cards.push(
-      <GlassCard key="foundation" className="border-amber-500/20">
+        </GlassCard>
+      );
+    }
+
+    // P3: Review Due
+    if (signals.reviewDueCount > 0 && completedLessons.length >= 3) {
+      const reviewLesson = signals.recommendedReviewLessons[0];
+      if (reviewLesson) {
+        result.push(
+          <GlassCard key="review" hoverable onClick={() => onSelectLesson(reviewLesson.id)}
+            className="border-accent/15">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-xl bg-accent/15"><RotateCcw className="h-5 w-5 text-accent" /></div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-accent mb-0.5">Review Due</p>
+                <p className="text-sm font-bold truncate">{reviewLesson.title}</p>
+                <p className="text-[10px] text-muted-foreground/60 mt-0.5 italic">Review recommended</p>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Revisit this to lock in understanding.
+                </p>
+                <div className="flex items-center gap-1 mt-2 text-accent text-xs font-medium">
+                  Review Now <ArrowRight className="h-3 w-3" />
+                </div>
+              </div>
+            </div>
+          </GlassCard>
+        );
+      }
+    }
+
+    // P4: Focus Area
+    if (completedLessons.length >= 1) {
+      result.push(
+        <GlassCard key="focus" className="border-primary/10">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-xl bg-primary/15"><Compass className="h-5 w-5 text-primary" /></div>
+            <div className="flex-1">
+              <p className="text-xs font-semibold text-primary mb-0.5">Current Focus</p>
+              <p className="text-sm font-bold">{signals.currentFocusArea}</p>
+              <p className="text-[10px] text-muted-foreground/60 mt-0.5 italic">
+                {signals.isBeginner ? "Build your base first" : "Good next step"}
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-1">{stateLabel}</p>
+            </div>
+          </div>
+        </GlassCard>
+      );
+    }
+
+    // P5: Progress Milestone
+    if (totalXp < 800) {
+      const nextLvl = getLevel(totalXp);
+      const xpNeeded = nextLvl.next - totalXp;
+      const nextName = getLevel(nextLvl.next).name;
+
+      // Badge nudge
+      const closeBadge = signals.badgeProgress.find(b => b.close && b.current < b.target);
+
+      result.push(
+        <GlassCard key="milestone" className="border-verdict-buy/15">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-xl bg-verdict-buy/15">
+              {closeBadge ? <Award className="h-5 w-5 text-verdict-buy" /> : <TrendingUp className="h-5 w-5 text-verdict-buy" />}
+            </div>
+            <div className="flex-1">
+              <p className="text-xs font-semibold text-verdict-buy mb-0.5">Next Milestone</p>
+              {closeBadge ? (
+                <>
+                  <p className="text-sm text-foreground/85">
+                    {closeBadge.current}/{closeBadge.target} for {closeBadge.icon} {closeBadge.name}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-0.5 italic">Almost there</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-foreground/85">
+                    Earn {xpNeeded} more XP to reach {nextName}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-0.5 italic">Keep going</p>
+                </>
+              )}
+            </div>
+          </div>
+        </GlassCard>
+      );
+    }
+
+    // P6: Daily Micro Lesson
+    result.push(
+      <GlassCard key="micro" className="border-accent/15 bg-gradient-to-br from-accent/5 to-transparent">
         <div className="flex items-start gap-3">
-          <div className="p-2 rounded-xl bg-amber-500/15"><Target className="h-5 w-5 text-amber-400" /></div>
+          <div className="p-2 rounded-xl bg-accent/15"><Zap className="h-5 w-5 text-accent" /></div>
           <div className="flex-1">
-            <p className="text-xs font-semibold text-amber-400 mb-0.5">Build Your Foundation</p>
-            <p className="text-sm text-foreground/85">Start with Beginner lessons to understand the basics before moving to technical analysis and strategy.</p>
+            <p className="text-xs font-semibold text-accent mb-1">Daily Concept</p>
+            <p className="text-sm text-foreground/85 leading-relaxed">{dailyMicro.text}</p>
+            <span className="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-full bg-accent/10 text-accent font-medium">
+              {dailyMicro.category}
+            </span>
           </div>
         </div>
       </GlassCard>
     );
-  }
 
-  // Milestone
-  if (milestone) {
-    cards.push(
-      <GlassCard key="milestone" className="border-verdict-buy/15">
+    // P7: Progress Summary
+    result.push(
+      <GlassCard key="summary">
         <div className="flex items-start gap-3">
-          <div className="p-2 rounded-xl bg-verdict-buy/15"><TrendingUp className="h-5 w-5 text-verdict-buy" /></div>
+          <div className="p-2 rounded-xl bg-primary/15"><Trophy className="h-5 w-5 text-primary" /></div>
           <div className="flex-1">
-            <p className="text-xs font-semibold text-verdict-buy mb-0.5">Next Milestone</p>
-            <p className="text-sm text-foreground/85">{milestone}</p>
+            <p className="text-xs font-semibold text-primary mb-2">Your Progress</p>
+            <div className="grid grid-cols-4 gap-2">
+              <div className="text-center">
+                <p className="text-lg font-bold">{completedLessons.length}</p>
+                <p className="text-[10px] text-muted-foreground">Lessons</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold">{signals.totalQuizPasses}</p>
+                <p className="text-[10px] text-muted-foreground">Quizzes</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold">{totalXp}</p>
+                <p className="text-[10px] text-muted-foreground">XP</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold">{streak}</p>
+                <p className="text-[10px] text-muted-foreground">Streak</p>
+              </div>
+            </div>
           </div>
         </div>
       </GlassCard>
     );
-  }
 
-  // Progress summary
-  cards.push(
-    <GlassCard key="summary">
-      <div className="flex items-start gap-3">
-        <div className="p-2 rounded-xl bg-primary/15"><Trophy className="h-5 w-5 text-primary" /></div>
-        <div className="flex-1">
-          <p className="text-xs font-semibold text-primary mb-2">Your Progress</p>
-          <div className="grid grid-cols-3 gap-3">
-            <div className="text-center">
-              <p className="text-lg font-bold">{completedLessons.length}</p>
-              <p className="text-[10px] text-muted-foreground">Lessons</p>
-            </div>
-            <div className="text-center">
-              <p className="text-lg font-bold">{totalXp}</p>
-              <p className="text-[10px] text-muted-foreground">Total XP</p>
-            </div>
-            <div className="text-center">
-              <p className="text-lg font-bold">{streak}</p>
-              <p className="text-[10px] text-muted-foreground">Streak</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </GlassCard>
-  );
+    return result.slice(0, MAX_CARDS);
+  }, [signals, completedLessons, totalXp, streak, dailyMicro, onSelectLesson, stateLabel, level]);
 
   return (
     <div className="flex flex-col gap-3 mt-3">
