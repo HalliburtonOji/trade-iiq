@@ -325,7 +325,7 @@ function buildStudyPlan(
       const drill = drills[i % drills.length] || drillsData[0];
       focus = `Practice: ${drill.title}`;
       drillId = drill.id;
-      minutes = drill.estimated_duration;
+      minutes = Math.ceil(drill.estimated_seconds / 60);
     } else {
       // Review day
       const weak = weakConcepts[i % Math.max(weakConcepts.length, 1)];
