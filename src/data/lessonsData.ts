@@ -16,7 +16,7 @@ export interface Lesson {
   slug: string;
   title: string;
   icon: string;
-  category: "Beginner" | "Technical" | "Risk" | "Psychology" | "Strategy";
+  category: "Beginner" | "Technical" | "Risk" | "Psychology" | "Strategy" | "Advanced";
   difficulty: "Easy" | "Medium" | "Hard";
   duration_minutes: number;
   xp_reward: number;
