@@ -80,7 +80,13 @@ const Learn = () => {
           </TabsContent>
 
           <TabsContent value="lessons">
-            <LessonsTab completedLessons={completedLessons} onSelectLesson={handleSelectLesson} />
+            <LessonsTab
+              completedLessons={completedLessons}
+              onSelectLesson={handleSelectLesson}
+              quizAttempts={quizAttempts}
+              totalXp={totalXp}
+              streak={streak}
+            />
           </TabsContent>
 
           <TabsContent value="practice">
@@ -88,7 +94,13 @@ const Learn = () => {
           </TabsContent>
 
           <TabsContent value="review">
-            <ReviewTab completedLessons={completedLessons} quizAttempts={quizAttempts} onSelectLesson={handleSelectLesson} />
+            <ReviewTab
+              completedLessons={completedLessons}
+              quizAttempts={quizAttempts}
+              onSelectLesson={handleSelectLesson}
+              totalXp={totalXp}
+              streak={streak}
+            />
           </TabsContent>
 
           <TabsContent value="badges">
