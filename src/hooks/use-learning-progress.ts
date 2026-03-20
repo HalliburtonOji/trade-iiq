@@ -8,6 +8,7 @@ export interface LearningProgressData {
   totalXp: number;
   streak: number;
   quizAttempts: QuizAttemptRecord[];
+  learningDates: Map<string, string>;
   loading: boolean;
   refetch: () => Promise<void>;
 }
