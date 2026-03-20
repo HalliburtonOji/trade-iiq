@@ -1,8 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Dumbbell, Zap, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
+import { Dumbbell, Zap, CheckCircle2, ArrowRight, Sparkles, Clock } from "lucide-react";
 import GlassCard from "@/components/GlassCard";
 import DrillDetail from "./DrillDetail";
+import TimedChallenge from "./TimedChallenge";
 import { drillsData, practiceTypeLabels, practiceTypeIcons, type PracticeType, type Drill } from "@/data/drillsData";
 import { usePracticeProgress } from "@/hooks/use-practice-progress";
 import { useRecommendationEngine } from "@/hooks/use-recommendation-engine";
@@ -30,11 +31,11 @@ const practiceFilters: Array<{ label: string; value: PracticeType | "all" }> = [
 const PracticeTab = ({ completedLessons, quizAttempts = [], totalXp = 0, streak = 0, onSelectLesson }: Props) => {
   const [filter, setFilter] = useState<PracticeType | "all">("all");
   const [activeDrill, setActiveDrill] = useState<Drill | null>(null);
+  const [showTimedChallenge, setShowTimedChallenge] = useState(false);
   const { completedDrills, totalPracticeXp, saveDrillResult } = usePracticeProgress();
   const signals = useRecommendationEngine(completedLessons, totalXp, streak, quizAttempts);
   const { toast } = useToast();
 
-  // Category progress
   const categoryProgress = useMemo(() => {
     const types: PracticeType[] = ["scenario", "chart_reading", "risk", "bias", "quick_check", "invalidation"];
     return types.map(t => {
@@ -44,22 +45,18 @@ const PracticeTab = ({ completedLessons, quizAttempts = [], totalXp = 0, streak 
     });
   }, [completedDrills]);
 
-  // Filtered + sorted drills
   const filteredDrills = useMemo(() => {
     let list = filter === "all" ? [...drillsData] : drillsData.filter(d => d.practice_type === filter);
-    // Sort: incomplete first, then recommended
     return list.sort((a, b) => {
       const aDone = completedDrills.includes(a.id) ? 1 : 0;
       const bDone = completedDrills.includes(b.id) ? 1 : 0;
       if (aDone !== bDone) return aDone - bDone;
-      // Prioritise drills matching weak categories
       const aWeak = signals.weakCategories.includes(a.category) ? -1 : 0;
       const bWeak = signals.weakCategories.includes(b.category) ? -1 : 0;
       return aWeak - bWeak;
     });
   }, [filter, completedDrills, signals]);
 
-  // Recommendation label for drill
   const getDrillLabel = (drill: Drill): string | null => {
     if (signals.isBeginner && (drill.practice_type === "quick_check" || drill.practice_type === "scenario")) {
       return "Build your foundation";
@@ -71,14 +68,26 @@ const PracticeTab = ({ completedLessons, quizAttempts = [], totalXp = 0, streak 
     return null;
   };
 
-  const handleDrillComplete = async (drill: Drill, passed: boolean) => {
+  const handleDrillComplete = useCallback(async (drill: Drill, passed: boolean) => {
     const alreadyDone = completedDrills.includes(drill.id);
     const xp = passed && !alreadyDone ? drill.xp_reward : 0;
     await saveDrillResult(drill.id, drill.practice_type, drill.category, passed, xp, passed ? [] : drill.concept_tags);
     if (passed && !alreadyDone) {
       toast({ title: `⚡ +${drill.xp_reward} XP`, description: `"${drill.title}" completed!` });
     }
-  };
+  }, [completedDrills, saveDrillResult, toast]);
+
+  const handleTimedComplete = useCallback((correct: number, total: number, xp: number) => {
+    if (xp > 0) {
+      toast({ title: `🏎️ +${xp} XP`, description: `Speed round: ${correct}/${total} correct!` });
+    }
+    setShowTimedChallenge(false);
+  }, [toast]);
+
+  // Timed challenge view
+  if (showTimedChallenge) {
+    return <TimedChallenge onComplete={handleTimedComplete} onBack={() => setShowTimedChallenge(false)} />;
+  }
 
   // Drill detail view
   if (activeDrill) {
@@ -93,7 +102,6 @@ const PracticeTab = ({ completedLessons, quizAttempts = [], totalXp = 0, streak 
     );
   }
 
-  // Recommended first drill
   const recommendedDrill = filteredDrills.find(d => !completedDrills.includes(d.id));
 
   return (
@@ -112,6 +120,26 @@ const PracticeTab = ({ completedLessons, quizAttempts = [], totalXp = 0, streak 
           </div>
         </div>
       </GlassCard>
+
+      {/* Speed Round CTA */}
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+        <GlassCard
+          hoverable
+          onClick={() => setShowTimedChallenge(true)}
+          className="border-accent/20 bg-gradient-to-br from-accent/10 to-primary/5"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-accent/15">
+              <Clock className="h-5 w-5 text-accent" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-bold">⚡ Speed Round</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">60 seconds. As many quick checks as you can. Bonus XP.</p>
+            </div>
+            <ArrowRight className="h-4 w-4 text-accent" />
+          </div>
+        </GlassCard>
+      </motion.div>
 
       {/* Filter chips */}
       <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
@@ -233,7 +261,7 @@ const PracticeTab = ({ completedLessons, quizAttempts = [], totalXp = 0, streak 
           <Zap className="h-6 w-6 text-verdict-buy mx-auto mb-2" />
           <p className="text-sm font-semibold text-verdict-buy">All drills completed!</p>
           <p className="text-[11px] text-muted-foreground mt-1">
-            You can replay any drill to reinforce concepts. More drills coming soon.
+            Try the Speed Round or replay drills to reinforce concepts.
           </p>
         </GlassCard>
       )}

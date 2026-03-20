@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, AlertTriangle, Lightbulb, BookOpen, CheckCircle2, ArrowRight } from "lucide-react";
+import { ArrowLeft, AlertTriangle, Lightbulb, BookOpen, CheckCircle2, ArrowRight, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/GlassCard";
 import QuizFlow from "./QuizFlow";
 import { type Lesson, lessonsData, difficultyColors } from "@/data/lessonsData";
+import { drillsData, practiceTypeLabels } from "@/data/drillsData";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -15,18 +16,24 @@ interface Props {
   onBack: () => void;
   onLessonComplete: () => void;
   onSelectLesson: (id: string) => void;
+  onSelectDrill?: (drillId: string) => void;
 }
 
-const LessonDetail = ({ lesson, completed, onBack, onLessonComplete, onSelectLesson }: Props) => {
+const LessonDetail = ({ lesson, completed, onBack, onLessonComplete, onSelectLesson, onSelectDrill }: Props) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [showQuiz, setShowQuiz] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
 
+  // Related drills for this lesson
+  const relatedDrills = useMemo(() =>
+    drillsData.filter(d => d.related_lesson_ids.includes(lesson.id)),
+    [lesson.id]
+  );
+
   const handleQuizComplete = async (score: number, total: number, passed: boolean, weakTags: string[]) => {
     if (!user) return;
 
-    // Save quiz attempt
     await supabase.from("quiz_attempts").insert({
       user_id: user.id,
       lesson_id: lesson.id,
@@ -37,7 +44,6 @@ const LessonDetail = ({ lesson, completed, onBack, onLessonComplete, onSelectLes
     });
 
     if (passed && !completed) {
-      // Mark lesson complete
       await supabase.from("learning_progress").upsert({
         user_id: user.id,
         lesson_id: lesson.id,
@@ -77,7 +83,6 @@ const LessonDetail = ({ lesson, completed, onBack, onLessonComplete, onSelectLes
 
   return (
     <div className="flex flex-col gap-4 px-4 pt-6 pb-24">
-      {/* Back button */}
       <button onClick={onBack} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
         <ArrowLeft className="h-4 w-4" /> Back to Lessons
       </button>
@@ -182,6 +187,27 @@ const LessonDetail = ({ lesson, completed, onBack, onLessonComplete, onSelectLes
             Retake Quiz
           </Button>
         </GlassCard>
+      )}
+
+      {/* Practice this concept */}
+      {relatedDrills.length > 0 && (
+        <div className="flex flex-col gap-2 mt-2">
+          <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+            <Dumbbell className="h-3.5 w-3.5" /> Practice This Concept
+          </p>
+          {relatedDrills.slice(0, 3).map(drill => (
+            <GlassCard key={drill.id} hoverable onClick={() => onSelectDrill?.(drill.id)}>
+              <div className="flex items-center gap-3">
+                <span className="text-lg">{practiceTypeLabels[drill.practice_type] === "Scenarios" ? "🎯" : "⚡"}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold truncate">{drill.title}</p>
+                  <p className="text-[10px] text-muted-foreground">{practiceTypeLabels[drill.practice_type]} · +{drill.xp_reward} XP</p>
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+              </div>
+            </GlassCard>
+          ))}
+        </div>
       )}
 
       {/* Related lessons */}
