@@ -12,10 +12,16 @@ const CURRICULUM_ORDER = [
   "trend-market-structure",
   "understanding-rsi",
   "understanding-macd",
+  "volume-analysis",
+  "candlestick-patterns",
+  "moving-averages",
   "risk-management",
   "position-sizing",
   "fomo-and-chasing",
   "breakouts-vs-fakeouts",
+  "trade-journaling",
+  "building-trading-plan",
+  "correlation-trading",
 ];
 
 const FOUNDATION_IDS = [
