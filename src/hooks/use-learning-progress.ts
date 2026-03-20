@@ -28,6 +28,7 @@ export function useLearningProgress(): LearningProgressData {
   const [totalXp, setTotalXp] = useState(0);
   const [streak, setStreak] = useState(0);
   const [quizAttempts, setQuizAttempts] = useState<QuizAttemptRecord[]>([]);
+  const [learningDates, setLearningDates] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
 
   const fetchProgress = useCallback(async () => {
