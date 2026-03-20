@@ -102,7 +102,7 @@ function getWeakConcepts(attempts: QuizAttemptRecord[]): string[] {
 }
 
 function getCategoryStats(completed: string[]) {
-  const categories = ["Beginner", "Technical", "Risk", "Psychology", "Strategy"] as const;
+  const categories = ["Beginner", "Technical", "Risk", "Psychology", "Strategy", "Advanced"] as const;
   const stats: Record<string, { completed: number; total: number; weak: boolean; strong: boolean; label: string }> = {};
 
   categories.forEach(cat => {

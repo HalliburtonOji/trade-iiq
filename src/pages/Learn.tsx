@@ -90,7 +90,13 @@ const Learn = () => {
           </TabsContent>
 
           <TabsContent value="practice">
-            <PracticeTab completedLessons={completedLessons} />
+            <PracticeTab
+              completedLessons={completedLessons}
+              quizAttempts={quizAttempts}
+              totalXp={totalXp}
+              streak={streak}
+              onSelectLesson={handleSelectLesson}
+            />
           </TabsContent>
 
           <TabsContent value="review">
