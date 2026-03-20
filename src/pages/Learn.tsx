@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import PageShell from "@/components/PageShell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { lessonsData } from "@/data/lessonsData";
+import { drillsData } from "@/data/drillsData";
 import { useLearningProgress } from "@/hooks/use-learning-progress";
+import { usePracticeProgress } from "@/hooks/use-practice-progress";
 import LearnHeader from "@/components/learn/LearnHeader";
 import ForYouTab from "@/components/learn/ForYouTab";
 import LessonsTab from "@/components/learn/LessonsTab";
@@ -10,18 +12,61 @@ import PracticeTab from "@/components/learn/PracticeTab";
 import ReviewTab from "@/components/learn/ReviewTab";
 import BadgesTab from "@/components/learn/BadgesTab";
 import LessonDetail from "@/components/learn/LessonDetail";
+import DrillDetail from "@/components/learn/DrillDetail";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 const Learn = () => {
-  const { completedLessons, totalXp, streak, quizAttempts, loading, refetch } = useLearningProgress();
+  const { completedLessons, totalXp, streak, quizAttempts, loading, refetch, learningDates } = useLearningProgress();
+  const { completedDrills, records: practiceRecords, saveDrillResult } = usePracticeProgress();
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
+  const [selectedDrillId, setSelectedDrillId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const selectedLesson = selectedLessonId ? lessonsData.find(l => l.id === selectedLessonId) : null;
+  const selectedDrill = selectedDrillId ? drillsData.find(d => d.id === selectedDrillId) : null;
 
-  const handleSelectLesson = (id: string) => {
+  const handleSelectLesson = useCallback((id: string) => {
     setSelectedLessonId(id);
+    setSelectedDrillId(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  }, []);
+
+  const handleSelectDrill = useCallback((drillId: string) => {
+    setSelectedDrillId(drillId);
+    setSelectedLessonId(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  const handleDrillComplete = useCallback(async (passed: boolean) => {
+    if (!selectedDrill) return;
+    const alreadyDone = completedDrills.includes(selectedDrill.id);
+    const xp = passed && !alreadyDone ? selectedDrill.xp_reward : 0;
+    await saveDrillResult(selectedDrill.id, selectedDrill.practice_type, selectedDrill.category, passed, xp, passed ? [] : selectedDrill.concept_tags);
+    if (passed && !alreadyDone) {
+      toast({ title: `⚡ +${selectedDrill.xp_reward} XP`, description: `"${selectedDrill.title}" completed!` });
+    }
+  }, [selectedDrill, completedDrills, saveDrillResult, toast]);
+
+  // Learning dates map
+  const learningDatesMap = useMemo(() => {
+    return learningDates || new Map<string, string>();
+  }, [learningDates]);
+
+  // Drill detail view
+  if (selectedDrill) {
+    return (
+      <PageShell>
+        <DrillDetail
+          drill={selectedDrill}
+          alreadyCompleted={completedDrills.includes(selectedDrill.id)}
+          onComplete={handleDrillComplete}
+          onBack={() => setSelectedDrillId(null)}
+          onSelectLesson={handleSelectLesson}
+        />
+      </PageShell>
+    );
+  }
 
   if (selectedLesson) {
     return (
@@ -32,6 +77,7 @@ const Learn = () => {
           onBack={() => setSelectedLessonId(null)}
           onLessonComplete={refetch}
           onSelectLesson={handleSelectLesson}
+          onSelectDrill={handleSelectDrill}
         />
       </PageShell>
     );
@@ -103,6 +149,8 @@ const Learn = () => {
             <ReviewTab
               completedLessons={completedLessons}
               quizAttempts={quizAttempts}
+              practiceRecords={practiceRecords}
+              learningDates={learningDatesMap}
               onSelectLesson={handleSelectLesson}
               totalXp={totalXp}
               streak={streak}

@@ -8,6 +8,7 @@ export interface LearningProgressData {
   totalXp: number;
   streak: number;
   quizAttempts: QuizAttemptRecord[];
+  learningDates: Map<string, string>;
   loading: boolean;
   refetch: () => Promise<void>;
 }
@@ -27,6 +28,7 @@ export function useLearningProgress(): LearningProgressData {
   const [totalXp, setTotalXp] = useState(0);
   const [streak, setStreak] = useState(0);
   const [quizAttempts, setQuizAttempts] = useState<QuizAttemptRecord[]>([]);
+  const [learningDates, setLearningDates] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
 
   const fetchProgress = useCallback(async () => {
@@ -41,6 +43,11 @@ export function useLearningProgress(): LearningProgressData {
     if (progressRes.data) {
       setCompletedLessons(progressRes.data.map((d: any) => d.lesson_id));
       setTotalXp(progressRes.data.reduce((s: number, d: any) => s + (d.xp_earned || 0), 0));
+      const dates = new Map<string, string>();
+      progressRes.data.forEach((d: any) => {
+        if (d.completed_date) dates.set(d.lesson_id, d.completed_date);
+      });
+      setLearningDates(dates);
     }
     if (quizRes.data) {
       setQuizAttempts(quizRes.data as any);
@@ -53,7 +60,7 @@ export function useLearningProgress(): LearningProgressData {
 
   useEffect(() => { fetchProgress(); }, [fetchProgress]);
 
-  return { completedLessons, totalXp, streak, quizAttempts, loading, refetch: fetchProgress };
+  return { completedLessons, totalXp, streak, quizAttempts, learningDates, loading, refetch: fetchProgress };
 }
 
 // Levels
