@@ -1,10 +1,14 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import PageShell from "@/components/PageShell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { lessonsData } from "@/data/lessonsData";
 import { drillsData } from "@/data/drillsData";
 import { useLearningProgress } from "@/hooks/use-learning-progress";
 import { usePracticeProgress } from "@/hooks/use-practice-progress";
+import { useCoachingEngine, type TradeRow, type ReviewRow, type ChartAnalysisRow, type TradingRuleRow } from "@/hooks/use-coaching-engine";
+import { useRecommendationEngine } from "@/hooks/use-recommendation-engine";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import LearnHeader from "@/components/learn/LearnHeader";
 import ForYouTab from "@/components/learn/ForYouTab";
 import LessonsTab from "@/components/learn/LessonsTab";
@@ -17,11 +21,42 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
 const Learn = () => {
+  const { user } = useAuth();
   const { completedLessons, totalXp, streak, quizAttempts, loading, refetch, learningDates } = useLearningProgress();
   const { completedDrills, records: practiceRecords, saveDrillResult } = usePracticeProgress();
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   const [selectedDrillId, setSelectedDrillId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Coaching data
+  const [trades, setTrades] = useState<TradeRow[]>([]);
+  const [reviews, setReviews] = useState<ReviewRow[]>([]);
+  const [chartAnalyses, setChartAnalyses] = useState<ChartAnalysisRow[]>([]);
+  const [tradingRules, setTradingRules] = useState<TradingRuleRow[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    Promise.all([
+      supabase.from("trade_decisions").select("id,symbol,asset_type,decision,outcome,confidence,invalidation_point,thesis_why,notes,time_horizon").eq("user_id", user.id).order("date", { ascending: false }).limit(100),
+      supabase.from("decision_reviews").select("trade_decision_id,verdict_correct,timing_correct,followed_plan,emotion,mistake_type,execution_quality").eq("user_id", user.id).limit(100),
+      supabase.from("chart_analyses").select("id,symbol,analysis_json").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30),
+      supabase.from("trading_rules").select("rule_text,category,is_active").eq("user_id", user.id).eq("is_active", true),
+    ]).then(([t, r, c, ru]) => {
+      if (t.data) setTrades(t.data as TradeRow[]);
+      if (r.data) setReviews(r.data as ReviewRow[]);
+      if (c.data) setChartAnalyses(c.data as ChartAnalysisRow[]);
+      if (ru.data) setTradingRules(ru.data as TradingRuleRow[]);
+    });
+  }, [user]);
+
+  const recSignals = useRecommendationEngine(completedLessons, totalXp, streak, quizAttempts);
+  const learningDatesMap = useMemo(() => learningDates || new Map<string, string>(), [learningDates]);
+
+  const coaching = useCoachingEngine(
+    trades, reviews, chartAnalyses, tradingRules,
+    completedLessons, quizAttempts, practiceRecords, learningDatesMap,
+    recSignals.weakCategories
+  );
 
   const selectedLesson = selectedLessonId ? lessonsData.find(l => l.id === selectedLessonId) : null;
   const selectedDrill = selectedDrillId ? drillsData.find(d => d.id === selectedDrillId) : null;
@@ -48,12 +83,6 @@ const Learn = () => {
     }
   }, [selectedDrill, completedDrills, saveDrillResult, toast]);
 
-  // Learning dates map
-  const learningDatesMap = useMemo(() => {
-    return learningDates || new Map<string, string>();
-  }, [learningDates]);
-
-  // Drill detail view
   if (selectedDrill) {
     return (
       <PageShell>
@@ -100,11 +129,7 @@ const Learn = () => {
   return (
     <PageShell>
       <div className="flex flex-col gap-4 px-4 pt-6 pb-24">
-        <LearnHeader
-          totalXp={totalXp}
-          streak={streak}
-          completedCount={completedLessons.length}
-        />
+        <LearnHeader totalXp={totalXp} streak={streak} completedCount={completedLessons.length} />
 
         <Tabs defaultValue="foryou">
           <TabsList className="w-full bg-secondary/50 h-10">
@@ -122,6 +147,10 @@ const Learn = () => {
               streak={streak}
               quizAttempts={quizAttempts}
               onSelectLesson={handleSelectLesson}
+              onSelectDrill={handleSelectDrill}
+              coachingCards={coaching.cards}
+              weeklyCoachingSummary={coaching.weeklyCoachingSummary}
+              studyPlan={coaching.studyPlan}
             />
           </TabsContent>
 
@@ -158,7 +187,11 @@ const Learn = () => {
           </TabsContent>
 
           <TabsContent value="badges">
-            <BadgesTab completedLessons={completedLessons} />
+            <BadgesTab
+              completedLessons={completedLessons}
+              conceptMastery={coaching.conceptMastery}
+              categoryMastery={coaching.categoryMastery}
+            />
           </TabsContent>
         </Tabs>
       </div>
