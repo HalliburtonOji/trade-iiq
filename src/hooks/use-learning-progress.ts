@@ -43,6 +43,11 @@ export function useLearningProgress(): LearningProgressData {
     if (progressRes.data) {
       setCompletedLessons(progressRes.data.map((d: any) => d.lesson_id));
       setTotalXp(progressRes.data.reduce((s: number, d: any) => s + (d.xp_earned || 0), 0));
+      const dates = new Map<string, string>();
+      progressRes.data.forEach((d: any) => {
+        if (d.completed_date) dates.set(d.lesson_id, d.completed_date);
+      });
+      setLearningDates(dates);
     }
     if (quizRes.data) {
       setQuizAttempts(quizRes.data as any);
