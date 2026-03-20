@@ -238,6 +238,54 @@ export type Database = {
         }
         Relationships: []
       }
+      practice_progress: {
+        Row: {
+          attempt_count: number
+          category: string
+          completed: boolean
+          completed_at: string | null
+          drill_id: string
+          id: string
+          passed: boolean
+          practice_type: string
+          score: number
+          started_at: string
+          user_id: string
+          weak_tags: string[] | null
+          xp_earned: number
+        }
+        Insert: {
+          attempt_count?: number
+          category?: string
+          completed?: boolean
+          completed_at?: string | null
+          drill_id: string
+          id?: string
+          passed?: boolean
+          practice_type?: string
+          score?: number
+          started_at?: string
+          user_id: string
+          weak_tags?: string[] | null
+          xp_earned?: number
+        }
+        Update: {
+          attempt_count?: number
+          category?: string
+          completed?: boolean
+          completed_at?: string | null
+          drill_id?: string
+          id?: string
+          passed?: boolean
+          practice_type?: string
+          score?: number
+          started_at?: string
+          user_id?: string
+          weak_tags?: string[] | null
+          xp_earned?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
