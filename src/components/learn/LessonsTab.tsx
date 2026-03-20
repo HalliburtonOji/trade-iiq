@@ -9,7 +9,7 @@ import {
   getRecommendationLabel,
 } from "@/hooks/use-recommendation-engine";
 
-const categories = ["All", "Beginner", "Technical", "Risk", "Psychology", "Strategy"];
+const categories = ["All", "Beginner", "Technical", "Risk", "Psychology", "Strategy", "Advanced"];
 
 interface Props {
   completedLessons: string[];
