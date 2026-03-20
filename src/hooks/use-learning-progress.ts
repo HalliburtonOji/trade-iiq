@@ -60,7 +60,7 @@ export function useLearningProgress(): LearningProgressData {
 
   useEffect(() => { fetchProgress(); }, [fetchProgress]);
 
-  return { completedLessons, totalXp, streak, quizAttempts, loading, refetch: fetchProgress };
+  return { completedLessons, totalXp, streak, quizAttempts, learningDates, loading, refetch: fetchProgress };
 }
 
 // Levels
