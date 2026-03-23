@@ -1,4 +1,4 @@
-import { Home, TrendingUp, ClipboardList, GraduationCap, PieChart } from "lucide-react";
+import { Home, TrendingUp, ClipboardList, GraduationCap, BarChart3 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -6,9 +6,9 @@ import { motion } from "framer-motion";
 const navItems = [
   { label: "Home", icon: Home, path: "/" },
   { label: "Analysis", icon: TrendingUp, path: "/analysis" },
+  { label: "Charts", icon: BarChart3, path: "/charts" },
   { label: "Tracker", icon: ClipboardList, path: "/tracker" },
   { label: "Learn", icon: GraduationCap, path: "/learn" },
-  { label: "Portfolio", icon: PieChart, path: "/portfolio" },
 ];
 
 const BottomNav = () => {
