@@ -36,6 +36,7 @@ const Analysis = () => {
   const [result, setResult] = useState<AnalysisResult | null>(
     searchParams.get("symbol") ? { ...(analysisData[searchParams.get("symbol")!.toUpperCase()] || analysisData["DEFAULT"]), symbol: searchParams.get("symbol")!.toUpperCase() } : null
   );
+  const [brokerOpen, setBrokerOpen] = useState(false);
 
   const handleSearch = (symbol?: string) => {
     const s = (symbol || query).toUpperCase().trim();
