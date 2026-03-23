@@ -205,10 +205,22 @@ const Analysis = () => {
               <Button variant="outline" className="flex-1 text-xs gap-1.5" size="sm" onClick={addToWatchlist}>
                 <Star className="h-3.5 w-3.5" /> Watchlist
               </Button>
+              <Button variant="outline" className="flex-1 text-xs gap-1.5" size="sm" onClick={() => setBrokerOpen(true)}>
+                <ExternalLink className="h-3.5 w-3.5" /> Execute
+              </Button>
               <Button className="flex-1 text-xs" size="sm" onClick={() => navigate("/tracker")}>
                 Log Decision
               </Button>
             </div>
+
+            <BrokerLauncher
+              open={brokerOpen}
+              onOpenChange={setBrokerOpen}
+              symbol={result.symbol}
+              decision={result.verdict}
+              price={result.price}
+              assetType={assetType}
+            />
           </motion.div>
         )}
           </>
