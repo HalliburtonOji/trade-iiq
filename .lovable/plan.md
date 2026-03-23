@@ -1,117 +1,95 @@
-
-
-# Plan: Charts, Live Market Data, and Screenshot Analysis
+# Plan: Broker Integration, Live Charts Tab, and Collapsible Sidebar
 
 ## What You Get
 
-1. **Performance Charts** — Recharts-powered visualizations across the app: win rate over time, P&L curve, confidence calibration bar chart, asset class donut, and emotion distribution
-2. **Additional Market Data Source** — Add Finnhub as a secondary free API (60 calls/min free tier, real-time US stocks) alongside Alpha Vantage, with automatic failover
-3. **Chart Screenshot Analysis** — Users upload broker/charting app screenshots, AI analyzes them (support/resistance, patterns, trend), and saves the analysis with the image to cloud storage
+1. **Smart Broker Launcher** — Pre-fill trade details (symbol, decision, price) and let users pick a broker to open. Users can search supported brokers, favorite one for quick access, and launch directly from Analysis or Tracker.
+2. **Live Charts Page** — A new "Charts" page with embedded TradingView widgets for professional candlestick, line, and area charts with full technical overlays (RSI, MACD, Bollinger Bands, MAs), plus timeframe controls. No API calls needed — TradingView's free embed handles everything.
+3. **Collapsible Sidebar** — The desktop SideNav collapses to an icon-only rail with a toggle button, preserving the animated active indicator and sign-out. State persists via localStorage.
 
 ---
 
 ## Technical Details
 
-### 1. Performance Charts (Recharts)
+### 1. Broker Launcher
 
-Already have `recharts` and `src/components/ui/chart.tsx` in the project. Will build:
+**New component: `src/components/BrokerLauncher.tsx**`
 
-**New component: `src/components/PerformanceCharts.tsx`**
-- **Win Rate Trend** — Line chart plotting cumulative win rate over time from `trade_decisions` (sorted by date)
-- **P&L Curve** — Area chart of cumulative P&L % from completed trades
-- **Confidence Calibration** — Bar chart (confidence 1-5 vs actual win rate) — replaces the current Progress bars in Insights
-- **Asset Breakdown** — Pie/donut chart (stock/crypto/forex win distribution)
-- **Emotion Distribution** — Radar or pie chart from `decision_reviews` emotions
+- Modal/sheet that receives `{ symbol, decision, price, assetType }`
+- Searchable list of brokers with deep-link URL templates:
+  - Trading 212: `https://app.trading212.com/`
+  - Interactive Brokers: `https://www.interactivebrokers.com/`
+  - eToro, Freetrade, Robinhood, Webull, Plus500, IG, Saxo, etc.
+- Each broker card shows name, logo placeholder, and "Open" button
+- Favorite broker stored in `profiles` table (new column `preferred_broker text`)
+- Favorited broker appears pinned at top with a star
+- Opens broker URL in new tab with `window.open()`
+- Pre-fill info shown as a copyable summary card (symbol, decision, entry price, notes) so users can paste into their broker
 
 **Integration points:**
-- Add "📊 Charts" tab to Insights page
-- Add a mini P&L sparkline to the Portfolio Overview tab
-- Add win rate trend mini-chart to the Home dashboard
 
-### 2. Finnhub as Secondary Market Data Source
+- "Execute Trade" button on Analysis page (next to Log Decision)
+- "Open in Broker" button on Tracker trade cards
+- MarketSignals result panel
 
-**Why Finnhub:** 60 API calls/min on free tier (vs Alpha Vantage's 25/day), real-time US stock quotes, WebSocket support for live prices.
+**DB change:** Add `preferred_broker` column to `profiles` table.
 
-**Implementation:**
-- User provides a Finnhub API key (free at finnhub.io) — store via `add_secret`
-- Update `market-signals` edge function to try Finnhub first for stock quotes (`/quote?symbol=X`), fall back to Alpha Vantage
-- Add Finnhub real-time quote endpoint for the Analysis page to show live price updates without burning Alpha Vantage calls
-- New edge function: `supabase/functions/live-quote/index.ts` — lightweight quote fetcher that tries Finnhub then Alpha Vantage, returns price + change + volume
-- Update `TickerMarquee` on home page to fetch actual prices from this endpoint instead of showing "—"
+### 2. Live Charts Page (TradingView Embed)
 
-**Edge function logic:**
-```text
-live-quote:
-  1. Check analysis_cache (< 5 min old? return cached)
-  2. Try Finnhub /quote (if key exists)
-  3. Fallback to Alpha Vantage GLOBAL_QUOTE
-  4. Cache result in analysis_cache
-  5. Return { price, change, changePercent, volume, source, cached_at }
-```
+**New page: `src/pages/Charts.tsx**`
 
-### 3. Chart Screenshot Analysis
+TradingView provides free embeddable widgets that handle all charting — no API key needed, no rate limits, professional-grade charts.
 
-**Storage setup:**
-- Create `chart_screenshots` storage bucket (SQL migration)
-- Create `chart_analyses` database table:
-  ```
-  id uuid PK
-  user_id uuid NOT NULL
-  image_url text NOT NULL
-  symbol text
-  analysis_json jsonb
-  created_at timestamptz DEFAULT now()
-  ```
-- RLS: users can CRUD own rows
+- **Advanced Chart Widget**: Full candlestick/line/area charts with built-in technical indicators (RSI, MACD, Bollinger, MA, Volume), drawing tools, and timeframe selection
+- Symbol search input at top
+- Asset type tabs (Stock / Crypto / Forex) that adjust the exchange prefix
+- TradingView widget loaded via `<script>` tag in a `useEffect`
+- Watchlist symbols shown as quick-access chips
+- Chart style toggle: Candlestick / Line / Area (passed as widget config)
 
-**New edge function: `supabase/functions/analyze-chart/index.ts`**
-- Receives `{ image_url, symbol? }` 
-- Calls Lovable AI (Gemini 2.5 Pro — best for image+text reasoning) with the screenshot
-- Uses tool calling to return structured JSON:
-  ```
-  { trend, patterns[], support_levels[], resistance_levels[],
-    indicators_spotted[], verdict, confidence, reasoning, warnings[] }
-  ```
-- Saves analysis to `chart_analyses` table
+**Route:** `/charts` added to `App.tsx` with ProtectedRoute
 
-**New component: `src/components/ChartAnalyzer.tsx`**
-- File upload dropzone (accept image/*)
-- Optional symbol input
-- Upload to `chart_screenshots` bucket via Supabase Storage SDK
-- Call `analyze-chart` edge function with the public URL
-- Display results: trend badge, pattern cards, S/R levels, AI reasoning
-- Gallery view of past analyses
+**Nav update:** Add "Charts" item with `BarChart3` icon to SideNav and BottomNav
 
-**Integration:**
-- Add to Analysis page as a new "📸 Chart" tab
-- Add to Tracker page as "Attach Chart" option when logging a decision
+### 3. Collapsible Sidebar
+
+**Modify: `src/components/SideNav.tsx**`
+
+- Add `collapsed` state with localStorage persistence
+- Toggle button (chevron icon) at the bottom or top of the sidebar
+- Collapsed state: `w-16` with icons only, no labels, no section titles
+- Expanded state: `w-64` with full labels (current behaviour)
+- Tooltip on hover for collapsed icon buttons (show label)
+- Brand shrinks to just "T" logo mark when collapsed
+- Smooth width transition with `transition-all duration-300`
+
+**Modify: `src/components/PageShell.tsx**`
+
+- Read collapsed state and adjust `ml-64` → `ml-16` accordingly
+- Pass collapsed state down or use shared state (localStorage + context or just read localStorage)
 
 ---
 
 ## Build Order
 
-1. **Finnhub secret + live-quote edge function** — unlocks real market data across the app
-2. **Storage bucket + chart_analyses table** (single migration)
-3. **analyze-chart edge function** — AI vision analysis
-4. **ChartAnalyzer component** — upload + display
-5. **PerformanceCharts component** — all Recharts visualizations
-6. **Integrate** — wire charts into Insights, Portfolio, Home, and Analysis pages
+1. Collapsible sidebar (SideNav + PageShell)
+2. Live Charts page with TradingView embed
+3. Broker Launcher component + profiles column migration
+4. Wire broker launcher into Analysis, Tracker, and MarketSignals  
+  
+add an ai chatbot that can do everything for the user and have proper conversations, explanations and perform all the features in the app straight from chat also whatsapp integration for this
 
 ---
 
-## Files Created/Modified
+## Files Created / Modified
 
-| Action | File |
-|--------|------|
-| Create | `supabase/functions/live-quote/index.ts` |
-| Create | `supabase/functions/analyze-chart/index.ts` |
-| Create | `src/components/PerformanceCharts.tsx` |
-| Create | `src/components/ChartAnalyzer.tsx` |
-| Create | SQL migration (bucket + table + RLS) |
-| Modify | `src/pages/Insights.tsx` — add Charts tab |
-| Modify | `src/pages/Analysis.tsx` — add Chart tab + live price |
-| Modify | `src/pages/Index.tsx` — live ticker data |
-| Modify | `src/components/TickerMarquee.tsx` — real prices |
-| Modify | `src/pages/Portfolio.tsx` — mini P&L chart |
-| Modify | `supabase/config.toml` — new functions |
 
+| Action    | File                                              |
+| --------- | ------------------------------------------------- |
+| Create    | `src/pages/Charts.tsx`                            |
+| Create    | `src/components/BrokerLauncher.tsx`               |
+| Modify    | `src/components/SideNav.tsx` — collapsible logic  |
+| Modify    | `src/components/PageShell.tsx` — dynamic margin   |
+| Modify    | `src/components/BottomNav.tsx` — add Charts       |
+| Modify    | `src/App.tsx` — add /charts route                 |
+| Modify    | `src/pages/Analysis.tsx` — broker launcher button |
+| Migration | Add `preferred_broker` column to `profiles`       |
