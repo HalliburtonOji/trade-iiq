@@ -294,6 +294,7 @@ export type Database = {
           last_active_date: string | null
           level: string
           paper_balance: number
+          preferred_broker: string | null
           streak_count: number
           trading_personality: string
           updated_at: string
@@ -307,6 +308,7 @@ export type Database = {
           last_active_date?: string | null
           level?: string
           paper_balance?: number
+          preferred_broker?: string | null
           streak_count?: number
           trading_personality?: string
           updated_at?: string
@@ -320,6 +322,7 @@ export type Database = {
           last_active_date?: string | null
           level?: string
           paper_balance?: number
+          preferred_broker?: string | null
           streak_count?: number
           trading_personality?: string
           updated_at?: string

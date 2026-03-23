@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, ArrowRight, Plus, Star, Camera } from "lucide-react";
+import { Search, ArrowRight, Plus, Star, Camera, ExternalLink } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { analysisData, type AnalysisResult } from "@/data/analysisData";
 import MarketSignals from "@/components/MarketSignals";
+import BrokerLauncher from "@/components/BrokerLauncher";
 
 type AssetType = "stock" | "crypto" | "forex";
 
@@ -35,6 +36,7 @@ const Analysis = () => {
   const [result, setResult] = useState<AnalysisResult | null>(
     searchParams.get("symbol") ? { ...(analysisData[searchParams.get("symbol")!.toUpperCase()] || analysisData["DEFAULT"]), symbol: searchParams.get("symbol")!.toUpperCase() } : null
   );
+  const [brokerOpen, setBrokerOpen] = useState(false);
 
   const handleSearch = (symbol?: string) => {
     const s = (symbol || query).toUpperCase().trim();
@@ -203,10 +205,22 @@ const Analysis = () => {
               <Button variant="outline" className="flex-1 text-xs gap-1.5" size="sm" onClick={addToWatchlist}>
                 <Star className="h-3.5 w-3.5" /> Watchlist
               </Button>
+              <Button variant="outline" className="flex-1 text-xs gap-1.5" size="sm" onClick={() => setBrokerOpen(true)}>
+                <ExternalLink className="h-3.5 w-3.5" /> Execute
+              </Button>
               <Button className="flex-1 text-xs" size="sm" onClick={() => navigate("/tracker")}>
                 Log Decision
               </Button>
             </div>
+
+            <BrokerLauncher
+              open={brokerOpen}
+              onOpenChange={setBrokerOpen}
+              symbol={result.symbol}
+              decision={result.verdict}
+              price={result.price}
+              assetType={assetType}
+            />
           </motion.div>
         )}
           </>

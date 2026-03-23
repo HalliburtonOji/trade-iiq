@@ -4,8 +4,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import AIChatbot from "@/components/AIChatbot";
 import Index from "./pages/Index";
 import Analysis from "./pages/Analysis";
+import Charts from "./pages/Charts";
 import Tracker from "./pages/Tracker";
 import Learn from "./pages/Learn";
 import Portfolio from "./pages/Portfolio";
@@ -28,6 +30,28 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const AppContent = () => {
+  const { user } = useAuth();
+  return (
+    <>
+      <Routes>
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+        <Route path="/analysis" element={<ProtectedRoute><Analysis /></ProtectedRoute>} />
+        <Route path="/charts" element={<ProtectedRoute><Charts /></ProtectedRoute>} />
+        <Route path="/tracker" element={<ProtectedRoute><Tracker /></ProtectedRoute>} />
+        <Route path="/learn" element={<ProtectedRoute><Learn /></ProtectedRoute>} />
+        <Route path="/portfolio" element={<ProtectedRoute><Portfolio /></ProtectedRoute>} />
+        <Route path="/screener" element={<ProtectedRoute><Screener /></ProtectedRoute>} />
+        <Route path="/daily-picks" element={<ProtectedRoute><DailyPicks /></ProtectedRoute>} />
+        <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      {user && <AIChatbot />}
+    </>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -35,18 +59,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-            <Route path="/analysis" element={<ProtectedRoute><Analysis /></ProtectedRoute>} />
-            <Route path="/tracker" element={<ProtectedRoute><Tracker /></ProtectedRoute>} />
-            <Route path="/learn" element={<ProtectedRoute><Learn /></ProtectedRoute>} />
-            <Route path="/portfolio" element={<ProtectedRoute><Portfolio /></ProtectedRoute>} />
-            <Route path="/screener" element={<ProtectedRoute><Screener /></ProtectedRoute>} />
-            <Route path="/daily-picks" element={<ProtectedRoute><DailyPicks /></ProtectedRoute>} />
-            <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AppContent />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
