@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { analysisData, type AnalysisResult } from "@/data/analysisData";
 import MarketSignals from "@/components/MarketSignals";
+import BrokerLauncher from "@/components/BrokerLauncher";
 
 type AssetType = "stock" | "crypto" | "forex";
 
