@@ -238,6 +238,96 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      paper_trades: {
+        Row: {
+          asset_type: string
+          closed_at: string | null
+          direction: string
+          entry_price: number
+          exit_price: number | null
+          id: string
+          opened_at: string
+          pnl: number | null
+          pnl_percent: number | null
+          quantity: number
+          status: string
+          stop_loss: number | null
+          symbol: string
+          take_profit: number | null
+          thesis: string | null
+          user_id: string
+        }
+        Insert: {
+          asset_type?: string
+          closed_at?: string | null
+          direction?: string
+          entry_price: number
+          exit_price?: number | null
+          id?: string
+          opened_at?: string
+          pnl?: number | null
+          pnl_percent?: number | null
+          quantity: number
+          status?: string
+          stop_loss?: number | null
+          symbol: string
+          take_profit?: number | null
+          thesis?: string | null
+          user_id: string
+        }
+        Update: {
+          asset_type?: string
+          closed_at?: string | null
+          direction?: string
+          entry_price?: number
+          exit_price?: number | null
+          id?: string
+          opened_at?: string
+          pnl?: number | null
+          pnl_percent?: number | null
+          quantity?: number
+          status?: string
+          stop_loss?: number | null
+          symbol?: string
+          take_profit?: number | null
+          thesis?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       practice_progress: {
         Row: {
           attempt_count: number
@@ -283,6 +373,36 @@ export type Database = {
           user_id?: string
           weak_tags?: string[] | null
           xp_earned?: number
+        }
+        Relationships: []
+      }
+      price_alerts: {
+        Row: {
+          created_at: string
+          direction: string
+          id: string
+          symbol: string
+          target_price: number
+          triggered: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          direction?: string
+          id?: string
+          symbol: string
+          target_price: number
+          triggered?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          id?: string
+          symbol?: string
+          target_price?: number
+          triggered?: boolean
+          user_id?: string
         }
         Relationships: []
       }

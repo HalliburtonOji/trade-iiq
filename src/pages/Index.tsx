@@ -13,6 +13,8 @@ import DailyMissions from "@/components/DailyMissions";
 import DQSWidget from "@/components/DQSWidget";
 import CoachCards from "@/components/CoachCards";
 import SmartAlerts from "@/components/SmartAlerts";
+import NotificationPanel from "@/components/NotificationPanel";
+import EconomicCalendar from "@/components/EconomicCalendar";
 
 const getGreeting = () => {
   const h = new Date().getHours();
@@ -105,11 +107,14 @@ const Index = () => {
             </p>
             <p className="text-[10px] text-muted-foreground/60">{formatDate()}</p>
           </div>
-          {isMobile && (
-            <button onClick={signOut} className="text-muted-foreground hover:text-foreground transition-colors mt-1">
-              <LogOut className="h-4 w-4" />
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            <NotificationPanel />
+            {isMobile && (
+              <button onClick={signOut} className="text-muted-foreground hover:text-foreground transition-colors mt-1">
+                <LogOut className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </motion.div>
 
         {/* Stats */}
@@ -142,6 +147,12 @@ const Index = () => {
         {/* Daily Missions */}
         <motion.div variants={fadeUp}>
           <DailyMissions />
+        </motion.div>
+
+        {/* Economic Calendar */}
+        <motion.div variants={fadeUp}>
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Economic Calendar</h2>
+          <EconomicCalendar />
         </motion.div>
 
         {/* Market Overview + Quick Actions side by side on desktop */}
