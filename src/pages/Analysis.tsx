@@ -20,6 +20,8 @@ import { analysisData, type AnalysisResult } from "@/data/analysisData";
 import { allSymbols, searchSymbols, type SymbolInfo } from "@/data/symbolLists";
 import MarketSignals from "@/components/MarketSignals";
 import BrokerLauncher from "@/components/BrokerLauncher";
+import SentimentPoll from "@/components/SentimentPoll";
+import SymbolCompare from "@/components/SymbolCompare";
 
 type AssetType = "stock" | "crypto" | "forex";
 
@@ -340,6 +342,9 @@ const Analysis = () => {
                 {/* AI Market Signals */}
                 <MarketSignals symbol={result.symbol} assetType={assetType} livePrice={result.price} />
 
+                {/* Community Sentiment */}
+                <SentimentPoll symbol={result.symbol} />
+
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1 text-xs gap-1.5" size="sm" onClick={addToWatchlist}>
                     <Star className="h-3.5 w-3.5" /> Watchlist
@@ -362,6 +367,9 @@ const Analysis = () => {
                 />
               </motion.div>
             )}
+
+            {/* Symbol Compare */}
+            <SymbolCompare />
           </>
         )}
       </div>

@@ -1,4 +1,4 @@
-import { Home, TrendingUp, ClipboardList, GraduationCap, PieChart, Sparkles, Lightbulb, LogOut, Filter, BarChart3, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Home, TrendingUp, ClipboardList, GraduationCap, PieChart, Sparkles, Lightbulb, LogOut, Filter, BarChart3, ChevronsLeft, ChevronsRight, Gamepad2, Users } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -17,8 +17,9 @@ const navSections = [
     ],
   },
   {
-    title: "Journal",
+    title: "Trading",
     items: [
+      { label: "Demo Trading", icon: Gamepad2, path: "/demo-trading" },
       { label: "Trade Tracker", icon: ClipboardList, path: "/tracker" },
       { label: "Portfolio", icon: PieChart, path: "/portfolio" },
       { label: "Insights", icon: Lightbulb, path: "/insights" },
@@ -28,6 +29,7 @@ const navSections = [
     title: "Grow",
     items: [
       { label: "Learn", icon: GraduationCap, path: "/learn" },
+      { label: "Community", icon: Users, path: "/community" },
     ],
   },
 ];
