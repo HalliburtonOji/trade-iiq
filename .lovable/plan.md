@@ -1,154 +1,250 @@
 
 
-# TradeIQ: Feature Improvements & Add-ons
+# Unified Plan: Demo Trading Simulator + Full Feature Upgrade
 
-Based on research into TraderSync, Edgewonk, TradeZella, TradingGame, TrendSpider, and Koyfin, here are the highest-impact improvements grouped into three areas: **Analysis**, **Training**, and **App-wide enhancements**.
+## Overview
 
----
-
-## Problem
-
-1. **Analysis is static** — only ~10 hardcoded symbols with fake prices. Any other symbol shows $0.00 with generic text. No live data, no real technicals.
-2. **Training lacks applied simulation** — lessons and drills are theoretical. No paper trading, no replay, no "what would you do?" with real chart scenarios.
-3. **Missing competitive features** — no news feed, no economic calendar, no portfolio P&L tracking, no social/community, no trade replay.
+This is a single unified build that combines everything from the approved improvement plan (landing page, UI polish, deeper analysis, gamification, adventurous trading, social features) with a new flagship **Demo Trading** page — a guided, interactive trading simulator with live charts, step-by-step coaching, and real-time paper execution.
 
 ---
 
-## What Gets Built
+## The Demo Trading Page
 
-### A. Analysis Overhaul
+Based on research into TradingGame (4.5M users), TradingView Paper Trading, IBKR Simulator, and Goat Funded Trader, the best demo trading experiences share these elements:
 
-1. **Live AI Analysis for Any Symbol**
-   - New edge function `analyze-symbol` that fetches real-time price via the existing `live-quote` pipeline, then sends data to Lovable AI (Gemini 2.5 Flash) to generate verdict, technicals, setup score, risk score, targets, and summary
-   - Results cached in the existing `analysis_cache` table (15-min TTL) to avoid redundant AI calls
-   - Analysis page gets a searchable Command dropdown with 50+ popular symbols (stocks, crypto, forex) plus free-text entry for any symbol
+- **Live chart embedded directly in the trading interface** (not a separate page)
+- **Guided walkthrough on first visit** — tooltip-driven steps teaching users how to read the chart, place an order, set stop-loss/take-profit, and review results
+- **One-click order placement** with BUY/SELL buttons alongside the chart
+- **Real-time position tracking** with floating P&L overlay on the chart
+- **Risk controls built in** — force users to set a stop-loss before confirming
+- **Post-trade review** — after closing, show what went right/wrong with AI coaching
+- **Progressive complexity** — start with simple market orders, unlock limit orders and leverage after completing introductory trades
 
-2. **Expanded Symbol Library**
-   - New `src/data/symbolLists.ts` with categorized symbols: ~30 stocks, ~15 crypto, ~10 forex pairs with display names and exchange prefixes
-   - Screener data also expanded to ~40+ assets
+### Demo Trading Page Design
 
-3. **Economic Calendar Widget**
-   - Lightweight component showing upcoming market-moving events (FOMC, CPI, NFP, earnings dates)
-   - Seeded from static data initially, upgradeable to API later
-   - Shown on Analysis page and Home dashboard
+```text
+┌─────────────────────────────────────────────────┐
+│  Demo Trading          Balance: £10,000   P&L   │
+│  [AAPL ▼] [Stock|Crypto|Forex]                  │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│          TradingView Advanced Chart              │
+│          (with drawing tools + indicators)       │
+│                                                 │
+│   ┌─ Open Position Overlay ──────────────┐      │
+│   │ AAPL LONG @ $182.50  P&L: +$45.20   │      │
+│   │ SL: $178  TP: $195  [Close Position] │      │
+│   └──────────────────────────────────────┘      │
+├─────────────────────────────────────────────────┤
+│  ┌──────────┐  ┌──────────┐                     │
+│  │  🟢 BUY  │  │  🔴 SELL │   Units: [___]     │
+│  └──────────┘  └──────────┘   Stop Loss: [___]  │
+│                               Take Profit:[___] │
+│  Risk: 2.3% of balance       [Place Order]      │
+├─────────────────────────────────────────────────┤
+│  Open Positions (2)  │  Trade History (14)       │
+│  AAPL +2.4% ● LIVE   │  NVDA +5.1% ✓ closed   │
+│  BTC  -0.8% ● LIVE   │  TSLA -1.2% ✗ closed   │
+└─────────────────────────────────────────────────┘
+```
 
-4. **News Sentiment Strip**
-   - Edge function using Perplexity `sonar` to fetch recent news for a searched symbol
-   - Shows 3-5 headline summaries with sentiment tags (Bullish/Bearish/Neutral) and source citations
-   - Appears as a collapsible section in the Analysis results
+### Guided Walkthrough (First Visit)
 
-### B. Training & Learning Upgrades
+A step-by-step tooltip tour that highlights UI elements in sequence:
 
-5. **Paper Trading Simulator**
-   - Virtual $10,000 portfolio (already exists as `paper_balance` in profiles)
-   - "Paper Trade" button on Analysis results — logs a simulated position with entry price
-   - New `paper_trades` table: symbol, entry_price, quantity, direction, status, exit_price, pnl
-   - Portfolio page shows open positions with live P&L (via live-quote), trade history, and running balance
-   - Position close with actual profit/loss calculation
+1. "Welcome to Demo Trading! You have £10,000 virtual cash to practice with."
+2. "Pick a symbol from the dropdown — try AAPL to start."
+3. "This is a live chart. Use the timeframe buttons and add indicators like RSI."
+4. "Ready to trade? Click BUY to go long, or SELL to go short."
+5. "Always set a Stop Loss — this limits your downside risk."
+6. "Set a Take Profit target to lock in gains automatically."
+7. "Review your risk — we show what % of your balance is at stake."
+8. "Click Place Order to execute. Your position will track live."
+9. "When ready, close the position and see your AI trade review."
 
-6. **Trade Replay / "What Would You Do?" Scenarios**
-   - New component that shows a historical chart screenshot + context, asks user to decide BUY/WAIT/AVOID
-   - Reveals what actually happened with explanation
-   - 10+ seeded scenarios across different setups (breakouts, reversals, traps, consolidation)
-   - Integrated into Practice tab as a new drill type
+State stored in `localStorage` (`demo_walkthrough_complete`) so it only shows once.
 
-7. **Interactive Chart Pattern Recognition Drills**
-   - Show a chart image with a pattern forming, ask user to identify it
-   - Options: Head & Shoulders, Double Bottom, Bull Flag, Wedge, etc.
-   - 15+ seeded pattern drills with real chart examples
-   - Awards XP on correct identification
+### AI Trade Review (Post-Close)
 
-8. **Strategy Backtesting Lite**
-   - User selects a strategy rule (e.g., "Buy when RSI < 30 and MACD crosses bullish")
-   - Shows historical examples where this triggered, with outcomes
-   - Simple win rate and avg return display
-   - Teaches users to think systematically about strategy rules
-
-### C. App-Wide Enhancements
-
-9. **Portfolio Dashboard Upgrade**
-   - Consolidate paper trades, watchlist, and real trade decisions into one view
-   - Show total paper P&L, best/worst positions, sector allocation pie
-   - Win rate by asset type, by strategy, by time of day
-
-10. **Notifications & Alerts System**
-    - Price alert: notify when a watchlist symbol hits a target price
-    - Review reminder: "You have 3 flashcards due"
-    - Coaching alert: "New weakness detected in your recent trades"
-    - Stored in a `notifications` table, shown as a bell icon with badge count
-    - In-app notification panel (not push notifications yet)
-
-11. **Social Proof / Community Lite**
-    - Anonymous aggregate stats: "72% of TradeIQ users rated NVDA as BUY this week"
-    - Leaderboard for XP (opt-in, display names only)
-    - Shown as small social strips on Analysis and Home pages
-
-12. **CSV Trade Import**
-    - Already has a `CsvImport` component — enhance it to parse common broker CSV formats
-    - Auto-map columns to trade_decisions fields
-    - Bulk import for users migrating from spreadsheets
-
-13. **Enhanced AI Chatbot**
-    - Add markdown rendering for chat responses (react-markdown)
-    - Add context awareness: chatbot knows user's recent trades, weak areas, completed lessons
-    - Quick action buttons: "Analyze AAPL", "Show my weak areas", "Quiz me on RSI"
+When a user closes a position, call the existing `chat` edge function with structured context:
+- Entry/exit price, P&L, duration held, stop-loss/take-profit hit or manual close
+- Returns: grade (A-F), what went well, what to improve, lesson link suggestion
 
 ---
 
-## Technical Details
+## Full Unified Build Order
 
-### New Edge Function: `analyze-symbol`
-- Calls existing `live-quote` function internally for real price data
-- Sends price + volume + RSI data to `google/gemini-2.5-flash` with structured prompt
-- Returns `AnalysisResult`-shaped JSON
-- Upserts result into `analysis_cache` table with 15-min TTL
-- Falls back to hardcoded `analysisData` if AI call fails
+### Phase A: Foundation (Landing + UI + Sidebar)
 
-### New Edge Function: `symbol-news`
-- Uses Perplexity `sonar` model to search `"{symbol} stock market news today"`
-- Returns 3-5 summarized headlines with sentiment and citations
-- Requires Perplexity connector
+1. **Public Landing Page** — `src/pages/Landing.tsx`
+   - Hero with animated headline, CTA buttons, feature showcase cards, social proof strip
+   - Becomes default route for unauthenticated users (replace redirect to `/auth`)
+   - Framer Motion scroll animations, glassmorphic design
 
-### Database Changes
-- New table `paper_trades`: id, user_id, symbol, asset_type, direction (long/short), entry_price, quantity, exit_price, pnl, status (open/closed), opened_at, closed_at
-- New table `notifications`: id, user_id, type, title, body, read, link, created_at
-- New table `price_alerts`: id, user_id, symbol, target_price, direction (above/below), triggered, created_at
-- RLS on all new tables: user can only access own rows
+2. **Onboarding Wizard** — `src/components/OnboardingWizard.tsx`
+   - 3-step flow: experience level → preferred assets → trading goals
+   - New profile columns: `experience_level`, `preferred_assets`, `trading_goals`
+   - Shows on first login, tailors recommendations
 
-### New Files
+3. **UI Polish**
+   - Theme toggle (dark/light) in sidebar — `src/components/ThemeToggle.tsx`
+   - Light theme CSS variables in `index.css`
+   - Skeleton loaders on all data-fetching pages
+   - Animated stat counters on dashboard
+
+### Phase B: Demo Trading Simulator
+
+4. **Demo Trading Page** — `src/pages/DemoTrading.tsx`
+   - TradingView chart embed (reuse pattern from Charts page)
+   - Symbol selector with asset type tabs
+   - BUY/SELL order form with units, stop-loss, take-profit inputs
+   - Risk calculator (% of balance at stake)
+   - Reads/writes to `paper_trades` DB table (already created)
+   - Live P&L tracking for open positions using `live-quote` pipeline
+   - Trade history panel with closed positions
+   - Balance display synced with profiles `paper_balance`
+
+5. **Guided Walkthrough** — `src/components/demo/GuidedWalkthrough.tsx`
+   - Tooltip-based step-by-step tour using absolute positioned highlight overlays
+   - 9 steps covering chart reading, order placement, risk management
+   - Persisted in localStorage, dismissable, re-triggerable from help button
+
+6. **AI Trade Review** — `src/components/demo/TradeReview.tsx`
+   - Post-close modal calling `chat` edge function with trade context
+   - Shows grade, strengths, improvements, and suggested lesson
+   - Option to save review to trade history
+
+### Phase C: Deeper Analysis
+
+7. **Multi-Symbol Compare** — `src/components/SymbolCompare.tsx`
+   - Side-by-side comparison of 2-3 symbols (verdict, scores, price change)
+   - New tab on Analysis page
+
+8. **Sector Heatmap** — `src/components/SectorHeatmap.tsx`
+   - Color-coded grid of sector performance on Screener page
+   - Click sector to filter symbols
+
+9. **AI "What If" Scenarios** — `supabase/functions/what-if/index.ts`
+   - "What happens to NVDA if Fed cuts rates?" using Gemini
+   - Accessible from Analysis page
+
+### Phase D: Gamification
+
+10. **Streak Calendar** — `src/components/learn/StreakCalendar.tsx`
+    - GitHub-style heatmap of daily learning activity
+    - Shown on Learn header
+
+11. **Daily Challenge** — `src/components/learn/DailyChallenge.tsx`
+    - One challenge per day with bonus XP
+    - DB table: `daily_challenges`
+
+12. **Skill Tree** — `src/components/learn/SkillTree.tsx`
+    - Visual mastery path showing progression through topics
+    - Nodes light up as lessons complete
+
+13. **Achievement Celebrations** — `src/components/AchievementCelebration.tsx`
+    - Full-screen confetti on level-up and badge unlock
+    - canvas-confetti library
+
+### Phase E: Adventurous Trading Tools
+
+14. **Risk Simulator** — `src/components/RiskSimulator.tsx`
+    - "What if your portfolio drops 30%?" drawdown modeling
+    - Interactive position size inputs
+
+15. **Leverage Calculator** — `src/components/LeverageCalculator.tsx`
+    - Slider showing P&L curves at 2x, 5x, 10x leverage
+    - Visual warnings at dangerous levels
+
+16. **Options Strategy Visualizer** — `src/components/OptionsVisualizer.tsx`
+    - Payoff diagrams for covered call, iron condor, straddle, bull spread
+    - Interactive strike price adjustment
+
+17. **Volatility Scanner** — `src/components/VolatilityScanner.tsx`
+    - High-volatility symbols list on Screener page
+    - Sorted by recent price swing magnitude
+
+### Phase F: Social & Community
+
+18. **Sentiment Polls** — `src/components/SentimentPoll.tsx`
+    - BUY/WAIT/AVOID vote per symbol on Analysis page
+    - Aggregate display: "68% say BUY"
+    - DB table: `community_votes`
+
+19. **Shared Analysis Feed** — `src/pages/Community.tsx`
+    - Publish trade ideas, browse others' analysis
+    - Like/bookmark system
+    - DB tables: `trade_ideas`, `idea_likes`
+
+20. **XP Leaderboard** — `src/components/Leaderboard.tsx`
+    - Weekly/monthly/all-time rankings
+    - Opt-in with display name
+
+### Phase G: Chatbot & Polish
+
+21. **Enhanced AI Chatbot**
+    - Markdown rendering (react-markdown)
+    - Context-aware: knows user's trades, weak areas, demo performance
+    - Quick action buttons: "Analyze AAPL", "Quiz me", "Show my stats"
+
+---
+
+## Technical Summary
+
+### New Files (25)
+
 | File | Purpose |
 |------|---------|
-| `supabase/functions/analyze-symbol/index.ts` | Live AI analysis |
-| `supabase/functions/symbol-news/index.ts` | News sentiment via Perplexity |
-| `src/data/symbolLists.ts` | Categorized symbol catalog |
-| `src/data/scenarioData.ts` | Trade replay scenarios |
-| `src/data/patternDrills.ts` | Chart pattern recognition drills |
-| `src/components/EconomicCalendar.tsx` | Calendar widget |
-| `src/components/NewsSentiment.tsx` | News strip component |
-| `src/components/PaperTradeButton.tsx` | Paper trade entry |
-| `src/components/NotificationPanel.tsx` | In-app notifications |
-| `src/components/learn/ScenarioReplay.tsx` | What-would-you-do drills |
-| `src/components/learn/PatternDrill.tsx` | Pattern recognition drills |
+| `src/pages/Landing.tsx` | Public landing page |
+| `src/pages/DemoTrading.tsx` | Guided demo trading simulator |
+| `src/pages/Community.tsx` | Social feed |
+| `src/components/OnboardingWizard.tsx` | First-login wizard |
+| `src/components/ThemeToggle.tsx` | Dark/light toggle |
+| `src/components/demo/GuidedWalkthrough.tsx` | Step-by-step tooltip tour |
+| `src/components/demo/TradeReview.tsx` | AI post-trade review |
+| `src/components/SymbolCompare.tsx` | Multi-symbol comparison |
+| `src/components/SectorHeatmap.tsx` | Sector performance grid |
+| `src/components/SentimentPoll.tsx` | Community vote widget |
+| `src/components/Leaderboard.tsx` | XP rankings |
+| `src/components/RiskSimulator.tsx` | Drawdown modeling |
+| `src/components/LeverageCalculator.tsx` | Leverage P&L curves |
+| `src/components/OptionsVisualizer.tsx` | Options payoff diagrams |
+| `src/components/VolatilityScanner.tsx` | High-volatility finder |
+| `src/components/AchievementCelebration.tsx` | Confetti celebrations |
+| `src/components/learn/StreakCalendar.tsx` | Activity heatmap |
+| `src/components/learn/DailyChallenge.tsx` | Daily challenge system |
+| `src/components/learn/SkillTree.tsx` | Visual mastery path |
+| `supabase/functions/what-if/index.ts` | AI scenario analysis |
 
-### Modified Files
+### Modified Files (10)
+
 | File | Change |
 |------|--------|
-| `src/pages/Analysis.tsx` | Command dropdown, live AI fetch, news strip, economic calendar |
-| `src/pages/Portfolio.tsx` | Paper trade positions, P&L tracking |
-| `src/components/learn/PracticeTab.tsx` | Add scenario + pattern drill sections |
-| `src/components/AIChatbot.tsx` | Markdown rendering, context-aware prompts |
-| `src/pages/Index.tsx` | Economic calendar widget, notification bell |
-| `supabase/functions/chat/index.ts` | Accept user context for smarter responses |
+| `src/App.tsx` | Add `/demo-trading`, `/community`, `/landing` routes |
+| `src/components/SideNav.tsx` | Add Demo Trading + Community nav items, theme toggle |
+| `src/components/BottomNav.tsx` | Add Demo Trading item |
+| `src/pages/Analysis.tsx` | Compare tab, sentiment poll, what-if button |
+| `src/pages/Screener.tsx` | Sector heatmap, volatility scanner |
+| `src/pages/Portfolio.tsx` | Link to demo trading, paper trade sync |
+| `src/components/learn/LearnHeader.tsx` | Streak calendar, daily challenge |
+| `src/components/AIChatbot.tsx` | Markdown rendering, context awareness |
+| `src/pages/Index.tsx` | Live market data, animated counters, continue card |
+| `src/index.css` | Light theme CSS variables |
 
----
+### Database Migrations (1)
 
-## Build Order
+New tables: `community_votes`, `trade_ideas`, `idea_likes`, `daily_challenges`
+New profile columns: `experience_level`, `preferred_assets`, `trading_goals`
+RLS on all new tables: users access own rows only; community tables allow authenticated reads.
 
-1. **Live AI Analysis** — analyze-symbol edge function + symbol lists + Analysis page rewrite (fixes the $0 problem)
-2. **Paper Trading** — paper_trades table + paper trade flow + Portfolio upgrade
-3. **Training drills** — scenario replay + pattern recognition + Practice tab integration
-4. **News + Calendar** — Perplexity connector + news edge function + economic calendar
-5. **Notifications** — table + panel + alert triggers
-6. **Chatbot upgrade** — markdown + context awareness
-7. **Social/community** — aggregate stats + leaderboard (lighter lift)
+### Build Order
+
+1. Landing page + onboarding wizard
+2. Demo Trading simulator with guided walkthrough
+3. UI polish (theme toggle, skeletons, animated counters)
+4. Deeper analysis (compare, heatmap, what-if)
+5. Gamification (streak, challenges, skill tree, celebrations)
+6. Adventurous tools (risk sim, leverage calc, options viz)
+7. Social/community (polls, feed, leaderboard)
+8. Chatbot upgrade (markdown, context, quick actions)
 
