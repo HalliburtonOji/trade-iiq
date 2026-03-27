@@ -87,7 +87,7 @@ const Community = () => {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold font-mono">{idea.symbol}</span>
-                    <VerdictBadge verdict={idea.verdict} size="sm" />
+                    <VerdictBadge verdict={idea.verdict as "BUY" | "WAIT" | "AVOID"} size="sm" />
                   </div>
                   <span className="text-[10px] text-muted-foreground">{new Date(idea.created_at).toLocaleDateString()}</span>
                 </div>

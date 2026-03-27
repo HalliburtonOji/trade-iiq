@@ -44,7 +44,7 @@ const DemoTrading = () => {
   const openSymbols = positions.map(p => p.symbol);
   const { quotes } = useQuotes(openSymbols.length > 0 ? openSymbols : [symbol], assetTab);
 
-  const currentPrice = quotes[symbol]?.price || 0;
+  const currentPrice = quotes[symbol]?.current_price || 0;
 
   // Load balance + positions
   useEffect(() => {
@@ -184,7 +184,7 @@ const DemoTrading = () => {
 
         {/* Open position overlay */}
         {positions.filter(p => p.symbol === symbol).map(pos => {
-          const live = quotes[pos.symbol]?.price || pos.entry_price;
+          const live = quotes[pos.symbol]?.current_price || pos.entry_price;
           const unrealizedPnl = pos.direction === "long" ? (live - pos.entry_price) * pos.quantity : (pos.entry_price - live) * pos.quantity;
           return (
             <GlassCard key={pos.id} className="border-primary/20 bg-primary/3" id="demo-position-overlay">
@@ -283,7 +283,7 @@ const DemoTrading = () => {
               </GlassCard>
             )}
             {positions.map(pos => {
-              const live = quotes[pos.symbol]?.price || pos.entry_price;
+              const live = quotes[pos.symbol]?.current_price || pos.entry_price;
               const pnl = pos.direction === "long" ? (live - pos.entry_price) * pos.quantity : (pos.entry_price - live) * pos.quantity;
               return (
                 <GlassCard key={pos.id} className="flex items-center justify-between">
