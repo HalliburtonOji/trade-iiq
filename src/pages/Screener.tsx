@@ -10,6 +10,7 @@ import GlassCard from "@/components/GlassCard";
 import VerdictBadge from "@/components/VerdictBadge";
 import { Input } from "@/components/ui/input";
 import { screenerData, type ScreenerAsset } from "@/data/screenerData";
+import SectorHeatmap from "@/components/SectorHeatmap";
 import { cn } from "@/lib/utils";
 
 type AssetTab = "Stocks" | "Crypto" | "Forex";
