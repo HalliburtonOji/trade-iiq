@@ -92,6 +92,30 @@ export type Database = {
         }
         Relationships: []
       }
+      community_votes: {
+        Row: {
+          id: string
+          symbol: string
+          user_id: string
+          vote: string
+          voted_at: string
+        }
+        Insert: {
+          id?: string
+          symbol: string
+          user_id: string
+          vote?: string
+          voted_at?: string
+        }
+        Update: {
+          id?: string
+          symbol?: string
+          user_id?: string
+          vote?: string
+          voted_at?: string
+        }
+        Relationships: []
+      }
       daily_missions: {
         Row: {
           completed_count: number
@@ -198,6 +222,35 @@ export type Database = {
             columns: ["trade_decision_id"]
             isOneToOne: true
             referencedRelation: "trade_decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      idea_likes: {
+        Row: {
+          created_at: string
+          id: string
+          idea_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          idea_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          idea_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "idea_likes_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "trade_ideas"
             referencedColumns: ["id"]
           },
         ]
@@ -410,12 +463,16 @@ export type Database = {
         Row: {
           created_at: string
           display_name: string | null
+          experience_level: string | null
           id: string
           last_active_date: string | null
           level: string
+          onboarding_complete: boolean | null
           paper_balance: number
+          preferred_assets: string[] | null
           preferred_broker: string | null
           streak_count: number
+          trading_goals: string[] | null
           trading_personality: string
           updated_at: string
           user_id: string
@@ -424,12 +481,16 @@ export type Database = {
         Insert: {
           created_at?: string
           display_name?: string | null
+          experience_level?: string | null
           id?: string
           last_active_date?: string | null
           level?: string
+          onboarding_complete?: boolean | null
           paper_balance?: number
+          preferred_assets?: string[] | null
           preferred_broker?: string | null
           streak_count?: number
+          trading_goals?: string[] | null
           trading_personality?: string
           updated_at?: string
           user_id: string
@@ -438,12 +499,16 @@ export type Database = {
         Update: {
           created_at?: string
           display_name?: string | null
+          experience_level?: string | null
           id?: string
           last_active_date?: string | null
           level?: string
+          onboarding_complete?: boolean | null
           paper_balance?: number
+          preferred_assets?: string[] | null
           preferred_broker?: string | null
           streak_count?: number
+          trading_goals?: string[] | null
           trading_personality?: string
           updated_at?: string
           user_id?: string
@@ -544,6 +609,42 @@ export type Database = {
           time_horizon?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      trade_ideas: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          display_name: string | null
+          id: string
+          likes_count: number | null
+          symbol: string
+          thesis: string
+          user_id: string
+          verdict: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          likes_count?: number | null
+          symbol: string
+          thesis?: string
+          user_id: string
+          verdict: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          likes_count?: number | null
+          symbol?: string
+          thesis?: string
+          user_id?: string
+          verdict?: string
         }
         Relationships: []
       }
