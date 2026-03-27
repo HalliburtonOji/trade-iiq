@@ -163,6 +163,8 @@ const Screener = () => {
   return (
     <PageShell>
       <div className="flex flex-col gap-4 pt-6 pb-24">
+        {/* Sector Heatmap */}
+        <SectorHeatmap onSelectSymbol={(sym) => { setSearch(sym); }} />
         {/* Header */}
         <div className={`flex items-center justify-between ${isMobile ? "px-4" : ""}`}>
           <div>
