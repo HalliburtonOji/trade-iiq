@@ -94,8 +94,7 @@ const DemoTrading = () => {
   }, [history, allTrades, totalTrades, wins, tradesWithSL, winRate, lessonsCompleted]);
 
   const completedMissions = useMemo(() => {
-    const { tradingMissions } = require("@/data/tradingMissions");
-    return tradingMissions.filter((m: any) => m.check(missionStats)).map((m: any) => m.id);
+    return tradingMissions.filter((m) => m.check(missionStats)).map((m) => m.id);
   }, [missionStats]);
 
   // Load data
