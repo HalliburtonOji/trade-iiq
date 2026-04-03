@@ -4,6 +4,8 @@ import { ArrowLeft, AlertTriangle, Lightbulb, BookOpen, CheckCircle2, ArrowRight
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/GlassCard";
 import QuizFlow from "./QuizFlow";
+import LessonIllustration from "./LessonIllustration";
+import LessonPdfExport from "./LessonPdfExport";
 import { type Lesson, lessonsData, difficultyColors } from "@/data/lessonsData";
 import { drillsData, practiceTypeLabels } from "@/data/drillsData";
 import { supabase } from "@/integrations/supabase/client";
