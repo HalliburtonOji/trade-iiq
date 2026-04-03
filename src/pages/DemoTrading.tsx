@@ -1,18 +1,26 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { TrendingUp, TrendingDown, X, AlertTriangle, HelpCircle, DollarSign, Target, ShieldAlert } from "lucide-react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { motion } from "framer-motion";
+import { TrendingUp, TrendingDown, AlertTriangle, ShieldAlert, Target, Percent } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
 import { useQuotes } from "@/hooks/use-quotes";
+import { toast } from "sonner";
 import PageShell from "@/components/PageShell";
 import GlassCard from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { allSymbols } from "@/data/symbolLists";
+import { computeLevel, type MissionStats } from "@/data/tradingMissions";
 import GuidedWalkthrough from "@/components/demo/GuidedWalkthrough";
 import TradeReview from "@/components/demo/TradeReview";
+import TradingLevel from "@/components/demo/TradingLevel";
+import ThesisBuilder, { type ThesisData } from "@/components/demo/ThesisBuilder";
+import TradingMissions from "@/components/demo/TradingMissions";
+import PerformanceStats from "@/components/demo/PerformanceStats";
+import TradeJournal from "@/components/demo/TradeJournal";
+import PositionAlerts from "@/components/demo/PositionAlerts";
 
 type AssetTab = "stock" | "crypto" | "forex";
 const exchangePrefix: Record<AssetTab, string> = { stock: "", crypto: "BINANCE:", forex: "FX:" };
@@ -22,47 +30,95 @@ interface PaperPosition {
   id: string; symbol: string; direction: string; entry_price: number; quantity: number;
   stop_loss: number | null; take_profit: number | null; status: string; opened_at: string;
   asset_type: string; thesis: string | null; exit_price: number | null; pnl: number | null;
-  pnl_percent: number | null; closed_at: string | null;
+  pnl_percent: number | null; closed_at: string | null; thesis_json?: any;
+  order_type?: string; emotion?: string | null; post_notes?: string | null; leverage?: number;
 }
 
 const DemoTrading = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [assetTab, setAssetTab] = useState<AssetTab>("stock");
   const [symbol, setSymbol] = useState("AAPL");
   const [balance, setBalance] = useState(10000);
+  const [xp, setXp] = useState(0);
   const [positions, setPositions] = useState<PaperPosition[]>([]);
-  const [history, setHistory] = useState<PaperPosition[]>([]);
+  const [allTrades, setAllTrades] = useState<PaperPosition[]>([]);
   const [direction, setDirection] = useState<"long" | "short">("long");
   const [units, setUnits] = useState("");
   const [stopLoss, setStopLoss] = useState("");
   const [takeProfit, setTakeProfit] = useState("");
+  const [orderType, setOrderType] = useState<"market" | "limit">("market");
   const [placing, setPlacing] = useState(false);
   const [reviewTrade, setReviewTrade] = useState<PaperPosition | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState(false);
+  const [thesis, setThesis] = useState<ThesisData>({ reason: "", confidence: 3, invalidation: "" });
+  const [lessonsCompleted, setLessonsCompleted] = useState(0);
   const chartRef = useRef<HTMLDivElement>(null);
 
   const openSymbols = positions.map(p => p.symbol);
-  const { quotes } = useQuotes(openSymbols.length > 0 ? openSymbols : [symbol], assetTab);
-
+  const { quotes } = useQuotes(openSymbols.length > 0 ? [...new Set([...openSymbols, symbol])] : [symbol], assetTab);
   const currentPrice = quotes[symbol]?.current_price || 0;
 
-  // Load balance + positions
+  // Computed stats
+  const history = useMemo(() => allTrades.filter(t => t.status !== "open"), [allTrades]);
+  const totalTrades = history.length;
+  const wins = useMemo(() => history.filter(t => (t.pnl || 0) > 0).length, [history]);
+  const winRate = totalTrades > 0 ? Math.round((wins / totalTrades) * 100) : 0;
+  const tradesWithSL = useMemo(() => allTrades.filter(t => t.stop_loss !== null).length, [allTrades]);
+  const slPercent = totalTrades > 0 ? (tradesWithSL / totalTrades) * 100 : 0;
+  const level = computeLevel(totalTrades, winRate, slPercent);
+
+  const missionStats: MissionStats = useMemo(() => {
+    const shortTrades = history.filter(t => t.direction === "short").length;
+    const totalPnl = history.reduce((s, t) => s + (t.pnl || 0), 0);
+    const holds = history.filter(t => t.closed_at).map(t => (new Date(t.closed_at!).getTime() - new Date(t.opened_at).getTime()) / 60000);
+    const longestHoldMin = holds.length ? Math.max(...holds) : 0;
+
+    let consecutiveSLTrades = 0;
+    for (let i = history.length - 1; i >= 0; i--) {
+      if (history[i].stop_loss !== null) consecutiveSLTrades++;
+      else break;
+    }
+
+    const riskPercs = history.filter(t => t.stop_loss && t.entry_price).map(t =>
+      Math.abs((t.entry_price - (t.stop_loss || 0)) * t.quantity / 10000 * 100)
+    );
+    const avgRiskPercent = riskPercs.length ? riskPercs.reduce((a, b) => a + b, 0) / riskPercs.length : 0;
+
+    return {
+      totalTrades, wins, losses: totalTrades - wins, tradesWithSL,
+      tradesWithTP: allTrades.filter(t => t.take_profit !== null).length,
+      shortTrades, totalPnl, longestHoldMin, consecutiveSLTrades,
+      avgRiskPercent, winRate, lessonsCompleted,
+      walkthroughDone: !!localStorage.getItem("demo_walkthrough_complete"),
+    };
+  }, [history, allTrades, totalTrades, wins, tradesWithSL, winRate, lessonsCompleted]);
+
+  const completedMissions = useMemo(() => {
+    const { tradingMissions } = require("@/data/tradingMissions");
+    return tradingMissions.filter((m: any) => m.check(missionStats)).map((m: any) => m.id);
+  }, [missionStats]);
+
+  // Load data
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [profileRes, openRes, closedRes] = await Promise.all([
-        supabase.from("profiles").select("paper_balance").eq("user_id", user.id).single(),
-        supabase.from("paper_trades").select("*").eq("user_id", user.id).eq("status", "open").order("opened_at", { ascending: false }),
-        supabase.from("paper_trades").select("*").eq("user_id", user.id).neq("status", "open").order("closed_at", { ascending: false }).limit(20),
+      const [profileRes, tradesRes, lessonsRes] = await Promise.all([
+        supabase.from("profiles").select("paper_balance, xp_total").eq("user_id", user.id).single(),
+        supabase.from("paper_trades").select("*").eq("user_id", user.id).order("opened_at", { ascending: false }),
+        supabase.from("learning_progress").select("id").eq("user_id", user.id).eq("completed", true),
       ]);
-      if (profileRes.data) setBalance(profileRes.data.paper_balance);
-      if (openRes.data) setPositions(openRes.data as any);
-      if (closedRes.data) setHistory(closedRes.data as any);
+      if (profileRes.data) { setBalance(profileRes.data.paper_balance); setXp(profileRes.data.xp_total); }
+      if (tradesRes.data) {
+        const all = tradesRes.data as any as PaperPosition[];
+        setAllTrades(all);
+        setPositions(all.filter(t => t.status === "open"));
+      }
+      if (lessonsRes.data) setLessonsCompleted(lessonsRes.data.length);
     };
     load();
   }, [user]);
 
-  // Load TradingView chart
+  // Chart
   const loadChart = useCallback((sym: string) => {
     if (!chartRef.current) return;
     chartRef.current.innerHTML = "";
@@ -81,43 +137,72 @@ const DemoTrading = () => {
   }, [assetTab]);
 
   useEffect(() => { loadChart(symbol); }, [symbol, loadChart]);
-  useEffect(() => { const s = defaultSymbols[assetTab]; setSymbol(s); }, [assetTab]);
+  useEffect(() => { setSymbol(defaultSymbols[assetTab]); }, [assetTab]);
 
+  // Risk calc
   const riskPercent = units && currentPrice && stopLoss
-    ? Math.abs((currentPrice - parseFloat(stopLoss)) * parseFloat(units) / balance * 100)
-    : 0;
+    ? Math.abs((currentPrice - parseFloat(stopLoss)) * parseFloat(units) / balance * 100) : 0;
+
+  const rrRatio = stopLoss && takeProfit && currentPrice
+    ? Math.abs((parseFloat(takeProfit) - currentPrice) / (currentPrice - parseFloat(stopLoss))) : 0;
+
+  const cost = parseFloat(units || "0") * currentPrice;
+
+  // Quick size
+  const quickSize = (pct: number) => {
+    if (!currentPrice) return;
+    const amt = (balance * pct / 100) / currentPrice;
+    setUnits(Math.floor(amt * 100) / 100 + "");
+  };
+
+  // Order
+  const attemptPlaceOrder = () => {
+    if (!user || !currentPrice) return;
+    const qty = parseFloat(units);
+    if (!qty || qty <= 0) { toast.error("Enter valid units"); return; }
+    if (!stopLoss) { toast.error("Stop Loss is required for risk management"); return; }
+    if (cost > balance) { toast.error("Insufficient balance"); return; }
+    // Level gates
+    if (direction === "short" && level < 3) { toast.error("Short selling unlocks at Level 3 (Trader)"); return; }
+    if (orderType === "limit" && level < 2) { toast.error("Limit orders unlock at Level 2 (Apprentice)"); return; }
+    // Large position warning
+    if (cost > balance * 0.1) { setConfirmDialog(true); return; }
+    placeOrder();
+  };
 
   const placeOrder = async () => {
     if (!user || !currentPrice) return;
-    const qty = parseFloat(units);
-    const sl = stopLoss ? parseFloat(stopLoss) : null;
-    const tp = takeProfit ? parseFloat(takeProfit) : null;
-    if (!qty || qty <= 0) { toast({ title: "Enter valid units", variant: "destructive" }); return; }
-    if (!sl) { toast({ title: "Stop Loss required", description: "Always set a stop loss to manage risk.", variant: "destructive" }); return; }
-    const cost = qty * currentPrice;
-    if (cost > balance) { toast({ title: "Insufficient balance", variant: "destructive" }); return; }
-
+    setConfirmDialog(false);
     setPlacing(true);
+    const qty = parseFloat(units);
+    const sl = parseFloat(stopLoss);
+    const tp = takeProfit ? parseFloat(takeProfit) : null;
+
     const { data, error } = await supabase.from("paper_trades").insert({
       user_id: user.id, symbol, asset_type: assetTab, direction, entry_price: currentPrice,
-      quantity: qty, stop_loss: sl, take_profit: tp, status: "open",
+      quantity: qty, stop_loss: sl, take_profit: tp, status: "open", order_type: orderType,
+      thesis_json: thesis.reason ? thesis : {},
     } as any).select().single();
 
-    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
+    if (error) { toast.error(error.message); }
     else {
       const newBal = balance - cost;
       await supabase.from("profiles").update({ paper_balance: newBal } as any).eq("user_id", user.id);
       setBalance(newBal);
-      setPositions(prev => [data as any, ...prev]);
+      const trade = data as any as PaperPosition;
+      setPositions(prev => [trade, ...prev]);
+      setAllTrades(prev => [trade, ...prev]);
       setUnits(""); setStopLoss(""); setTakeProfit("");
-      toast({ title: `${direction.toUpperCase()} ${symbol}`, description: `${qty} units @ $${currentPrice.toFixed(2)}` });
+      setThesis({ reason: "", confidence: 3, invalidation: "" });
+      toast.success(`${direction.toUpperCase()} ${symbol} — ${qty} units @ $${currentPrice.toFixed(2)}`);
     }
     setPlacing(false);
   };
 
   const closePosition = async (pos: PaperPosition) => {
-    if (!user || !currentPrice) return;
-    const exitPrice = currentPrice;
+    if (!user) return;
+    const exitPrice = quotes[pos.symbol]?.current_price || currentPrice;
+    if (!exitPrice) return;
     const pnl = pos.direction === "long"
       ? (exitPrice - pos.entry_price) * pos.quantity
       : (pos.entry_price - exitPrice) * pos.quantity;
@@ -134,32 +219,45 @@ const DemoTrading = () => {
       setBalance(newBal);
       const closed = { ...pos, exit_price: exitPrice, pnl, pnl_percent: Math.round(pnlPercent * 100) / 100, status: pnl >= 0 ? "closed-win" : "closed-loss", closed_at: new Date().toISOString() };
       setPositions(prev => prev.filter(p => p.id !== pos.id));
-      setHistory(prev => [closed, ...prev]);
+      setAllTrades(prev => prev.map(t => t.id === pos.id ? closed : t));
       setReviewTrade(closed);
-      toast({ title: `Closed ${pos.symbol}`, description: `P&L: ${pnl >= 0 ? "+" : ""}$${pnl.toFixed(2)} (${pnlPercent.toFixed(1)}%)` });
+      toast.success(`Closed ${pos.symbol} — P&L: ${pnl >= 0 ? "+" : ""}$${pnl.toFixed(2)}`);
     }
   };
 
-  const quickSymbols = allSymbols[assetTab]?.slice(0, 6) || [];
+  const reloadTrades = async () => {
+    if (!user) return;
+    const { data } = await supabase.from("paper_trades").select("*").eq("user_id", user.id).order("opened_at", { ascending: false });
+    if (data) {
+      const all = data as any as PaperPosition[];
+      setAllTrades(all);
+      setPositions(all.filter(t => t.status === "open"));
+    }
+  };
+
+  const quickSymbols = allSymbols[assetTab]?.slice(0, 8) || [];
 
   return (
     <PageShell>
-      <div className="flex flex-col gap-4 pt-6 pb-24">
+      <div className="flex flex-col gap-3 pt-4 pb-24">
         <GuidedWalkthrough />
+        <PositionAlerts positions={positions} quotes={quotes} balance={balance} />
 
-        {/* Header */}
-        <div className="flex items-center justify-between" id="demo-header">
-          <div>
-            <h1 className="text-xl font-bold">Demo Trading</h1>
-            <p className="text-xs text-muted-foreground">Practice with virtual money</p>
+        {/* Header with level */}
+        <div className="flex items-center justify-between gap-3" id="demo-header">
+          <div className="flex-1">
+            <h1 className="text-lg font-bold">Demo Trading</h1>
+            <p className="text-[10px] text-muted-foreground">Practice risk-free with virtual money</p>
           </div>
-          <GlassCard className="px-4 py-2">
-            <p className="text-[10px] text-muted-foreground">Balance</p>
+          <GlassCard className="px-3 py-1.5 shrink-0">
+            <p className="text-[9px] text-muted-foreground">Balance</p>
             <p className="text-sm font-bold font-mono text-verdict-buy">£{balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           </GlassCard>
         </div>
 
-        {/* Asset tabs + Symbol selector */}
+        <TradingLevel level={level} totalTrades={totalTrades} xp={xp} />
+
+        {/* Asset tabs */}
         <div className="flex gap-2" id="demo-asset-tabs">
           {(["stock", "crypto", "forex"] as AssetTab[]).map((t) => (
             <button key={t} onClick={() => setAssetTab(t)}
@@ -168,7 +266,8 @@ const DemoTrading = () => {
             </button>
           ))}
         </div>
-        <div className="flex flex-wrap gap-1.5" id="demo-symbols">
+
+        <div className="flex flex-wrap gap-1.5">
           {quickSymbols.map((s) => (
             <button key={s.symbol} onClick={() => setSymbol(s.symbol)}
               className={`rounded-full px-3 py-1 text-[11px] font-mono font-medium transition-all ${symbol === s.symbol ? "bg-primary/20 text-primary border border-primary/30" : "glass-card text-muted-foreground"}`}>
@@ -178,39 +277,44 @@ const DemoTrading = () => {
         </div>
 
         {/* Chart */}
-        <div id="demo-chart" className="rounded-2xl overflow-hidden border border-border/30 bg-card" style={{ height: "clamp(300px, 45vh, 500px)" }}>
+        <div id="demo-chart" className="rounded-2xl overflow-hidden border border-border/30 bg-card" style={{ height: "clamp(280px, 40vh, 450px)" }}>
           <div ref={chartRef} style={{ height: "100%", width: "100%" }} />
         </div>
 
-        {/* Open position overlay */}
+        {/* Open position overlays */}
         {positions.filter(p => p.symbol === symbol).map(pos => {
           const live = quotes[pos.symbol]?.current_price || pos.entry_price;
           const unrealizedPnl = pos.direction === "long" ? (live - pos.entry_price) * pos.quantity : (pos.entry_price - live) * pos.quantity;
+          const nearSL = pos.stop_loss && Math.abs(live - pos.stop_loss) / live < 0.01;
+          const nearTP = pos.take_profit && Math.abs(live - pos.take_profit) / live < 0.01;
+
           return (
-            <GlassCard key={pos.id} className="border-primary/20 bg-primary/3" id="demo-position-overlay">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-sm font-bold font-mono">{pos.symbol}</span>
-                  <span className={`ml-2 text-[10px] px-2 py-0.5 rounded-full font-medium ${pos.direction === "long" ? "bg-verdict-buy/10 text-verdict-buy" : "bg-verdict-avoid/10 text-verdict-avoid"}`}>
-                    {pos.direction.toUpperCase()}
-                  </span>
-                  <span className="text-xs text-muted-foreground ml-2">@ ${pos.entry_price.toFixed(2)}</span>
+            <motion.div key={pos.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <GlassCard className={`border ${unrealizedPnl >= 0 ? "border-verdict-buy/30 shadow-verdict-buy/5" : nearSL ? "border-verdict-wait/30 shadow-verdict-wait/5" : "border-verdict-avoid/30 shadow-verdict-avoid/5"}`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-sm font-bold font-mono">{pos.symbol}</span>
+                    <span className={`ml-2 text-[10px] px-2 py-0.5 rounded-full font-medium ${pos.direction === "long" ? "bg-verdict-buy/10 text-verdict-buy" : "bg-verdict-avoid/10 text-verdict-avoid"}`}>
+                      {pos.direction.toUpperCase()}
+                    </span>
+                    <span className="text-xs text-muted-foreground ml-2">@ ${pos.entry_price.toFixed(2)}</span>
+                  </div>
+                  <div className="text-right">
+                    <p className={`text-sm font-bold font-mono ${unrealizedPnl >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`}>
+                      {unrealizedPnl >= 0 ? "+" : ""}${unrealizedPnl.toFixed(2)}
+                    </p>
+                    <Button size="sm" variant="outline" className="text-[10px] h-6 mt-1" onClick={() => closePosition(pos)}>
+                      Close
+                    </Button>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className={`text-sm font-bold font-mono ${unrealizedPnl >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`}>
-                    {unrealizedPnl >= 0 ? "+" : ""}${unrealizedPnl.toFixed(2)}
-                  </p>
-                  <Button size="sm" variant="outline" className="text-[10px] h-6 mt-1" onClick={() => closePosition(pos)}>
-                    Close Position
-                  </Button>
+                <div className="flex gap-4 mt-2 text-[10px] text-muted-foreground">
+                  {pos.stop_loss && <span className={nearSL ? "text-verdict-wait font-bold" : ""}>SL: ${pos.stop_loss}</span>}
+                  {pos.take_profit && <span className={nearTP ? "text-verdict-buy font-bold" : ""}>TP: ${pos.take_profit}</span>}
+                  <span>Qty: {pos.quantity}</span>
                 </div>
-              </div>
-              <div className="flex gap-4 mt-2 text-[10px] text-muted-foreground">
-                {pos.stop_loss && <span>SL: ${pos.stop_loss}</span>}
-                {pos.take_profit && <span>TP: ${pos.take_profit}</span>}
-                <span>Qty: {pos.quantity}</span>
-              </div>
-            </GlassCard>
+              </GlassCard>
+            </motion.div>
           );
         })}
 
@@ -218,20 +322,44 @@ const DemoTrading = () => {
         <GlassCard id="demo-order-form">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Place Order</p>
-            {currentPrice > 0 && (
-              <span className="text-sm font-bold font-mono">${currentPrice.toFixed(2)}</span>
-            )}
+            <div className="flex items-center gap-2">
+              {level >= 2 && (
+                <div className="flex gap-1">
+                  {(["market", "limit"] as const).map((t) => (
+                    <button key={t} onClick={() => setOrderType(t)}
+                      className={`text-[10px] px-2 py-0.5 rounded-full capitalize ${orderType === t ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {currentPrice > 0 && <span className="text-sm font-bold font-mono">${currentPrice.toFixed(2)}</span>}
+            </div>
           </div>
 
+          {/* BUY/SELL */}
           <div className="flex gap-2 mb-3" id="demo-buy-sell">
             <Button onClick={() => setDirection("long")} className={`flex-1 gap-1.5 ${direction === "long" ? "bg-verdict-buy hover:bg-verdict-buy/90 text-white" : "bg-secondary text-muted-foreground"}`}>
               <TrendingUp className="h-4 w-4" /> BUY
             </Button>
-            <Button onClick={() => setDirection("short")} className={`flex-1 gap-1.5 ${direction === "short" ? "bg-verdict-avoid hover:bg-verdict-avoid/90 text-white" : "bg-secondary text-muted-foreground"}`}>
-              <TrendingDown className="h-4 w-4" /> SELL
+            <Button onClick={() => setDirection("short")} disabled={level < 3}
+              className={`flex-1 gap-1.5 ${direction === "short" ? "bg-verdict-avoid hover:bg-verdict-avoid/90 text-white" : "bg-secondary text-muted-foreground"}`}>
+              <TrendingDown className="h-4 w-4" /> SELL {level < 3 && "🔒"}
             </Button>
           </div>
 
+          {/* Quick size buttons */}
+          <div className="flex gap-1.5 mb-3">
+            <span className="text-[10px] text-muted-foreground self-center">Quick:</span>
+            {[1, 2, 5, 10].map((pct) => (
+              <button key={pct} onClick={() => quickSize(pct)}
+                className="text-[10px] px-2 py-0.5 rounded-full bg-secondary/50 text-muted-foreground hover:bg-primary/20 hover:text-primary transition-colors">
+                {pct}%
+              </button>
+            ))}
+          </div>
+
+          {/* Inputs */}
           <div className="grid grid-cols-3 gap-2 mb-3">
             <div>
               <label className="text-[10px] text-muted-foreground mb-1 block">Units</label>
@@ -239,7 +367,7 @@ const DemoTrading = () => {
             </div>
             <div id="demo-stoploss">
               <label className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
-                <ShieldAlert className="h-3 w-3" /> Stop Loss
+                <ShieldAlert className="h-3 w-3" /> Stop Loss *
               </label>
               <Input type="number" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} placeholder="$" className="bg-secondary/50" />
             </div>
@@ -251,30 +379,44 @@ const DemoTrading = () => {
             </div>
           </div>
 
-          {/* Risk indicator */}
-          <div className="flex items-center justify-between mb-3 text-xs" id="demo-risk">
-            <span className="text-muted-foreground">Risk: <span className={`font-mono font-bold ${riskPercent > 5 ? "text-verdict-avoid" : riskPercent > 2 ? "text-verdict-wait" : "text-verdict-buy"}`}>{riskPercent.toFixed(1)}%</span> of balance</span>
-            {units && currentPrice ? (
-              <span className="text-muted-foreground font-mono">Cost: ${(parseFloat(units || "0") * currentPrice).toFixed(2)}</span>
-            ) : null}
+          {/* Risk + R:R */}
+          <div className="flex items-center justify-between mb-2 text-xs" id="demo-risk">
+            <span className="text-muted-foreground">
+              Risk: <span className={`font-mono font-bold ${riskPercent > 5 ? "text-verdict-avoid" : riskPercent > 2 ? "text-verdict-wait" : "text-verdict-buy"}`}>{riskPercent.toFixed(1)}%</span>
+            </span>
+            {rrRatio > 0 && (
+              <span className="text-muted-foreground flex items-center gap-1">
+                <Percent className="h-3 w-3" /> R:R <span className={`font-mono font-bold ${rrRatio >= 2 ? "text-verdict-buy" : rrRatio >= 1 ? "text-verdict-wait" : "text-verdict-avoid"}`}>{rrRatio.toFixed(1)}</span>
+              </span>
+            )}
+            {cost > 0 && <span className="text-muted-foreground font-mono text-[10px]">Cost: ${cost.toFixed(2)}</span>}
           </div>
+
           {riskPercent > 5 && (
-            <div className="flex items-center gap-2 text-[10px] text-verdict-avoid mb-3">
+            <div className="flex items-center gap-2 text-[10px] text-verdict-avoid mb-2">
               <AlertTriangle className="h-3.5 w-3.5" /> High risk — consider reducing position size
             </div>
           )}
 
-          <Button onClick={placeOrder} disabled={placing || !units || !stopLoss} className="w-full" id="demo-place-order">
-            {placing ? "Placing..." : "Place Order"}
+          {/* Thesis builder */}
+          <ThesisBuilder thesis={thesis} onChange={setThesis} direction={direction} />
+
+          <Button onClick={attemptPlaceOrder} disabled={placing || !units || !stopLoss} className="w-full mt-3" id="demo-place-order">
+            {placing ? "Placing..." : `Place ${direction === "long" ? "Buy" : "Sell"} Order`}
           </Button>
         </GlassCard>
 
-        {/* Positions & History */}
+        {/* Missions */}
+        <TradingMissions stats={missionStats} completedIds={completedMissions} />
+
+        {/* Tabs: Open / Journal / Stats */}
         <Tabs defaultValue="open">
           <TabsList className="w-full bg-secondary/50">
             <TabsTrigger value="open" className="flex-1 text-xs">Open ({positions.length})</TabsTrigger>
-            <TabsTrigger value="history" className="flex-1 text-xs">History ({history.length})</TabsTrigger>
+            <TabsTrigger value="journal" className="flex-1 text-xs">Journal ({history.length})</TabsTrigger>
+            <TabsTrigger value="stats" className="flex-1 text-xs">Stats</TabsTrigger>
           </TabsList>
+
           <TabsContent value="open" className="mt-3 flex flex-col gap-2">
             {positions.length === 0 && (
               <GlassCard className="text-center py-8">
@@ -286,7 +428,7 @@ const DemoTrading = () => {
               const live = quotes[pos.symbol]?.current_price || pos.entry_price;
               const pnl = pos.direction === "long" ? (live - pos.entry_price) * pos.quantity : (pos.entry_price - live) * pos.quantity;
               return (
-                <GlassCard key={pos.id} className="flex items-center justify-between">
+                <GlassCard key={pos.id} className={`flex items-center justify-between ${pnl >= 0 ? "border-verdict-buy/10" : "border-verdict-avoid/10"}`}>
                   <div>
                     <span className="text-sm font-bold font-mono">{pos.symbol}</span>
                     <span className={`ml-2 text-[10px] ${pos.direction === "long" ? "text-verdict-buy" : "text-verdict-avoid"}`}>{pos.direction.toUpperCase()}</span>
@@ -302,31 +444,32 @@ const DemoTrading = () => {
               );
             })}
           </TabsContent>
-          <TabsContent value="history" className="mt-3 flex flex-col gap-2">
-            {history.length === 0 && (
-              <GlassCard className="text-center py-8">
-                <p className="text-sm text-muted-foreground">No closed trades yet</p>
-              </GlassCard>
-            )}
-            {history.map(pos => (
-              <GlassCard key={pos.id} className="flex items-center justify-between">
-                <div>
-                  <span className="text-sm font-bold font-mono">{pos.symbol}</span>
-                  <span className={`ml-2 text-[10px] px-1.5 py-0.5 rounded-full ${pos.status === "closed-win" ? "bg-verdict-buy/10 text-verdict-buy" : "bg-verdict-avoid/10 text-verdict-avoid"}`}>
-                    {pos.status === "closed-win" ? "WIN" : "LOSS"}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <p className={`text-sm font-bold font-mono ${(pos.pnl || 0) >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`}>
-                    {(pos.pnl || 0) >= 0 ? "+" : ""}${(pos.pnl || 0).toFixed(2)}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">{pos.pnl_percent?.toFixed(1)}%</p>
-                </div>
-              </GlassCard>
-            ))}
+
+          <TabsContent value="journal" className="mt-3">
+            <TradeJournal trades={history} onUpdate={reloadTrades} />
+          </TabsContent>
+
+          <TabsContent value="stats" className="mt-3">
+            <PerformanceStats trades={allTrades} balance={balance} />
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Confirmation dialog for large positions */}
+      <Dialog open={confirmDialog} onOpenChange={setConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Large Position Warning</DialogTitle>
+            <DialogDescription>
+              This trade uses more than 10% of your balance (${cost.toFixed(2)}). Are you sure?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDialog(false)}>Cancel</Button>
+            <Button onClick={placeOrder}>Confirm Order</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* AI Trade Review Modal */}
       {reviewTrade && <TradeReview trade={reviewTrade} onClose={() => setReviewTrade(null)} />}
