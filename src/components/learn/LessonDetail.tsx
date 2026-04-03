@@ -4,6 +4,8 @@ import { ArrowLeft, AlertTriangle, Lightbulb, BookOpen, CheckCircle2, ArrowRight
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/GlassCard";
 import QuizFlow from "./QuizFlow";
+import LessonIllustration from "./LessonIllustration";
+import LessonPdfExport from "./LessonPdfExport";
 import { type Lesson, lessonsData, difficultyColors } from "@/data/lessonsData";
 import { drillsData, practiceTypeLabels } from "@/data/drillsData";
 import { supabase } from "@/integrations/supabase/client";
@@ -102,6 +104,7 @@ const LessonDetail = ({ lesson, completed, onBack, onLessonComplete, onSelectLes
           </span>
           <span className="text-[10px] text-muted-foreground">{lesson.duration_minutes} min</span>
           <span className="text-[10px] text-primary font-mono font-semibold">+{lesson.xp_reward} XP</span>
+          <LessonPdfExport lesson={lesson} />
         </div>
       </motion.div>
 
@@ -114,6 +117,10 @@ const LessonDetail = ({ lesson, completed, onBack, onLessonComplete, onSelectLes
               <p key={j} className="text-[13px] text-foreground/80 leading-relaxed mb-2.5 last:mb-0">{p}</p>
             ))}
           </GlassCard>
+          {/* Render illustrations after this section */}
+          {lesson.illustrations?.filter(ill => (ill.afterSection ?? 0) === i).map((ill, idx) => (
+            <LessonIllustration key={`ill-${i}-${idx}`} type={ill.type} caption={ill.caption} />
+          ))}
         </motion.div>
       ))}
 

@@ -185,6 +185,42 @@ serve(async (req) => {
         }
       }
 
+      // ── Fallback for crypto: CoinGecko (free, no key) ──
+      if (!price && asset_type === "crypto") {
+        const COINGECKO_IDS: Record<string, string> = {
+          BTC: "bitcoin", ETH: "ethereum", SOL: "solana", XRP: "ripple",
+          DOGE: "dogecoin", ADA: "cardano", AVAX: "avalanche-2", DOT: "polkadot",
+          MATIC: "matic-network", LINK: "chainlink", UNI: "uniswap", ATOM: "cosmos",
+          LTC: "litecoin", BCH: "bitcoin-cash", NEAR: "near", APT: "aptos",
+          ARB: "arbitrum", OP: "optimism", SUI: "sui", FIL: "filecoin",
+          AAVE: "aave", MKR: "maker", SNX: "synthetix-network-token",
+          PEPE: "pepe", SHIB: "shiba-inu", BNB: "binancecoin",
+        };
+        const cgId = COINGECKO_IDS[symbol];
+        if (cgId) {
+          try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5000);
+            const res = await fetch(
+              `https://api.coingecko.com/api/v3/simple/price?ids=${cgId}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true`,
+              { signal: controller.signal }
+            );
+            clearTimeout(timeout);
+            const data = await res.json();
+            const coin = data[cgId];
+            if (coin && coin.usd && coin.usd > 0) {
+              price = coin.usd;
+              change = coin.usd_24h_change ? Math.round(coin.usd_24h_change * 100) / 100 : 0;
+              volume = coin.usd_24h_vol || null;
+              source = "coingecko" as any;
+              console.log(`CoinGecko hit for ${symbol}: $${price}`);
+            }
+          } catch (e) {
+            console.error("CoinGecko error:", e);
+          }
+        }
+      }
+
       // ── Fallback: Alpha Vantage ──
       if (!price && ALPHA_VANTAGE_KEY && isProviderHealthy("alphavantage")) {
         isFallback = source === "none" ? false : true; // only fallback if finnhub was tried
