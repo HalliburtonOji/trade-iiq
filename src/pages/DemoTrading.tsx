@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { allSymbols } from "@/data/symbolLists";
-import { computeLevel, type MissionStats } from "@/data/tradingMissions";
+import { computeLevel, tradingMissions, type MissionStats } from "@/data/tradingMissions";
 import GuidedWalkthrough from "@/components/demo/GuidedWalkthrough";
 import TradeReview from "@/components/demo/TradeReview";
 import TradingLevel from "@/components/demo/TradingLevel";
@@ -94,8 +94,7 @@ const DemoTrading = () => {
   }, [history, allTrades, totalTrades, wins, tradesWithSL, winRate, lessonsCompleted]);
 
   const completedMissions = useMemo(() => {
-    const { tradingMissions } = require("@/data/tradingMissions");
-    return tradingMissions.filter((m: any) => m.check(missionStats)).map((m: any) => m.id);
+    return tradingMissions.filter((m) => m.check(missionStats)).map((m) => m.id);
   }, [missionStats]);
 
   // Load data
