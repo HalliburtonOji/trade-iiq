@@ -329,54 +329,69 @@ export type Database = {
           asset_type: string
           closed_at: string | null
           direction: string
+          emotion: string | null
           entry_price: number
           exit_price: number | null
           id: string
+          leverage: number
           opened_at: string
+          order_type: string
           pnl: number | null
           pnl_percent: number | null
+          post_notes: string | null
           quantity: number
           status: string
           stop_loss: number | null
           symbol: string
           take_profit: number | null
           thesis: string | null
+          thesis_json: Json | null
           user_id: string
         }
         Insert: {
           asset_type?: string
           closed_at?: string | null
           direction?: string
+          emotion?: string | null
           entry_price: number
           exit_price?: number | null
           id?: string
+          leverage?: number
           opened_at?: string
+          order_type?: string
           pnl?: number | null
           pnl_percent?: number | null
+          post_notes?: string | null
           quantity: number
           status?: string
           stop_loss?: number | null
           symbol: string
           take_profit?: number | null
           thesis?: string | null
+          thesis_json?: Json | null
           user_id: string
         }
         Update: {
           asset_type?: string
           closed_at?: string | null
           direction?: string
+          emotion?: string | null
           entry_price?: number
           exit_price?: number | null
           id?: string
+          leverage?: number
           opened_at?: string
+          order_type?: string
           pnl?: number | null
           pnl_percent?: number | null
+          post_notes?: string | null
           quantity?: number
           status?: string
           stop_loss?: number | null
           symbol?: string
           take_profit?: number | null
           thesis?: string | null
+          thesis_json?: Json | null
           user_id?: string
         }
         Relationships: []
@@ -473,6 +488,7 @@ export type Database = {
           preferred_broker: string | null
           streak_count: number
           trading_goals: string[] | null
+          trading_level: number
           trading_personality: string
           updated_at: string
           user_id: string
@@ -491,6 +507,7 @@ export type Database = {
           preferred_broker?: string | null
           streak_count?: number
           trading_goals?: string[] | null
+          trading_level?: number
           trading_personality?: string
           updated_at?: string
           user_id: string
@@ -509,6 +526,7 @@ export type Database = {
           preferred_broker?: string | null
           streak_count?: number
           trading_goals?: string[] | null
+          trading_level?: number
           trading_personality?: string
           updated_at?: string
           user_id?: string
