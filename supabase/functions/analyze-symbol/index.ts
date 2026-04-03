@@ -97,9 +97,10 @@ serve(async (req) => {
     }
 
     // Build context for AI
+    const priceAvailable = livePrice > 0;
     const priceContext = `Symbol: ${upperSymbol} (${asset_type})
-Current Price: $${livePrice}
-Price Change: ${priceChange}%
+${priceAvailable ? `Current Price: $${livePrice}` : "Current Price: UNAVAILABLE — use your knowledge to estimate current market price and provide reasonable targets"}
+${priceAvailable ? `Price Change: ${priceChange}%` : ""}
 ${dayHigh ? `Day High: $${dayHigh}` : ""}
 ${dayLow ? `Day Low: $${dayLow}` : ""}
 ${volume ? `Volume: ${volume.toLocaleString()}` : ""}

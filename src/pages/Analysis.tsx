@@ -238,11 +238,15 @@ const Analysis = () => {
                   <div>
                     <h2 className="text-lg font-bold">{result.symbol}</h2>
                     <p className="text-2xl font-bold font-mono">
-                      ${typeof result.price === 'number' ? result.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}
+                      {typeof result.price === 'number' && result.price > 0
+                        ? `$${result.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                        : <span className="text-muted-foreground text-base">Price unavailable</span>}
                     </p>
-                    <p className={`text-sm font-mono font-medium ${(result.change || 0) >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`}>
-                      {(result.change || 0) >= 0 ? "+" : ""}{(result.change || 0).toFixed(2)}%
-                    </p>
+                    {typeof result.price === 'number' && result.price > 0 && (
+                      <p className={`text-sm font-mono font-medium ${(result.change || 0) >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`}>
+                        {(result.change || 0) >= 0 ? "+" : ""}{(result.change || 0).toFixed(2)}%
+                      </p>
+                    )}
                     {(result as any).source && (
                       <span className="text-[9px] text-muted-foreground/50 font-mono">
                         {(result as any).source === "ai" ? "🤖 Live AI" : (result as any).source === "cache" ? `📦 Cached (${(result as any).cache_age_minutes}m)` : "📊 Static"}
