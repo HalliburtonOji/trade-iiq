@@ -117,6 +117,10 @@ const LessonDetail = ({ lesson, completed, onBack, onLessonComplete, onSelectLes
               <p key={j} className="text-[13px] text-foreground/80 leading-relaxed mb-2.5 last:mb-0">{p}</p>
             ))}
           </GlassCard>
+          {/* Render illustrations after this section */}
+          {lesson.illustrations?.filter(ill => (ill.afterSection ?? 0) === i).map((ill, idx) => (
+            <LessonIllustration key={`ill-${i}-${idx}`} type={ill.type} caption={ill.caption} />
+          ))}
         </motion.div>
       ))}
 
