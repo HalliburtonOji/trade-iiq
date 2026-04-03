@@ -1,250 +1,173 @@
+# Demo Trading: Complete Rebuild - Beginner to Pro
 
+## What's Wrong Now
 
-# Unified Plan: Demo Trading Simulator + Full Feature Upgrade
+The current Demo Trading page is a basic order form with a chart. It has no structure, no progression, no educational context, no performance analytics, and no way to guide someone from complete beginner to competent trader. It's just "pick a symbol, click buy."
 
-## Overview
+## Research Insights
 
-This is a single unified build that combines everything from the approved improvement plan (landing page, UI polish, deeper analysis, gamification, adventurous trading, social features) with a new flagship **Demo Trading** page — a guided, interactive trading simulator with live charts, step-by-step coaching, and real-time paper execution.
+Based on TradingGame (4.5M users), TradingView Paper Trading, and IBKR:
 
----
-
-## The Demo Trading Page
-
-Based on research into TradingGame (4.5M users), TradingView Paper Trading, IBKR Simulator, and Goat Funded Trader, the best demo trading experiences share these elements:
-
-- **Live chart embedded directly in the trading interface** (not a separate page)
-- **Guided walkthrough on first visit** — tooltip-driven steps teaching users how to read the chart, place an order, set stop-loss/take-profit, and review results
-- **One-click order placement** with BUY/SELL buttons alongside the chart
-- **Real-time position tracking** with floating P&L overlay on the chart
-- **Risk controls built in** — force users to set a stop-loss before confirming
-- **Post-trade review** — after closing, show what went right/wrong with AI coaching
-- **Progressive complexity** — start with simple market orders, unlock limit orders and leverage after completing introductory trades
-
-### Demo Trading Page Design
-
-```text
-┌─────────────────────────────────────────────────┐
-│  Demo Trading          Balance: £10,000   P&L   │
-│  [AAPL ▼] [Stock|Crypto|Forex]                  │
-├─────────────────────────────────────────────────┤
-│                                                 │
-│          TradingView Advanced Chart              │
-│          (with drawing tools + indicators)       │
-│                                                 │
-│   ┌─ Open Position Overlay ──────────────┐      │
-│   │ AAPL LONG @ $182.50  P&L: +$45.20   │      │
-│   │ SL: $178  TP: $195  [Close Position] │      │
-│   └──────────────────────────────────────┘      │
-├─────────────────────────────────────────────────┤
-│  ┌──────────┐  ┌──────────┐                     │
-│  │  🟢 BUY  │  │  🔴 SELL │   Units: [___]     │
-│  └──────────┘  └──────────┘   Stop Loss: [___]  │
-│                               Take Profit:[___] │
-│  Risk: 2.3% of balance       [Place Order]      │
-├─────────────────────────────────────────────────┤
-│  Open Positions (2)  │  Trade History (14)       │
-│  AAPL +2.4% ● LIVE   │  NVDA +5.1% ✓ closed   │
-│  BTC  -0.8% ● LIVE   │  TSLA -1.2% ✗ closed   │
-└─────────────────────────────────────────────────┘
-```
-
-### Guided Walkthrough (First Visit)
-
-A step-by-step tooltip tour that highlights UI elements in sequence:
-
-1. "Welcome to Demo Trading! You have £10,000 virtual cash to practice with."
-2. "Pick a symbol from the dropdown — try AAPL to start."
-3. "This is a live chart. Use the timeframe buttons and add indicators like RSI."
-4. "Ready to trade? Click BUY to go long, or SELL to go short."
-5. "Always set a Stop Loss — this limits your downside risk."
-6. "Set a Take Profit target to lock in gains automatically."
-7. "Review your risk — we show what % of your balance is at stake."
-8. "Click Place Order to execute. Your position will track live."
-9. "When ready, close the position and see your AI trade review."
-
-State stored in `localStorage` (`demo_walkthrough_complete`) so it only shows once.
-
-### AI Trade Review (Post-Close)
-
-When a user closes a position, call the existing `chat` edge function with structured context:
-- Entry/exit price, P&L, duration held, stop-loss/take-profit hit or manual close
-- Returns: grade (A-F), what went well, what to improve, lesson link suggestion
+- **Structured progression** is the key differentiator: beginners start with guided "lesson trades" (forced scenarios), not free trading
+- **Missions/challenges** tie each trade to a learning objective ("Place a trade with a 2:1 risk-reward ratio")
+- **Performance dashboard** tracks win rate, average R:R, best/worst trades, equity curve over time
+- **Pre-trade checklist** forces users to build a thesis before executing (why are you trading?)
+- **Post-trade journal** captures emotions, mistakes, and lessons — not just P&L
+- **Progressive unlocks** gate complexity: market orders first, then limit orders, then leverage, then multi-leg strategies
 
 ---
 
-## Full Unified Build Order
+## What Gets Built
 
-### Phase A: Foundation (Landing + UI + Sidebar)
+### 1. Progression System with Trading Levels
 
-1. **Public Landing Page** — `src/pages/Landing.tsx`
-   - Hero with animated headline, CTA buttons, feature showcase cards, social proof strip
-   - Becomes default route for unauthenticated users (replace redirect to `/auth`)
-   - Framer Motion scroll animations, glassmorphic design
+A 5-tier skill level system that gates features and tracks readiness:
 
-2. **Onboarding Wizard** — `src/components/OnboardingWizard.tsx`
-   - 3-step flow: experience level → preferred assets → trading goals
-   - New profile columns: `experience_level`, `preferred_assets`, `trading_goals`
-   - Shows on first login, tailors recommendations
 
-3. **UI Polish**
-   - Theme toggle (dark/light) in sidebar — `src/components/ThemeToggle.tsx`
-   - Light theme CSS variables in `index.css`
-   - Skeleton loaders on all data-fetching pages
-   - Animated stat counters on dashboard
+| Level | Name       | Requirement                       | Unlocks                                |
+| ----- | ---------- | --------------------------------- | -------------------------------------- |
+| 1     | Observer   | Complete walkthrough              | Market orders, single positions        |
+| 2     | Apprentice | 5 trades + 1 lesson completed     | Multiple positions, limit orders       |
+| 3     | Trader     | 20 trades, 40%+ win rate          | Short selling, all asset types         |
+| 4     | Strategist | 50 trades, set SL on 80%+         | Leverage (2x-5x), advanced order types |
+| 5     | Pro        | 100 trades, positive equity curve | Full access, mentorship challenges     |
 
-### Phase B: Demo Trading Simulator
 
-4. **Demo Trading Page** — `src/pages/DemoTrading.tsx`
-   - TradingView chart embed (reuse pattern from Charts page)
-   - Symbol selector with asset type tabs
-   - BUY/SELL order form with units, stop-loss, take-profit inputs
-   - Risk calculator (% of balance at stake)
-   - Reads/writes to `paper_trades` DB table (already created)
-   - Live P&L tracking for open positions using `live-quote` pipeline
-   - Trade history panel with closed positions
-   - Balance display synced with profiles `paper_balance`
+Level displayed prominently on the page with XP bar. Computed from `paper_trades` history.
 
-5. **Guided Walkthrough** — `src/components/demo/GuidedWalkthrough.tsx`
-   - Tooltip-based step-by-step tour using absolute positioned highlight overlays
-   - 9 steps covering chart reading, order placement, risk management
-   - Persisted in localStorage, dismissable, re-triggerable from help button
+### 2. Pre-Trade Thesis Builder
 
-6. **AI Trade Review** — `src/components/demo/TradeReview.tsx`
-   - Post-close modal calling `chat` edge function with trade context
-   - Shows grade, strengths, improvements, and suggested lesson
-   - Option to save review to trade history
+Before placing any order, users must fill a quick thesis:
 
-### Phase C: Deeper Analysis
+- **Why?** (dropdown: breakout, reversal, momentum, news catalyst, support bounce)
+- **Confidence** (1-5 stars)
+- **Invalidation** ("I'm wrong if price goes below/above ___")
+- Stored in `paper_trades.thesis` as structured JSON
 
-7. **Multi-Symbol Compare** — `src/components/SymbolCompare.tsx`
-   - Side-by-side comparison of 2-3 symbols (verdict, scores, price change)
-   - New tab on Analysis page
+This teaches deliberate decision-making from day one.
 
-8. **Sector Heatmap** — `src/components/SectorHeatmap.tsx`
-   - Color-coded grid of sector performance on Screener page
-   - Click sector to filter symbols
+### 3. Trading Missions (Structured Challenges)
 
-9. **AI "What If" Scenarios** — `supabase/functions/what-if/index.ts`
-   - "What happens to NVDA if Fed cuts rates?" using Gemini
-   - Accessible from Analysis page
+A set of progressive missions that teach specific skills:
 
-### Phase D: Gamification
+**Beginner missions:**
 
-10. **Streak Calendar** — `src/components/learn/StreakCalendar.tsx`
-    - GitHub-style heatmap of daily learning activity
-    - Shown on Learn header
+- "Place your first BUY order on any stock"
+- "Set a stop loss within 2% of entry"
+- "Close a trade in profit"
+- "Place a trade with at least 2:1 reward-to-risk ratio"
 
-11. **Daily Challenge** — `src/components/learn/DailyChallenge.tsx`
-    - One challenge per day with bonus XP
-    - DB table: `daily_challenges`
+**Intermediate missions:**
 
-12. **Skill Tree** — `src/components/learn/SkillTree.tsx`
-    - Visual mastery path showing progression through topics
-    - Nodes light up as lessons complete
+- "Hold a position for at least 1 hour"
+- "Close 3 consecutive trades with stop losses set"
+- "Achieve a 50% win rate over 10 trades"
+- "Place a SHORT trade"
 
-13. **Achievement Celebrations** — `src/components/AchievementCelebration.tsx`
-    - Full-screen confetti on level-up and badge unlock
-    - canvas-confetti library
+**Advanced missions:**
 
-### Phase E: Adventurous Trading Tools
+- "Place a trade based on RSI being oversold (<30)"
+- "Achieve positive P&L over 20 trades"
+- "Keep average risk per trade under 2%"
 
-14. **Risk Simulator** — `src/components/RiskSimulator.tsx`
-    - "What if your portfolio drops 30%?" drawdown modeling
-    - Interactive position size inputs
+Each mission awards XP and can trigger achievement celebrations. Missions panel shown as a collapsible sidebar section on the demo page.
 
-15. **Leverage Calculator** — `src/components/LeverageCalculator.tsx`
-    - Slider showing P&L curves at 2x, 5x, 10x leverage
-    - Visual warnings at dangerous levels
+### 4. Performance Dashboard Tab
 
-16. **Options Strategy Visualizer** — `src/components/OptionsVisualizer.tsx`
-    - Payoff diagrams for covered call, iron condor, straddle, bull spread
-    - Interactive strike price adjustment
+A new "Stats" tab alongside Open/History showing:
 
-17. **Volatility Scanner** — `src/components/VolatilityScanner.tsx`
-    - High-volatility symbols list on Screener page
-    - Sorted by recent price swing magnitude
+- **Equity curve** (line chart of balance over time)
+- **Win rate** (pie chart or percentage)
+- **Average risk:reward ratio**
+- **Best & worst trades** (highlighted cards)
+- **Trades by asset type** (bar chart)
+- **Average hold time**
+- **P&L by day of week** (heatmap)
+- **Streak tracker** (current winning/losing streak)
 
-### Phase F: Social & Community
+All computed from `paper_trades` history. Uses Recharts (already in project).
 
-18. **Sentiment Polls** — `src/components/SentimentPoll.tsx`
-    - BUY/WAIT/AVOID vote per symbol on Analysis page
-    - Aggregate display: "68% say BUY"
-    - DB table: `community_votes`
+### 5. Enhanced Order Form
 
-19. **Shared Analysis Feed** — `src/pages/Community.tsx`
-    - Publish trade ideas, browse others' analysis
-    - Like/bookmark system
-    - DB tables: `trade_ideas`, `idea_likes`
+- **Order type selector**: Market (default) / Limit (unlocked at Level 2)
+- **Quick position sizing buttons**: 1%, 2%, 5% of balance
+- **Auto-calculated risk:reward ratio** display when SL and TP are set
+- **Suggested stop loss** based on recent support/ATR (hint text, not binding)
+- **Thesis fields** integrated into the form (see #2)
+- **Confirmation dialog** for large positions (>10% of balance)
 
-20. **XP Leaderboard** — `src/components/Leaderboard.tsx`
-    - Weekly/monthly/all-time rankings
-    - Opt-in with display name
+### 6. Improved Trade History with Journal
 
-### Phase G: Chatbot & Polish
+Each closed trade in history becomes expandable:
 
-21. **Enhanced AI Chatbot**
-    - Markdown rendering (react-markdown)
-    - Context-aware: knows user's trades, weak areas, demo performance
-    - Quick action buttons: "Analyze AAPL", "Quiz me", "Show my stats"
+- Entry/exit prices, P&L, duration
+- The thesis they wrote before entering
+- AI review grade (if generated)
+- User can add post-trade notes: "I panicked and closed early" / "Should have waited for confirmation"
+- Emotion tag: Calm, FOMO, Revenge, Greedy, Fearful
+- Filter history by: win/loss, asset type, direction, emotion
+
+### 7. Real-Time Position Alerts
+
+- Visual + toast alert when price approaches stop loss (within 1%)
+- Visual + toast alert when price approaches take profit (within 1%)
+- Alert when risk exceeds 5% of balance
+- Color-coded position cards: green glow when profitable, red glow when losing, amber when near SL/TP
+
+### 8. Tutorial Overlay Enhancements
+
+Replace the current basic tooltip walkthrough with a richer system:
+
+- **Spotlight mode**: dims the rest of the page and highlights the target element
+- **Interactive steps**: some steps require user action ("Now click BUY") before advancing
+- **Contextual tips**: show mini-tips when user hovers over specific elements (e.g., "RSI below 30 means oversold")
+- **Video placeholder areas**: space for future short tutorial clips
 
 ---
 
-## Technical Summary
+## Technical Details
 
-### New Files (25)
+### New Components
 
-| File | Purpose |
-|------|---------|
-| `src/pages/Landing.tsx` | Public landing page |
-| `src/pages/DemoTrading.tsx` | Guided demo trading simulator |
-| `src/pages/Community.tsx` | Social feed |
-| `src/components/OnboardingWizard.tsx` | First-login wizard |
-| `src/components/ThemeToggle.tsx` | Dark/light toggle |
-| `src/components/demo/GuidedWalkthrough.tsx` | Step-by-step tooltip tour |
-| `src/components/demo/TradeReview.tsx` | AI post-trade review |
-| `src/components/SymbolCompare.tsx` | Multi-symbol comparison |
-| `src/components/SectorHeatmap.tsx` | Sector performance grid |
-| `src/components/SentimentPoll.tsx` | Community vote widget |
-| `src/components/Leaderboard.tsx` | XP rankings |
-| `src/components/RiskSimulator.tsx` | Drawdown modeling |
-| `src/components/LeverageCalculator.tsx` | Leverage P&L curves |
-| `src/components/OptionsVisualizer.tsx` | Options payoff diagrams |
-| `src/components/VolatilityScanner.tsx` | High-volatility finder |
-| `src/components/AchievementCelebration.tsx` | Confetti celebrations |
-| `src/components/learn/StreakCalendar.tsx` | Activity heatmap |
-| `src/components/learn/DailyChallenge.tsx` | Daily challenge system |
-| `src/components/learn/SkillTree.tsx` | Visual mastery path |
-| `supabase/functions/what-if/index.ts` | AI scenario analysis |
 
-### Modified Files (10)
+| File                                       | Purpose                                           |
+| ------------------------------------------ | ------------------------------------------------- |
+| `src/components/demo/TradingLevel.tsx`     | Level badge + XP progress bar                     |
+| `src/components/demo/ThesisBuilder.tsx`    | Pre-trade thesis form                             |
+| `src/components/demo/TradingMissions.tsx`  | Mission checklist with progress                   |
+| `src/components/demo/PerformanceStats.tsx` | Stats dashboard with charts                       |
+| `src/components/demo/TradeJournal.tsx`     | Expandable trade history with notes               |
+| `src/components/demo/PositionAlerts.tsx`   | Price proximity alerts logic                      |
+| `src/data/tradingMissions.ts`              | Mission definitions (30+ missions across 3 tiers) |
 
-| File | Change |
-|------|--------|
-| `src/App.tsx` | Add `/demo-trading`, `/community`, `/landing` routes |
-| `src/components/SideNav.tsx` | Add Demo Trading + Community nav items, theme toggle |
-| `src/components/BottomNav.tsx` | Add Demo Trading item |
-| `src/pages/Analysis.tsx` | Compare tab, sentiment poll, what-if button |
-| `src/pages/Screener.tsx` | Sector heatmap, volatility scanner |
-| `src/pages/Portfolio.tsx` | Link to demo trading, paper trade sync |
-| `src/components/learn/LearnHeader.tsx` | Streak calendar, daily challenge |
-| `src/components/AIChatbot.tsx` | Markdown rendering, context awareness |
-| `src/pages/Index.tsx` | Live market data, animated counters, continue card |
-| `src/index.css` | Light theme CSS variables |
 
-### Database Migrations (1)
+### Modified Files
 
-New tables: `community_votes`, `trade_ideas`, `idea_likes`, `daily_challenges`
-New profile columns: `experience_level`, `preferred_assets`, `trading_goals`
-RLS on all new tables: users access own rows only; community tables allow authenticated reads.
+
+| File                                        | Change                                                                                                                                     |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/pages/DemoTrading.tsx`                 | Major rewrite: add level display, thesis builder in order form, missions panel, stats tab, improved history, position alerts, limit orders |
+| `src/components/demo/GuidedWalkthrough.tsx` | Spotlight mode, interactive steps                                                                                                          |
+| `src/components/demo/TradeReview.tsx`       | Add emotion/journal fields to review modal                                                                                                 |
+
+
+### Database Migration
+
+- Add columns to `paper_trades`: `thesis_json` (jsonb, structured thesis), `order_type` (text, default 'market'), `emotion` (text), `post_notes` (text), `leverage` (numeric, default 1)
+- Add `trading_level` column to `profiles` (integer, default 1)
+
+### No New Edge Functions
+
+All stats and level computation happen client-side from `paper_trades` data. Missions are evaluated client-side against trade history.
 
 ### Build Order
 
-1. Landing page + onboarding wizard
-2. Demo Trading simulator with guided walkthrough
-3. UI polish (theme toggle, skeletons, animated counters)
-4. Deeper analysis (compare, heatmap, what-if)
-5. Gamification (streak, challenges, skill tree, celebrations)
-6. Adventurous tools (risk sim, leverage calc, options viz)
-7. Social/community (polls, feed, leaderboard)
-8. Chatbot upgrade (markdown, context, quick actions)
-
+1. Database migration (new columns)
+2. Trading missions data file
+3. Level system + thesis builder components
+4. Rewrite DemoTrading.tsx with new layout (level bar, missions panel, enhanced form, stats tab)
+5. Performance stats dashboard with Recharts
+6. Trade journal with expandable history
+7. Position alerts
+8. Walkthrough upgrade (spotlight + interactive)  
+implement all  
