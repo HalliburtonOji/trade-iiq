@@ -1,3 +1,5 @@
+import type { IllustrationType } from "@/components/learn/LessonIllustration";
+
 export interface QuizQuestion {
   question: string;
   options: string[];
@@ -9,6 +11,12 @@ export interface QuizQuestion {
 export interface ContentSection {
   heading: string;
   body: string[];
+}
+
+export interface LessonIllustrationData {
+  type: IllustrationType;
+  caption: string;
+  afterSection?: number; // index of content section after which to show (default: 0)
 }
 
 export interface Lesson {
@@ -28,6 +36,7 @@ export interface Lesson {
   takeaways: string[];
   quiz: QuizQuestion[];
   related_lessons: string[];
+  illustrations?: LessonIllustrationData[];
 }
 
 export const lessonsData: Lesson[] = [
