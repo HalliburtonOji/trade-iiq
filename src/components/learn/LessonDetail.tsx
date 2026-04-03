@@ -104,6 +104,7 @@ const LessonDetail = ({ lesson, completed, onBack, onLessonComplete, onSelectLes
           </span>
           <span className="text-[10px] text-muted-foreground">{lesson.duration_minutes} min</span>
           <span className="text-[10px] text-primary font-mono font-semibold">+{lesson.xp_reward} XP</span>
+          <LessonPdfExport lesson={lesson} />
         </div>
       </motion.div>
 
