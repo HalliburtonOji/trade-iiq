@@ -30,6 +30,7 @@ const navSections = [
     items: [
       { label: "Learn", icon: GraduationCap, path: "/learn" },
       { label: "Community", icon: Users, path: "/community" },
+      { label: "Profile", icon: User, path: "/profile" },
     ],
   },
 ];
