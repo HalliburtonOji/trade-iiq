@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import AIChatbot from "@/components/AIChatbot";
+import FloatingHub from "@/components/FloatingHub";
 import Index from "./pages/Index";
 import Analysis from "./pages/Analysis";
 import Charts from "./pages/Charts";
@@ -19,6 +19,9 @@ import Landing from "./pages/Landing";
 import DemoTrading from "./pages/DemoTrading";
 import Community from "./pages/Community";
 import Profile from "./pages/Profile";
+import Playbook from "./pages/Playbook";
+import ScreenshotVault from "./pages/ScreenshotVault";
+import ReviewWorkspace from "./pages/ReviewWorkspace";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,9 +67,12 @@ const AppContent = () => {
         <Route path="/demo-trading" element={<ProtectedRoute><DemoTrading /></ProtectedRoute>} />
         <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/playbook" element={<ProtectedRoute><Playbook /></ProtectedRoute>} />
+        <Route path="/screenshots" element={<ProtectedRoute><ScreenshotVault /></ProtectedRoute>} />
+        <Route path="/review" element={<ProtectedRoute><ReviewWorkspace /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      {user && <AIChatbot />}
+      {user && <FloatingHub />}
     </>
   );
 };
