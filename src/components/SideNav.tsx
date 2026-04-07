@@ -1,4 +1,4 @@
-import { Home, TrendingUp, ClipboardList, GraduationCap, PieChart, Sparkles, Lightbulb, LogOut, Filter, BarChart3, ChevronsLeft, ChevronsRight, Gamepad2, Users } from "lucide-react";
+import { Home, TrendingUp, ClipboardList, GraduationCap, PieChart, Sparkles, Lightbulb, LogOut, Filter, BarChart3, ChevronsLeft, ChevronsRight, Gamepad2, Users, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -30,6 +30,7 @@ const navSections = [
     items: [
       { label: "Learn", icon: GraduationCap, path: "/learn" },
       { label: "Community", icon: Users, path: "/community" },
+      { label: "Profile", icon: User, path: "/profile" },
     ],
   },
 ];

@@ -86,16 +86,60 @@ const Analysis = () => {
     }
   };
 
+  const [watchlistSaving, setWatchlistSaving] = useState(false);
+  const [watchlistSaved, setWatchlistSaved] = useState(false);
+
+  // Reset saved state when result changes
+  useEffect(() => { setWatchlistSaved(false); }, [result?.symbol]);
+
   const addToWatchlist = async () => {
     if (!result || !user) return;
-    const { error } = await supabase.from("watchlist").upsert({
-      user_id: user.id,
-      symbol: result.symbol,
-      name: result.symbol,
-      type: assetType,
-    }, { onConflict: "user_id,symbol" });
-    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
-    else toast({ title: "Added to watchlist", description: `${result.symbol} is now on your watchlist.` });
+    setWatchlistSaving(true);
+    try {
+      // Check if already exists
+      const { data: existing } = await supabase
+        .from("watchlist")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("symbol", result.symbol)
+        .maybeSingle();
+
+      if (existing) {
+        setWatchlistSaved(true);
+        toast({ title: "Already saved", description: `${result.symbol} is already on your watchlist.` });
+        setWatchlistSaving(false);
+        return;
+      }
+
+      const { error } = await supabase.from("watchlist").insert({
+        user_id: user.id,
+        symbol: result.symbol,
+        name: result.symbol,
+        type: assetType,
+      });
+
+      if (error) {
+        toast({ title: "Error saving", description: error.message, variant: "destructive" });
+      } else {
+        // Verify it was saved
+        const { data: verify } = await supabase
+          .from("watchlist")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("symbol", result.symbol)
+          .maybeSingle();
+
+        if (verify) {
+          setWatchlistSaved(true);
+          toast({ title: "Added to watchlist", description: `${result.symbol} is now on your watchlist.` });
+        } else {
+          toast({ title: "Save failed", description: "Could not verify the item was saved. Please try again.", variant: "destructive" });
+        }
+      }
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message || "Failed to save", variant: "destructive" });
+    }
+    setWatchlistSaving(false);
   };
 
   const filteredSymbols = searchSymbols(searchTerm, assetType);
@@ -350,8 +394,20 @@ const Analysis = () => {
                 <SentimentPoll symbol={result.symbol} />
 
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1 text-xs gap-1.5" size="sm" onClick={addToWatchlist}>
-                    <Star className="h-3.5 w-3.5" /> Watchlist
+                  <Button
+                    variant={watchlistSaved ? "default" : "outline"}
+                    className="flex-1 text-xs gap-1.5"
+                    size="sm"
+                    onClick={addToWatchlist}
+                    disabled={watchlistSaving || watchlistSaved}
+                  >
+                    {watchlistSaving ? (
+                      <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving...</>
+                    ) : watchlistSaved ? (
+                      <><Star className="h-3.5 w-3.5 fill-current" /> Saved</>
+                    ) : (
+                      <><Star className="h-3.5 w-3.5" /> Watchlist</>
+                    )}
                   </Button>
                   <Button variant="outline" className="flex-1 text-xs gap-1.5" size="sm" onClick={() => setBrokerOpen(true)}>
                     <ExternalLink className="h-3.5 w-3.5" /> Execute
