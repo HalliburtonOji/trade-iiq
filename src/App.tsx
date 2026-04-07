@@ -18,6 +18,7 @@ import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import DemoTrading from "./pages/DemoTrading";
 import Community from "./pages/Community";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

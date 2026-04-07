@@ -394,8 +394,20 @@ const Analysis = () => {
                 <SentimentPoll symbol={result.symbol} />
 
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1 text-xs gap-1.5" size="sm" onClick={addToWatchlist}>
-                    <Star className="h-3.5 w-3.5" /> Watchlist
+                  <Button
+                    variant={watchlistSaved ? "default" : "outline"}
+                    className="flex-1 text-xs gap-1.5"
+                    size="sm"
+                    onClick={addToWatchlist}
+                    disabled={watchlistSaving || watchlistSaved}
+                  >
+                    {watchlistSaving ? (
+                      <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving...</>
+                    ) : watchlistSaved ? (
+                      <><Star className="h-3.5 w-3.5 fill-current" /> Saved</>
+                    ) : (
+                      <><Star className="h-3.5 w-3.5" /> Watchlist</>
+                    )}
                   </Button>
                   <Button variant="outline" className="flex-1 text-xs gap-1.5" size="sm" onClick={() => setBrokerOpen(true)}>
                     <ExternalLink className="h-3.5 w-3.5" /> Execute
