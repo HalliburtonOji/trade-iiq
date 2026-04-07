@@ -1,276 +1,143 @@
-# Unified Plan: Mobile Navigation Fix + Watchlist Fix + Profile Page + Market-Driven Next Add-On
 
-## What I found
 
-- **Mobile navigation issue:** `PageShell.tsx` shows only `BottomNav` on mobile, and `BottomNav.tsx` currently hardcodes just 5 items: Home, Analysis, Demo, Tracker, Learn. That is why the rest of the desktop routes are inaccessible on mobile.
-- **Watchlist issue:** the database now has the needed watchlist policies and a `(user_id, symbol)` uniqueness rule, so the remaining problem is likely the **client save flow** in `Analysis.tsx`. It uses a blind `upsert()` with no verification/refetch, so failures are hard to diagnose and success is not reflected reliably.
-- **Profile page:** there is currently **no `/profile` route/page**, but the backend already has useful profile fields (`display_name`, `trading_personality`, `preferred_broker`, `experience_level`, `preferred_assets`, `trading_goals`, `xp_total`, `streak_count`, `paper_balance`, `trading_level`).
-- **Market research direction:** based on current trading-product trends, the strongest demand is not “more indicators” first — it is **journaling + review + coaching + automation**. Traders want one place that connects learning, execution, psychology, and performance review.
+# Floating Nav Hub + Trader OS Features
 
-## Implementation plan
+## 1. Replace BottomNav with Floating Nav Hub
 
-### 1. Fix mobile navigation properly
+**Current state**: Two overlapping nav elements on mobile -- a bottom bar (Home, Analysis, Demo, Learn, More) and a floating chat bubble. Redundant.
 
-Replace the current 5-item-only mobile nav with a structure that keeps the app usable on small screens.
+**Change**: Remove `BottomNav` entirely. Refactor `AIChatbot.tsx` into a unified floating hub with a hamburger icon (`Menu` / three-dash). When tapped, it opens a bottom sheet with two tabs:
 
-**Build**
+- **Navigate tab**: Grid of ALL routes (Home, Analysis, Demo Trading, Learn, Charts, Screener, Daily Picks, Tracker, Portfolio, Insights, Community, Profile) + Sign Out. Active route highlighted.
+- **AI Coach tab**: The existing streaming chatbot, unchanged.
 
-- Keep a compact bottom bar with the most-used tabs:
-  - Home
-  - Analysis
-  - Demo Trading
-  - Learn
-  - More
-- Add a **More** sheet/drawer that exposes all remaining routes:
-  - Charts
-  - Screener
-  - Daily Picks
-  - Tracker
-  - Portfolio
-  - Insights
-  - Community
-  - Profile
-  - Sign Out
-- Mirror desktop information architecture so users do not feel like mobile is a different app.
-- Highlight the active route in both bottom bar and More sheet.
-- Make Profile accessible from mobile without hunting through hidden UI.
+**Files**:
+- `src/components/AIChatbot.tsx` -- full rewrite into `FloatingHub.tsx` (or rename in place). Hamburger icon FAB, Sheet with tabs for Nav + Chat.
+- `src/components/BottomNav.tsx` -- delete
+- `src/components/PageShell.tsx` -- remove BottomNav import/render on mobile; remove `pb-20` since no bottom bar. Keep SideNav for desktop.
+- `src/App.tsx` -- update import if component is renamed
 
-**Why this approach**
-
-- 10+ icons in a bottom bar is poor mobile UX.
-- A “More” drawer is the cleanest way to expose all routes without crowding.
+**UX**: FAB sits bottom-right. On mobile, no bottom bar at all -- just the floating button. Desktop keeps SideNav + floating button (chat only, no nav grid needed on desktop since SideNav exists).
 
 ---
 
-### 2. Fix watchlist saving end-to-end
+## 2. Database Migration -- New Tables
 
-Make watchlist saving deterministic instead of relying on a fragile blind upsert path.
+Three new tables needed for the Trader OS features:
 
-**Build**
+**`playbooks`** -- stores repeatable setup templates
+- `id`, `user_id`, `name`, `strategy_type` (breakout/pullback/mean-reversion/custom), `checklist` (jsonb array), `conditions` (jsonb), `invalidation_rules` (text), `example_screenshots` (text[] -- storage URLs), `notes`, `created_at`, `updated_at`
+- RLS: user owns their playbooks (SELECT/INSERT/UPDATE/DELETE)
 
-- In `Analysis.tsx`, replace the current watchlist save with:
-  1. normalize symbol
-  2. check if it already exists for the logged-in user
-  3. if missing → insert
-  4. if existing → show “Already saved” or update metadata deliberately
-- Add explicit loading state on the button:
-  - `Add to Watchlist`
-  - `Saving...`
-  - `Saved`
-- After success:
-  - refresh local watchlist state
-  - optionally dispatch a lightweight refresh event so dashboard/ticker/watchlist widgets update immediately
-- Improve error handling:
-  - show exact backend error if insert fails
-  - block action if user/session/result is missing
-- Add a quick verification query after save so the UI only shows success when the row actually exists.
+**`screenshot_vault`** -- pre/post trade chart screenshots with annotations
+- `id`, `user_id`, `trade_id` (nullable ref to paper_trades), `symbol`, `image_url`, `annotation` (text), `phase` (pre_trade/post_trade/general), `tags` (text[]), `created_at`
+- RLS: user owns their screenshots
 
-**Likely root cause addressed**
+**`accountability_streaks`** -- tracks review streaks and accountability
+- `id`, `user_id`, `current_streak`, `longest_streak`, `last_review_date`, `pending_reviews` (integer), `updated_at`
+- RLS: user owns their streak data
 
-- The schema is now ready, so the remaining failure is most likely the client flow not confirming save state and not handling duplicates clearly.
+No new tables needed for Review Workspace or Weekly Coaching -- those are computed views over existing `paper_trades`, `decision_reviews`, `trade_decisions`, and `trading_dna` tables, plus the existing `weekly-digest` edge function.
 
 ---
 
-### 3. Add a full Profile page
+## 3. Playbook Builder
 
-Create a dedicated profile/settings area using the data already stored in the app.
+New page component at `/playbook` (or section within Demo Trading / Tracker).
 
-**Profile page sections**
+**Features**:
+- Create/edit/delete playbooks
+- Each playbook has: name, strategy type selector, checklist items (add/remove/reorder), entry/exit conditions (text fields), invalidation rules, notes
+- Attach example screenshots from Screenshot Vault
+- When opening a new paper trade in Demo Trading, user can select a playbook to pre-fill thesis
 
-1. **Profile header**
-  - avatar from auth metadata
-  - display name
-  - email (read-only)
-  - experience level
-  - trading level badge
-2. **Learning & trading progress**
-  - XP total
-  - streak count
-  - completed lessons
-  - completed drills
-  - paper balance
-  - total paper trades / win rate snapshot
-3. **Preferences**
-  - trading personality
-  - preferred broker
-  - preferred assets
-  - trading goals
-4. **Account & app controls**
-  - onboarding preferences edit
-  - reset paper balance action
-  - sign out
-  - future placeholder for notification preferences / privacy settings
-
-**Build**
-
-- Add route: `/profile`
-- Add page file: `src/pages/Profile.tsx`
-- Add navigation entry:
-  - desktop sidebar
-  - mobile More sheet
-- Reuse existing components where possible:
-  - `PersonalitySelector`
-  - existing stat/glass card patterns
-- Fetch from:
-  - `profiles`
-  - `learning_progress`
-  - `practice_progress`
-  - `paper_trades`
+**Files**:
+- `src/pages/Playbook.tsx` (new) -- list view + create/edit form
+- `src/components/playbook/PlaybookCard.tsx` -- display card
+- `src/components/playbook/PlaybookForm.tsx` -- create/edit form with checklist builder
+- Add route in `App.tsx`, add to nav items
 
 ---
 
-### 4. Unify profile + mobile nav + watchlist UX
+## 4. Screenshot Vault
 
-These should feel connected, not like isolated fixes.
+**Features**:
+- Upload chart screenshots (pre-trade / post-trade) to existing `chart_screenshots` storage bucket
+- Add text annotations and tags
+- Link to a specific paper trade (optional)
+- Gallery view with filter by symbol, phase, tags
+- View screenshot with overlay annotation
 
-**Build**
-
-- Add a watchlist summary card to Profile:
-  - recent saved symbols
-  - count by asset type
-- Add “Go to Analysis” and “Manage Watchlist” actions from Profile
-- Make the dashboard/profile/watchlist states refresh from the same save events so users see changes instantly
-- Ensure the same nav labels/icons are used across desktop and mobile
-
----
-
-## Market research: what traders need most next
-
-## Research summary
-
-Across modern trading apps, journals, and simulator products, the strongest recurring needs are:
-
-1. **Less manual logging**
-  - traders hate entering trade data repeatedly
-  - manual journaling kills consistency
-2. **Performance review that leads to action**
-  - not just P&L charts
-  - users want mistake patterns, best setups, weak sessions, emotional leaks
-3. **Psychology + behavior tracking**
-  - emotions, impulsive trades, revenge trades, over-sizing
-  - this is increasingly treated as core, not optional
-4. **Learning tied to actual trades**
-  - users want lessons that react to what they did wrong
-  - “academy” and “simulator” work best when linked
-5. **Playbooks and repeatable setups**
-  - advanced traders want setup libraries, tags, screenshots, checklists
-  - beginners want guided templates
-
-## Best next big add-on: Trade Journal + Playbook + Review Hub
-
-The strongest next major feature for this product is a **unified trader operating system** layer, not another isolated tool.
-
-### Recommended product concept
-
-**AI Review Hub / Trader OS**
-
-### Why this is the best next move
-
-Your app already has:
-
-- analysis
-- demo trading
-- learning
-- tracker
-- insights
-- community
-
-What it still lacks is the **system that turns activity into improvement**.
-
-That means a next add-on focused on:
-
-- trade capture
-- screenshots
-- tags/setups
-- post-trade review
-- weekly coaching
-- mistake clustering
-- playbook building
-
-### Suggested feature set
-
-1. **Auto Journal**
-  - CSV import first
-  - later broker sync
-  - auto-fill symbol, side, entry, exit, P&L
-2. **Playbook Builder**
-  - save setups like breakout, pullback, mean reversion
-  - attach checklist, ideal conditions, invalidation, examples
-3. **Screenshot Vault**
-  - pre-trade and post-trade chart screenshots
-  - annotate what the trader saw vs what happened
-4. **Review Workspace**
-  - best/worst setup reports
-  - mistake tags
-  - win rate by setup / session / asset type
-  - emotional pattern breakdown
-5. **Weekly Coaching Report**
-  - “what improved”
-  - “what is leaking money”
-  - “one rule for next week”
-  - lesson recommendations linked to actual mistakes
-6. **Accountability Loop**
-  - review streaks
-  - “3 trades pending review”
-  - mission system tied to real behavior
-
-### Why this beats other add-ons right now
-
-- Higher retention than adding more discovery tools
-- Better monetization potential than a pure social feature
-- Strong fit with your existing lesson/demo/analysis stack
-- Creates a daily habit loop
+**Files**:
+- `src/pages/ScreenshotVault.tsx` (new) or section within existing pages
+- `src/components/vault/ScreenshotUpload.tsx` -- upload + annotate form
+- `src/components/vault/ScreenshotGallery.tsx` -- filterable grid
+- Add route, add to nav
 
 ---
 
-## Technical details
+## 5. Review Workspace
 
-### Files likely affected
+Computed dashboard pulling from existing tables -- no new backend tables needed.
 
-- `src/components/BottomNav.tsx`
-- `src/components/PageShell.tsx`
-- `src/components/SideNav.tsx`
-- `src/App.tsx`
-- `src/pages/Analysis.tsx`
-- `src/pages/Profile.tsx` (new)
-- optional new mobile nav helper:
-  - `src/components/MobileMoreNav.tsx`
-- optional profile subcomponents:
-  - `src/components/profile/ProfileHeader.tsx`
-  - `src/components/profile/ProfileProgress.tsx`
-  - `src/components/profile/ProfilePreferences.tsx`
-  - `src/components/profile/ProfileWatchlist.tsx`
+**Features**:
+- Best/worst setup reports (aggregate `paper_trades` by `thesis_json.strategy`)
+- Mistake tags breakdown (from `decision_reviews.mistake_type`)
+- Win rate by: setup type, session time, asset type
+- Emotional pattern breakdown (from `paper_trades.emotion` + `decision_reviews.emotion`)
+- "Trades pending review" counter -- paper trades with no matching decision_review
 
-### Data sources
+**Files**:
+- `src/pages/ReviewWorkspace.tsx` (new)
+- `src/components/review/SetupReport.tsx`
+- `src/components/review/MistakeBreakdown.tsx`
+- `src/components/review/EmotionalPatterns.tsx`
+- `src/components/review/PendingReviews.tsx`
+- Add route, add to nav
 
-- `profiles`
-- `watchlist`
-- `learning_progress`
-- `practice_progress`
-- `paper_trades`
+---
 
-### No risky backend redesign needed
+## 6. Weekly Coaching Report
 
-- Mobile nav and profile page are frontend additions
-- Watchlist fix should be solvable mainly in frontend logic
-- Existing profile schema already supports a useful first version
+Extend the existing `weekly-digest` edge function output. Add a new page/component to display it.
 
-## Recommended build order
+**Features**:
+- "What improved this week" (compare current vs previous week stats)
+- "What's leaking money" (top mistake types, worst setups)
+- "One rule for next week" (AI-generated from digest data)
+- Lesson recommendations linked to actual mistakes
+- The existing edge function already generates `ai_focus` -- extend the prompt to produce structured coaching sections
 
-1. Rework mobile navigation with a More drawer
-2. Add `/profile` route and page
-3. Fix watchlist save flow with explicit insert/check/refresh logic
-4. Wire profile/watchlist/dashboard refresh behavior together
-5. After that, start the next major add-on:
-  - Auto Journal + Playbook + Review Hub
+**Files**:
+- `src/components/review/WeeklyCoachingReport.tsx` (new) -- fetches from `weekly-digest` edge function, renders structured report
+- `supabase/functions/weekly-digest/index.ts` -- extend AI prompt to return structured coaching JSON (what_improved, money_leak, next_rule, recommended_lessons)
+- Surface in Review Workspace or as standalone tab
 
-## Expected outcome
+---
 
-After this build:
+## 7. Accountability Loop
 
-- mobile users can access the full app
-- watchlist saving becomes reliable and visibly confirmed
-- users get a proper profile/settings area
-- the product gets a clearer roadmap toward a differentiated, high-retention trader platform centered on review, discipline, and improvement  
-  
-implement all with new features too
+**Features**:
+- Review streak tracking (consecutive days with at least one trade review)
+- "X trades pending review" badge/notification
+- Mission system tied to real behavior: "Review 3 trades", "Write 1 post-mortem", "Update your playbook"
+- Streak display on Profile page and Review Workspace
+
+**Files**:
+- `src/components/review/AccountabilityWidget.tsx` -- streak display, pending count, missions
+- Integrate into Profile page and Review Workspace
+- Update `DailyMissions` data to include review-based missions
+
+---
+
+## Build Order
+
+1. **Floating Nav Hub** -- refactor AIChatbot into nav+chat hub, delete BottomNav, update PageShell
+2. **Database migration** -- create `playbooks`, `screenshot_vault`, `accountability_streaks` tables with RLS
+3. **Playbook Builder** -- page + components
+4. **Screenshot Vault** -- page + upload + gallery
+5. **Review Workspace** -- computed dashboard from existing data
+6. **Weekly Coaching Report** -- extend edge function + display component
+7. **Accountability Loop** -- streak tracking + review missions
+8. **Wire into nav** -- add all new routes to floating hub nav grid and desktop SideNav
+
