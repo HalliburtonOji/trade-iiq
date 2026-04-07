@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      accountability_streaks: {
+        Row: {
+          current_streak: number
+          id: string
+          last_review_date: string | null
+          longest_streak: number
+          pending_reviews: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_streak?: number
+          id?: string
+          last_review_date?: string | null
+          longest_streak?: number
+          pending_reviews?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_streak?: number
+          id?: string
+          last_review_date?: string | null
+          longest_streak?: number
+          pending_reviews?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       analysis_cache: {
         Row: {
           asset_type: string
@@ -396,6 +426,48 @@ export type Database = {
         }
         Relationships: []
       }
+      playbooks: {
+        Row: {
+          checklist: Json
+          conditions: Json
+          created_at: string
+          example_screenshots: string[] | null
+          id: string
+          invalidation_rules: string | null
+          name: string
+          notes: string | null
+          strategy_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          checklist?: Json
+          conditions?: Json
+          created_at?: string
+          example_screenshots?: string[] | null
+          id?: string
+          invalidation_rules?: string | null
+          name: string
+          notes?: string | null
+          strategy_type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          checklist?: Json
+          conditions?: Json
+          created_at?: string
+          example_screenshots?: string[] | null
+          id?: string
+          invalidation_rules?: string | null
+          name?: string
+          notes?: string | null
+          strategy_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       practice_progress: {
         Row: {
           attempt_count: number
@@ -566,6 +638,50 @@ export type Database = {
           weak_tags?: string[] | null
         }
         Relationships: []
+      }
+      screenshot_vault: {
+        Row: {
+          annotation: string | null
+          created_at: string
+          id: string
+          image_url: string
+          phase: string
+          symbol: string
+          tags: string[] | null
+          trade_id: string | null
+          user_id: string
+        }
+        Insert: {
+          annotation?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          phase?: string
+          symbol?: string
+          tags?: string[] | null
+          trade_id?: string | null
+          user_id: string
+        }
+        Update: {
+          annotation?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          phase?: string
+          symbol?: string
+          tags?: string[] | null
+          trade_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screenshot_vault_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "paper_trades"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trade_decisions: {
         Row: {

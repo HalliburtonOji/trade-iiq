@@ -67,6 +67,9 @@ const AppContent = () => {
         <Route path="/demo-trading" element={<ProtectedRoute><DemoTrading /></ProtectedRoute>} />
         <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/playbook" element={<ProtectedRoute><Playbook /></ProtectedRoute>} />
+        <Route path="/screenshots" element={<ProtectedRoute><ScreenshotVault /></ProtectedRoute>} />
+        <Route path="/review" element={<ProtectedRoute><ReviewWorkspace /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {user && <FloatingHub />}
