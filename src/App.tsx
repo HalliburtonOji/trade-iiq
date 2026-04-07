@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import AIChatbot from "@/components/AIChatbot";
+import FloatingHub from "@/components/FloatingHub";
 import Index from "./pages/Index";
 import Analysis from "./pages/Analysis";
 import Charts from "./pages/Charts";

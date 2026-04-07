@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import BottomNav from "./BottomNav";
 import SideNav from "./SideNav";
 
 interface PageShellProps {
@@ -25,9 +24,8 @@ const PageShell = ({ children }: PageShellProps) => {
 
   if (isMobile) {
     return (
-      <div className="mx-auto min-h-screen max-w-[480px] pb-20">
+      <div className="mx-auto min-h-screen max-w-[480px] pb-4">
         {children}
-        <BottomNav />
       </div>
     );
   }
