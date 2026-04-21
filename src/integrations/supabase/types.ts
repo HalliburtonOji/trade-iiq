@@ -639,6 +639,33 @@ export type Database = {
         }
         Relationships: []
       }
+      recommended_lessons: {
+        Row: {
+          created_at: string
+          dismissed_at: string | null
+          id: string
+          lesson_id: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dismissed_at?: string | null
+          id?: string
+          lesson_id: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dismissed_at?: string | null
+          id?: string
+          lesson_id?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       screenshot_vault: {
         Row: {
           annotation: string | null
