@@ -1,5 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Sun, Moon } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 type StoaShellProps = {
   children: React.ReactNode;
@@ -57,6 +59,7 @@ export default function StoaShell({
   rightBar,
 }: StoaShellProps) {
   const loc = useLocation();
+  const { theme, toggleTheme } = useTheme();
   const paletteClass = palette === "pompeii" ? "stoa-pompeii" : "";
 
   return (
@@ -175,6 +178,27 @@ export default function StoaShell({
             {crumb || "Stoa"}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={theme === "cream" ? "Switch to dark theme" : "Switch to cream theme"}
+              title={theme === "cream" ? "Switch to dark theme" : "Switch to cream theme"}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                border: "1px solid var(--stoa-rule)",
+                background: "var(--stoa-shine)",
+                color: "var(--stoa-ink)",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "background 0.15s ease, border-color 0.15s ease",
+              }}
+            >
+              {theme === "cream" ? <Moon size={15} /> : <Sun size={15} />}
+            </button>
             {rightBar}
           </div>
         </header>
