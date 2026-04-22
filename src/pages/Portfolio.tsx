@@ -153,80 +153,187 @@ const Portfolio = () => {
     >
       <div className="flex flex-col gap-2 mb-2 min-w-0 max-w-full overflow-hidden">
         <PedimentCap variant="rule" />
-        <span className="stoa-kicker">TRAINING · THE TREASURY</span>
+        <span className="stoa-kicker">ATHENAION · THE GYMNASIUM</span>
         <div className="flex items-baseline gap-3">
           <h1 className="stoa-display text-3xl font-semibold">Portfolio</h1>
           <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Θησαυρός</span>
         </div>
-        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>thy paper coin</p>
+        <p style={{ fontFamily: "Georgia, 'EB Garamond', serif", fontStyle: "italic", fontSize: 13, color: "var(--stoa-muted)" }}>
+          rehearse each decision before capital flows
+        </p>
       </div>
       <div className="flex flex-col gap-4 px-4 pt-6 pb-24">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">Portfolio</h1>
-          <Button variant="outline" size="sm" onClick={exportJournal} disabled={exporting} className="gap-1.5 text-xs">
+        {/* ---------- Export bar ---------- */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "10px 0",
+            borderTop: "1px solid var(--stoa-rule)",
+            borderBottom: "1px solid var(--stoa-rule)",
+          }}
+        >
+          <span className="stoa-kicker">EXPORT</span>
+          <button
+            onClick={exportJournal}
+            disabled={exporting}
+            className="stoa-display"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 14px",
+              fontSize: 12,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "var(--stoa-ink)",
+              background: "transparent",
+              border: "1px solid var(--stoa-rule)",
+              borderRadius: 2,
+              cursor: exporting ? "not-allowed" : "pointer",
+              opacity: exporting ? 0.5 : 1,
+            }}
+          >
             <Download className="h-3.5 w-3.5" />
-            Export Journal
-          </Button>
+            Export journal · Πίναξ
+          </button>
         </div>
 
-        <GlassCard className="flex items-center gap-4">
+        {/* ---------- Portfolio Health ---------- */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            padding: 16,
+            background: "var(--stoa-shine)",
+            border: "1px solid var(--stoa-rule)",
+            borderRadius: 2,
+          }}
+        >
           <SetupScoreMeter score={healthScore} size="lg" />
-          <div>
-            <p className="text-sm font-semibold">Portfolio Health</p>
-            <p className="text-xs text-muted-foreground">Based on win rate, activity & diversification</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <span className="stoa-kicker">PORTFOLIO HEALTH · Ὑγίεια</span>
+            <p style={{ margin: 0, fontFamily: "Georgia, 'EB Garamond', serif", fontStyle: "italic", fontSize: 12, color: "var(--stoa-muted)" }}>
+              measured by win rate, activity, and diversification
+            </p>
           </div>
-        </GlassCard>
+        </div>
 
-        <div className="grid grid-cols-4 gap-2">
-          <StatCard label="Win Rate" value={`${stats.winRate}%`} trend={stats.winRate >= 50 ? "up" : stats.total > 0 ? "down" : "neutral"} />
-          <StatCard label="Decisions" value={stats.total} />
-          <StatCard label="Avg P&L" value={stats.avgPnl ? `${stats.avgPnl}%` : "—"} trend={stats.avgPnl > 0 ? "up" : stats.avgPnl < 0 ? "down" : "neutral"} />
-          <StatCard label="Pending" value={stats.pending} />
+        {/* ---------- Vitals strip ---------- */}
+        <div
+          style={{
+            padding: 12,
+            background: "var(--stoa-shine)",
+            border: "1px solid var(--stoa-rule)",
+            borderRadius: 2,
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+          }}
+        >
+          <span className="stoa-kicker">VITALS · Σῆμα</span>
+          <div className="grid grid-cols-4 gap-2">
+            <StatCard label="Win Rate" value={`${stats.winRate}%`} trend={stats.winRate >= 50 ? "up" : stats.total > 0 ? "down" : "neutral"} />
+            <StatCard label="Decisions" value={stats.total} />
+            <StatCard label="Avg P&L" value={stats.avgPnl ? `${stats.avgPnl}%` : "—"} trend={stats.avgPnl > 0 ? "up" : stats.avgPnl < 0 ? "down" : "neutral"} />
+            <StatCard label="Pending" value={stats.pending} />
+          </div>
         </div>
 
         <Tabs defaultValue="overview">
-          <TabsList className="w-full bg-secondary/50">
-            <TabsTrigger value="overview" className="flex-1 text-xs">Overview</TabsTrigger>
-            <TabsTrigger value="paper" className="flex-1 text-xs">Paper Trade</TabsTrigger>
-            <TabsTrigger value="personality" className="flex-1 text-xs">Personality</TabsTrigger>
+          <TabsList
+            className="grid grid-cols-3 w-full bg-transparent rounded-none p-0 h-auto"
+            style={{ borderBottom: "1px solid var(--stoa-rule)" }}
+          >
+            {[
+              { v: "overview", en: "Overview", gr: "Σύνοψις" },
+              { v: "paper", en: "Paper Trade", gr: "Γυμνάσιον" },
+              { v: "personality", en: "Personality", gr: "Ἦθος" },
+            ].map((t) => (
+              <TabsTrigger
+                key={t.v}
+                value={t.v}
+                className="flex flex-col gap-0.5 py-2 rounded-none border-b-[2px] border-transparent bg-transparent text-[color:var(--stoa-muted)] data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                style={{ marginBottom: -1 }}
+              >
+                <span className="stoa-display" style={{ fontSize: 13, letterSpacing: "0.06em" }}>{t.en}</span>
+                <span className="stoa-greek" style={{ fontSize: 10, color: "var(--stoa-muted)" }}>{t.gr}</span>
+              </TabsTrigger>
+            ))}
           </TabsList>
 
           <TabsContent value="overview" className="mt-3 flex flex-col gap-3">
+            {/* a) Wins / Losses / Pending */}
             <div className="grid grid-cols-3 gap-2">
-              <GlassCard className="text-center py-3">
-                <p className="text-lg font-bold text-verdict-buy">{stats.wins}</p>
-                <p className="text-[10px] text-muted-foreground">Wins</p>
-              </GlassCard>
-              <GlassCard className="text-center py-3">
-                <p className="text-lg font-bold text-verdict-avoid">{stats.losses}</p>
-                <p className="text-[10px] text-muted-foreground">Losses</p>
-              </GlassCard>
-              <GlassCard className="text-center py-3">
-                <p className="text-lg font-bold text-muted-foreground">{stats.pending}</p>
-                <p className="text-[10px] text-muted-foreground">Pending</p>
-              </GlassCard>
+              {[
+                { kicker: "WINS · Νίκαι", value: stats.wins, color: "hsl(var(--verdict-buy))" },
+                { kicker: "LOSSES · Ἧτται", value: stats.losses, color: "hsl(var(--verdict-avoid))" },
+                { kicker: "PENDING · Ἐκκρεμῆ", value: stats.pending, color: "var(--stoa-muted)" },
+              ].map((c) => (
+                <div
+                  key={c.kicker}
+                  style={{
+                    padding: "14px 8px",
+                    textAlign: "center",
+                    background: "var(--stoa-shine)",
+                    border: "1px solid var(--stoa-rule)",
+                    borderRadius: 2,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 6,
+                    alignItems: "center",
+                  }}
+                >
+                  <span className="stoa-kicker" style={{ fontSize: 9 }}>{c.kicker}</span>
+                  <span className="stoa-mono" style={{ fontSize: 24, fontWeight: 600, color: c.color, lineHeight: 1 }}>
+                    {c.value}
+                  </span>
+                </div>
+              ))}
             </div>
 
-            {/* P&L Summary */}
-            <GlassCard>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">P&L Summary</h3>
+            {/* b) P&L Summary */}
+            <div
+              style={{
+                padding: 16,
+                background: "var(--stoa-shine)",
+                border: "1px solid var(--stoa-rule)",
+                borderRadius: 2,
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+              }}
+            >
+              <span className="stoa-kicker">PROFIT &amp; LOSS · Κέρδος</span>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <p className="text-[10px] text-muted-foreground">Avg P&L per Trade</p>
-                  <p className={`text-sm font-bold font-mono ${stats.avgPnl > 0 ? "text-verdict-buy" : stats.avgPnl < 0 ? "text-verdict-avoid" : "text-foreground"}`}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <span className="stoa-kicker" style={{ fontSize: 9 }}>Avg P&amp;L per trade</span>
+                  <span
+                    className="stoa-mono"
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 600,
+                      color:
+                        stats.avgPnl > 0 ? "hsl(var(--verdict-buy))"
+                        : stats.avgPnl < 0 ? "hsl(var(--verdict-avoid))"
+                        : "var(--stoa-ink)",
+                    }}
+                  >
                     {stats.avgPnl > 0 ? "+" : ""}{stats.avgPnl}%
-                  </p>
+                  </span>
                 </div>
-                <div>
-                  <p className="text-[10px] text-muted-foreground">Profit Factor</p>
-                  <p className="text-sm font-bold font-mono text-foreground">
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <span className="stoa-kicker" style={{ fontSize: 9 }}>Profit factor</span>
+                  <span className="stoa-mono" style={{ fontSize: 18, fontWeight: 600, color: "var(--stoa-ink)" }}>
                     {stats.losses > 0 ? (stats.wins / stats.losses).toFixed(1) : stats.wins > 0 ? "∞" : "—"}
-                  </p>
+                  </span>
                 </div>
               </div>
-            </GlassCard>
+            </div>
 
-            {/* P&L Sparkline */}
+            {/* c) P&L Curve */}
             {pnlSparkline.length >= 2 && (() => {
               const now = new Date();
               const cutoff = sparkRange === "7D" ? new Date(now.getTime() - 7 * 86400000)
@@ -239,16 +346,32 @@ const Portfolio = () => {
               const periodChange = Math.round((lastVal - firstVal) * 10) / 10;
               const isUp = lastVal >= 0;
               const trendLabel = periodChange > 1 ? "Uptrend" : periodChange < -1 ? "Deteriorating" : "Flat";
-              // Best / worst
               const best = displayData.reduce((b, d) => d.pnl > b.pnl ? d : b, displayData[0]);
               const worst = displayData.reduce((w, d) => d.pnl < w.pnl ? d : w, displayData[0]);
               return (
-                <GlassCard>
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">P&L Curve</h3>
-                    <ToggleGroup type="single" value={sparkRange} onValueChange={(v) => v && setSparkRange(v as any)} className="gap-0">
+                <div
+                  style={{
+                    padding: 16,
+                    background: "var(--stoa-shine)",
+                    border: "1px solid var(--stoa-rule)",
+                    borderRadius: 2,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span className="stoa-kicker">P&amp;L CURVE · Καμπύλη</span>
+                    <ToggleGroup type="single" value={sparkRange} onValueChange={(v) => v && setSparkRange(v as any)} className="gap-1">
                       {(["7D", "30D", "90D"] as const).map(r => (
-                        <ToggleGroupItem key={r} value={r} className="text-[9px] h-5 px-1.5 data-[state=on]:bg-primary/20 data-[state=on]:text-primary">{r}</ToggleGroupItem>
+                        <ToggleGroupItem
+                          key={r}
+                          value={r}
+                          className="stoa-mono h-6 px-2 rounded-none bg-transparent text-[color:var(--stoa-muted)] data-[state=on]:text-[color:var(--stoa-accent)] data-[state=on]:border-[color:var(--stoa-accent)] data-[state=on]:bg-transparent"
+                          style={{ fontSize: 10, border: "1px solid var(--stoa-rule)" }}
+                        >
+                          {r}
+                        </ToggleGroupItem>
                       ))}
                     </ToggleGroup>
                   </div>
@@ -257,37 +380,81 @@ const Portfolio = () => {
                       <RechartsTooltip
                         content={({ active, payload }) => {
                           if (!active || !payload?.length) return null;
+                          const v = payload[0].value as number;
                           return (
-                            <div className="glass-card px-2 py-1 text-[10px] font-mono">
-                              P&L: <span className={payload[0].value as number >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}>{payload[0].value as number > 0 ? "+" : ""}{(payload[0].value as number).toFixed(1)}%</span>
+                            <div
+                              className="stoa-mono"
+                              style={{
+                                padding: "4px 8px",
+                                fontSize: 10,
+                                background: "var(--stoa-shine)",
+                                border: "1px solid var(--stoa-rule)",
+                                borderRadius: 2,
+                                color: "var(--stoa-ink)",
+                              }}
+                            >
+                              P&amp;L:{" "}
+                              <span style={{ color: v >= 0 ? "hsl(var(--verdict-buy))" : "hsl(var(--verdict-avoid))" }}>
+                                {v > 0 ? "+" : ""}{v.toFixed(1)}%
+                              </span>
                             </div>
                           );
                         }}
                       />
-                      <Line type="monotone" dataKey="pnl" stroke={isUp ? "hsl(142, 71%, 45%)" : "hsl(0, 72%, 51%)"} strokeWidth={2} dot={false} />
+                      <Line
+                        type="monotone"
+                        dataKey="pnl"
+                        stroke={isUp ? "var(--stoa-accent)" : "hsl(var(--verdict-avoid))"}
+                        strokeWidth={2}
+                        dot={false}
+                      />
                     </LineChart>
                   </ResponsiveContainer>
-                  <div className="flex items-center justify-between mt-1">
-                    <div className="flex items-center gap-1">
-                      {periodChange >= 0 ? <ChevronUp className="h-3 w-3 text-verdict-buy" /> : <ChevronDown className="h-3 w-3 text-verdict-avoid" />}
-                      <span className={`text-[10px] font-mono font-bold ${periodChange >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      {periodChange >= 0
+                        ? <ChevronUp className="h-3 w-3" style={{ color: "var(--stoa-accent)" }} />
+                        : <ChevronDown className="h-3 w-3" style={{ color: "hsl(var(--verdict-avoid))" }} />}
+                      <span
+                        className="stoa-mono"
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: periodChange >= 0 ? "var(--stoa-accent)" : "hsl(var(--verdict-avoid))",
+                        }}
+                      >
                         {periodChange > 0 ? "+" : ""}{periodChange}%
                       </span>
-                      <span className="text-[9px] text-muted-foreground ml-1">{trendLabel}</span>
+                      <span className="stoa-kicker" style={{ fontSize: 9, marginLeft: 4 }}>{trendLabel}</span>
                     </div>
-                    <div className="flex gap-2 text-[9px] text-muted-foreground">
-                      <span>Best: <span className="text-verdict-buy font-mono">+{best.pnl}%</span></span>
-                      <span>Worst: <span className="text-verdict-avoid font-mono">{worst.pnl}%</span></span>
+                    <div style={{ display: "flex", gap: 10 }}>
+                      <span className="stoa-kicker" style={{ fontSize: 9 }}>
+                        Best <span className="stoa-mono" style={{ color: "hsl(var(--verdict-buy))", marginLeft: 2 }}>+{best.pnl}%</span>
+                      </span>
+                      <span className="stoa-kicker" style={{ fontSize: 9 }}>
+                        Worst <span className="stoa-mono" style={{ color: "hsl(var(--verdict-avoid))", marginLeft: 2 }}>{worst.pnl}%</span>
+                      </span>
                     </div>
                   </div>
-                </GlassCard>
+                </div>
               );
             })()}
 
+            {/* d) Empty state */}
             {stats.total === 0 && (
-              <GlassCard className="text-center py-6">
-                <p className="text-sm text-muted-foreground">Log decisions in the Tracker to see portfolio insights</p>
-              </GlassCard>
+              <div
+                style={{
+                  padding: "20px 16px",
+                  background: "var(--stoa-shine)",
+                  border: "1px solid var(--stoa-rule)",
+                  borderRadius: 2,
+                  textAlign: "center",
+                }}
+              >
+                <p style={{ margin: 0, fontFamily: "Georgia, 'EB Garamond', serif", fontStyle: "italic", fontSize: 13, color: "var(--stoa-muted)" }}>
+                  Log decisions in the Tracker to populate the Gymnasium
+                </p>
+              </div>
             )}
           </TabsContent>
 
