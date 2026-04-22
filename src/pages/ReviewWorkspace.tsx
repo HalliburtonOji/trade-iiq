@@ -104,7 +104,7 @@ const ReviewWorkspace = () => {
 
   return (
     <StoaShell palette="delphi" crumb={stoaCrumb}>
-      <div className="flex flex-col gap-2 mb-4">
+      <div className="flex flex-col gap-2 mb-4 min-w-0 max-w-full overflow-hidden">
         <PedimentCap variant="rule" />
         <span className="stoa-kicker">GROW · THE AMPHITHEATER</span>
         <div className="flex items-baseline gap-3">

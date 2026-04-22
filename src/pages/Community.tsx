@@ -79,7 +79,7 @@ const Community = () => {
         </span>
       }
     >
-      <div className="flex flex-col gap-2 mb-2">
+      <div className="flex flex-col gap-2 mb-2 min-w-0 max-w-full overflow-hidden">
         <PedimentCap variant="rule" />
         <span className="stoa-kicker">GROW · THE PORCH</span>
         <div className="flex items-baseline gap-3">
