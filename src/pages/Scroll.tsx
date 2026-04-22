@@ -92,7 +92,7 @@ const Scroll = () => {
 
       if (cancelled) return;
 
-      let ent = (entryRes.data as JournalEntry | null) ?? null;
+      let ent = (entryRes.data as unknown as JournalEntry | null) ?? null;
       if (!ent) {
         const seed = {
           user_id: user.id,
@@ -111,7 +111,7 @@ const Scroll = () => {
           .insert(seed)
           .select()
           .single();
-        if (!ins.error) ent = ins.data as JournalEntry;
+        if (!ins.error) ent = ins.data as unknown as JournalEntry;
       }
       setEntry(ent);
       setTrades((tradesRes.data ?? []) as Trade[]);
@@ -165,7 +165,7 @@ const Scroll = () => {
     setEntry({ ...entry, reflections: next });
     await supabase
       .from("journal_entries")
-      .update({ reflections: next })
+      .update({ reflections: next as unknown as never })
       .eq("id", entry.id);
   };
 
@@ -175,7 +175,7 @@ const Scroll = () => {
     setEntry({ ...entry, reflections: next });
     await supabase
       .from("journal_entries")
-      .update({ reflections: next })
+      .update({ reflections: next as unknown as never })
       .eq("id", entry.id);
   };
 

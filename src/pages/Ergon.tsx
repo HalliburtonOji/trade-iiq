@@ -38,7 +38,7 @@ const Ergon = () => {
     (async () => {
       const { data } = await supabase.from("user_preferences").select("*").eq("user_id", user.id).maybeSingle();
       if (data) {
-        const d = data as Partial<Prefs>;
+        const d = data as unknown as Partial<Prefs>;
         setPrefs({
           identity: { ...DEFAULT_PREFS.identity, ...(d.identity ?? {}) },
           oracle: { ...DEFAULT_PREFS.oracle, ...(d.oracle ?? {}) },
