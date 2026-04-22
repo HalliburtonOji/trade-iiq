@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:wght@400;500&family=Inter:wght@500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,6 +6,17 @@
 
 @layer base {
   :root {
+    /* ===== Stoa: Delphi Night (default) ===== */
+    --bg: #0E1116;
+    --ink: #F2EAD7;
+    --muted: #9AA0A6;
+    --accent: #D4A94A;
+    --secondary: #6F7B3F;
+    --signal: #C1440E;
+    --rule: rgba(242, 234, 215, 0.12);
+    --gold-rule: rgba(212, 169, 74, 0.35);
+
+    /* ===== Legacy TradeIQ tokens (kept so existing pages keep working) ===== */
     --background: 222 50% 6%;
     --foreground: 220 20% 92%;
 
@@ -18,13 +29,13 @@
     --primary: 239 84% 67%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 30% 14%;
+    --secondary-hsl: 220 30% 14%;
     --secondary-foreground: 220 20% 80%;
 
-    --muted: 220 25% 12%;
+    --muted-hsl: 220 25% 12%;
     --muted-foreground: 220 15% 50%;
 
-    --accent: 258 90% 66%;
+    --accent-hsl: 258 90% 66%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
@@ -45,7 +56,6 @@
     --sidebar-border: 220 20% 16%;
     --sidebar-ring: 239 84% 67%;
 
-    /* Custom TradeIQ tokens */
     --glass-bg: 0 0% 100% / 0.03;
     --glass-border: 0 0% 100% / 0.08;
     --glass-bg-hover: 0 0% 100% / 0.06;
@@ -55,6 +65,18 @@
     --gradient-primary: linear-gradient(135deg, hsl(239 84% 67%), hsl(258 90% 66%));
     --gradient-bg: linear-gradient(180deg, hsl(222 50% 6%), hsl(216 43% 9%));
     --shadow-glow: 0 0 30px -5px hsl(239 84% 67% / 0.3);
+  }
+
+  /* ===== Stoa: Pompeii palette (light parchment) ===== */
+  .p-pompeii {
+    --bg: #EFE6D2;
+    --ink: #2B1D13;
+    --muted: #6B5A43;
+    --accent: #C19A3A;
+    --secondary: #7A7A3A;
+    --signal: #9A2A1E;
+    --rule: rgba(43, 29, 19, 0.14);
+    --gold-rule: rgba(193, 154, 58, 0.45);
   }
 
   .dark {
@@ -68,14 +90,76 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
     background: var(--gradient-bg);
     min-height: 100vh;
     font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
   }
 
   code, .font-mono {
     font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* ===== Stoa typography utilities ===== */
+  .stoa-body {
+    font-family: 'IBM Plex Serif', Georgia, serif;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink);
+    background: var(--bg);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .display, .stoa-display {
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+  }
+
+  .kicker {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .greek {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+
+  .data, .mono {
+    font-family: 'IBM Plex Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ===== Accessibility — focus rings ===== */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+/* ===== Restrained motion ===== */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes stoa-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+  @keyframes stoa-shine {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .animate-stoa-pulse { animation: stoa-pulse 2.4s ease-in-out infinite; }
+  .animate-stoa-shine {
+    background: linear-gradient(90deg, transparent, var(--gold-rule), transparent);
+    background-size: 200% 100%;
+    animation: stoa-shine 2.4s linear infinite;
   }
 }
 
