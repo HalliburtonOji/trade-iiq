@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import StoaShell from "@/components/stoa/StoaShell";
 import PedimentCap from "@/components/stoa/PedimentCap";
-import GlassCard from "@/components/GlassCard";
+
 import VerdictBadge from "@/components/VerdictBadge";
 import { Input } from "@/components/ui/input";
 import { screenerData, type ScreenerAsset } from "@/data/screenerData";
@@ -448,56 +448,107 @@ const Screener = () => {
           </div>
         ) : (
           /* CARDS VIEW */
-          <div className={`flex flex-col gap-2 ${isMobile ? "px-4" : "grid grid-cols-2 xl:grid-cols-3 gap-3"}`}>
-            {filtered.map((asset) => {
-              const fit = fitData.bestAsset ? getFitScore(asset) : null;
-              return (
-                <div key={asset.symbol}>
-                  <GlassCard hoverable onClick={() => setExpanded(expanded === asset.symbol ? null : asset.symbol)} className="cursor-pointer">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold font-mono">{asset.symbol}</span>
-                          <VerdictBadge verdict={asset.verdict} size="sm" />
+          <div>
+            <div className="mb-2">
+              <span className="stoa-kicker">THE STALLS · Σκηναί</span>
+            </div>
+            <div className={`flex flex-col gap-2 ${isMobile ? "px-4" : "grid grid-cols-2 xl:grid-cols-3 gap-3"}`}>
+              {filtered.map((asset) => {
+                const fit = fitData.bestAsset ? getFitScore(asset) : null;
+                return (
+                  <div key={asset.symbol}>
+                    <div
+                      onClick={() => setExpanded(expanded === asset.symbol ? null : asset.symbol)}
+                      className="cursor-pointer transition-colors"
+                      style={{
+                        background: "var(--stoa-shine)",
+                        border: "1px solid var(--stoa-rule)",
+                        borderRadius: 2,
+                        padding: 14,
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--stoa-accent)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--stoa-rule)")}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold font-mono">{asset.symbol}</span>
+                            <VerdictBadge verdict={asset.verdict} size="sm" />
+                          </div>
+                          <p className="text-[11px] text-muted-foreground">{asset.name} · {asset.sector}</p>
                         </div>
-                        <p className="text-[11px] text-muted-foreground">{asset.name} · {asset.sector}</p>
+                        <div className="text-right">
+                          <p className={`text-xs font-mono font-bold ${asset.change >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`}>
+                            {asset.change >= 0 ? "+" : ""}{asset.change.toFixed(1)}%
+                          </p>
+                          <p className="text-[10px] text-muted-foreground font-mono">RSI {asset.rsi}</p>
+                        </div>
+                        {expanded === asset.symbol ? <ChevronUp className="h-4 w-4 text-muted-foreground ml-2" /> : <ChevronDown className="h-4 w-4 text-muted-foreground ml-2" />}
                       </div>
-                      <div className="text-right">
-                        <p className={`text-xs font-mono font-bold ${asset.change >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`}>
-                          {asset.change >= 0 ? "+" : ""}{asset.change.toFixed(1)}%
-                        </p>
-                        <p className="text-[10px] text-muted-foreground font-mono">RSI {asset.rsi}</p>
+                      <div className="flex gap-1.5 mt-2 flex-wrap">
+                        <MomentumPill value={asset.momentum} />
+                        <SentimentPill value={asset.sentiment} />
+                        <RiskPill value={asset.risk} />
+                        <FitPill asset={asset} />
                       </div>
-                      {expanded === asset.symbol ? <ChevronUp className="h-4 w-4 text-muted-foreground ml-2" /> : <ChevronDown className="h-4 w-4 text-muted-foreground ml-2" />}
                     </div>
-                    <div className="flex gap-1.5 mt-2 flex-wrap">
-                      <MomentumPill value={asset.momentum} />
-                      <SentimentPill value={asset.sentiment} />
-                      <RiskPill value={asset.risk} />
-                      <FitPill asset={asset} />
-                    </div>
-                  </GlassCard>
-                  <AnimatePresence>
-                    {expanded === asset.symbol && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-                        <GlassCard className="mt-1 ml-2 mr-0">
-                          <p className="text-xs text-muted-foreground mb-2">{asset.reason}</p>
-                          {fit && (
-                            <p className="text-[10px] text-muted-foreground/80 mb-2">
-                              <Sparkles className="h-3 w-3 inline mr-1" />Personal fit: <span className="font-semibold text-foreground">{fit.score}/100</span> — {fit.reason}
+                    <AnimatePresence>
+                      {expanded === asset.symbol && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                          <div
+                            style={{
+                              background: "var(--stoa-shine)",
+                              border: "1px solid var(--stoa-rule)",
+                              borderLeft: "3px solid var(--stoa-accent)",
+                              borderRadius: 2,
+                              padding: 14,
+                              marginTop: 4,
+                              marginLeft: 8,
+                            }}
+                          >
+                            <p style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", color: "var(--stoa-muted)", marginBottom: 10 }}>
+                              {asset.reason}
                             </p>
-                          )}
-                          <button onClick={() => navigate(`/analysis?symbol=${asset.symbol}`)}
-                            className="flex items-center gap-1 text-xs text-primary font-medium hover:underline">
-                            Full Analysis <ArrowRight className="h-3 w-3" />
-                          </button>
-                        </GlassCard>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
+                            {fit && (
+                              <p className="stoa-kicker" style={{ color: "var(--stoa-muted)", marginBottom: 10 }}>
+                                <Sparkles className="h-3 w-3 inline mr-1" />Personal fit: <span className="font-semibold text-foreground">{fit.score}/100</span> — {fit.reason}
+                              </p>
+                            )}
+                            <button
+                              onClick={() => navigate(`/analysis?symbol=${asset.symbol}`)}
+                              className="inline-flex items-center gap-1 stoa-display uppercase text-[color:var(--stoa-accent)] hover:underline"
+                              style={{ fontSize: 12 }}
+                            >
+                              Open in Oracle · Χρησμός <ArrowRight className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {filtered.length === 0 && (
+          <div
+            style={{
+              background: "var(--stoa-shine)",
+              border: "1px solid var(--stoa-rule)",
+              borderRadius: 2,
+              padding: 24,
+              marginTop: 8,
+              textAlign: "center",
+            }}
+          >
+            <span style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", color: "var(--stoa-muted)" }}>
+              The stalls are bare · κενόν
+            </span>
+            <span className="stoa-kicker" style={{ marginTop: 6, display: "block" }}>
+              loosen filters to widen the field
+            </span>
           </div>
         )}
       </div>
