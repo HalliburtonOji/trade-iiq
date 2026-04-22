@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { BarChart3, AlertTriangle, Brain, Clock, TrendingUp, TrendingDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import PageShell from "@/components/PageShell";
+import StoaShell from "@/components/stoa/StoaShell";
+import PedimentCap from "@/components/stoa/PedimentCap";
 import GlassCard from "@/components/GlassCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -93,10 +94,25 @@ const ReviewWorkspace = () => {
     strategy: s, winRate: d.total > 0 ? Math.round((d.wins / d.total) * 100) : 0, count: d.total,
   })).sort((a, b) => b.count - a.count);
 
-  if (loading) return <PageShell><div className="flex justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div></PageShell>;
+  const stoaCrumb = (
+    <span>
+      <span className="stoa-greek">Θέατρον</span> · Review
+    </span>
+  );
+
+  if (loading) return <StoaShell palette="delphi" crumb={stoaCrumb}><div className="flex justify-center py-20"><div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div></StoaShell>;
 
   return (
-    <PageShell>
+    <StoaShell palette="delphi" crumb={stoaCrumb}>
+      <div className="flex flex-col gap-2 mb-4">
+        <PedimentCap variant="rule" />
+        <span className="stoa-kicker">GROW · THE AMPHITHEATER</span>
+        <div className="flex items-baseline gap-3">
+          <h1 className="stoa-display text-3xl font-semibold">Review</h1>
+          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Θέατρον</span>
+        </div>
+        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>watch thyself trade</p>
+      </div>
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Review Workspace</h1>
@@ -206,7 +222,7 @@ const ReviewWorkspace = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </PageShell>
+    </StoaShell>
   );
 };
 

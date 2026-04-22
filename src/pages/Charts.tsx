@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Search } from "lucide-react";
-import PageShell from "@/components/PageShell";
+import StoaShell from "@/components/stoa/StoaShell";
+import PedimentCap from "@/components/stoa/PedimentCap";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -80,7 +81,23 @@ const Charts = () => {
   };
 
   return (
-    <PageShell>
+    <StoaShell
+      palette="delphi"
+      crumb={
+        <span>
+          <span className="stoa-greek">Γραμμαί</span> · Charts
+        </span>
+      }
+    >
+      <div className="flex flex-col gap-2 mb-2">
+        <PedimentCap variant="rule" />
+        <span className="stoa-kicker">ACROPOLIS · THE LINES</span>
+        <div className="flex items-baseline gap-3">
+          <h1 className="stoa-display text-3xl font-semibold">Charts</h1>
+          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Γραμμαί</span>
+        </div>
+        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>TradingView under the colonnade</p>
+      </div>
       <div className="flex flex-col gap-4 px-4 pt-6 pb-24">
         <h1 className="text-xl font-bold">Live Charts</h1>
 
@@ -146,7 +163,7 @@ const Charts = () => {
           Charts powered by TradingView. Not financial advice.
         </p>
       </div>
-    </PageShell>
+    </StoaShell>
   );
 };
 

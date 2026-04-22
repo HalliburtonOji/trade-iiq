@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import PageShell from "@/components/PageShell";
+import StoaShell from "@/components/stoa/StoaShell";
+import PedimentCap from "@/components/stoa/PedimentCap";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { lessonsData } from "@/data/lessonsData";
 import { drillsData } from "@/data/drillsData";
@@ -83,9 +84,15 @@ const Learn = () => {
     }
   }, [selectedDrill, completedDrills, saveDrillResult, toast]);
 
+  const stoaCrumb = (
+    <span>
+      <span className="stoa-greek">Κῶδιξ</span> · Learn
+    </span>
+  );
+
   if (selectedDrill) {
     return (
-      <PageShell>
+      <StoaShell palette="delphi" crumb={stoaCrumb}>
         <DrillDetail
           drill={selectedDrill}
           alreadyCompleted={completedDrills.includes(selectedDrill.id)}
@@ -93,13 +100,13 @@ const Learn = () => {
           onBack={() => setSelectedDrillId(null)}
           onSelectLesson={handleSelectLesson}
         />
-      </PageShell>
+      </StoaShell>
     );
   }
 
   if (selectedLesson) {
     return (
-      <PageShell>
+      <StoaShell palette="delphi" crumb={stoaCrumb}>
         <LessonDetail
           lesson={selectedLesson}
           completed={completedLessons.includes(selectedLesson.id)}
@@ -108,13 +115,13 @@ const Learn = () => {
           onSelectLesson={handleSelectLesson}
           onSelectDrill={handleSelectDrill}
         />
-      </PageShell>
+      </StoaShell>
     );
   }
 
   if (loading) {
     return (
-      <PageShell>
+      <StoaShell palette="delphi" crumb={stoaCrumb}>
         <div className="flex flex-col gap-4 px-4 pt-6">
           <Skeleton className="h-8 w-32" />
           <Skeleton className="h-20 w-full rounded-xl" />
@@ -122,12 +129,21 @@ const Learn = () => {
           <Skeleton className="h-32 w-full rounded-xl" />
           <Skeleton className="h-32 w-full rounded-xl" />
         </div>
-      </PageShell>
+      </StoaShell>
     );
   }
 
   return (
-    <PageShell>
+    <StoaShell palette="delphi" crumb={stoaCrumb}>
+      <div className="flex flex-col gap-2 mb-2">
+        <PedimentCap variant="rule" />
+        <span className="stoa-kicker">GROW · THE CODEX</span>
+        <div className="flex items-baseline gap-3">
+          <h1 className="stoa-display text-3xl font-semibold">Learn</h1>
+          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Κῶδιξ</span>
+        </div>
+        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>read · drill · review</p>
+      </div>
       <div className="flex flex-col gap-4 px-4 pt-6 pb-24">
         <LearnHeader totalXp={totalXp} streak={streak} completedCount={completedLessons.length} />
 
@@ -195,7 +211,7 @@ const Learn = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </PageShell>
+    </StoaShell>
   );
 };
 

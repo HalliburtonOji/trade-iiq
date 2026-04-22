@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import PageShell from "@/components/PageShell";
+import StoaShell from "@/components/stoa/StoaShell";
+import PedimentCap from "@/components/stoa/PedimentCap";
 import GlassCard from "@/components/GlassCard";
 import VerdictBadge from "@/components/VerdictBadge";
 import Leaderboard from "@/components/Leaderboard";
@@ -70,7 +71,23 @@ const Community = () => {
   };
 
   return (
-    <PageShell>
+    <StoaShell
+      palette="delphi"
+      crumb={
+        <span>
+          <span className="stoa-greek">Στοά</span> · Community
+        </span>
+      }
+    >
+      <div className="flex flex-col gap-2 mb-2">
+        <PedimentCap variant="rule" />
+        <span className="stoa-kicker">GROW · THE PORCH</span>
+        <div className="flex items-baseline gap-3">
+          <h1 className="stoa-display text-3xl font-semibold">Community</h1>
+          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Στοά</span>
+        </div>
+        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>traders under one roof</p>
+      </div>
       <div className="flex flex-col gap-4 pt-6 pb-24">
         <h1 className="text-xl font-bold">Community</h1>
 
@@ -135,7 +152,7 @@ const Community = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </PageShell>
+    </StoaShell>
   );
 };
 

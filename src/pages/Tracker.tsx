@@ -4,7 +4,8 @@ import { Plus, TrendingUp, TrendingDown, Clock, Trash2, MessageSquare, Target, Z
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import PageShell from "@/components/PageShell";
+import StoaShell from "@/components/stoa/StoaShell";
+import PedimentCap from "@/components/stoa/PedimentCap";
 import GlassCard from "@/components/GlassCard";
 import StatCard from "@/components/StatCard";
 import VerdictBadge from "@/components/VerdictBadge";
@@ -145,7 +146,23 @@ const Tracker = () => {
   });
 
   return (
-    <PageShell>
+    <StoaShell
+      palette="pompeii"
+      crumb={
+        <span>
+          <span className="stoa-greek">Βίβλος</span> · Trade Tracker
+        </span>
+      }
+    >
+      <div className="flex flex-col gap-2 mb-2">
+        <PedimentCap variant="rule" />
+        <span className="stoa-kicker">TRAINING · THE SCROLL</span>
+        <div className="flex items-baseline gap-3">
+          <h1 className="stoa-display text-3xl font-semibold">Trade Tracker</h1>
+          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Βίβλος</span>
+        </div>
+        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>every decision, inscribed</p>
+      </div>
       <div className="flex flex-col gap-4 px-4 pt-6">
         <h1 className="text-xl font-bold">Decision Tracker</h1>
 
@@ -365,7 +382,7 @@ const Tracker = () => {
           ))}
         </div>
       </div>
-    </PageShell>
+    </StoaShell>
   );
 };
 

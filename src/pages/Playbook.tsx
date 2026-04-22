@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Plus, BookOpen, Trash2, Edit2, Check, X, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import PageShell from "@/components/PageShell";
+import StoaShell from "@/components/stoa/StoaShell";
+import PedimentCap from "@/components/stoa/PedimentCap";
 import GlassCard from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -102,7 +103,23 @@ const Playbook = () => {
   };
 
   return (
-    <PageShell>
+    <StoaShell
+      palette="pompeii"
+      crumb={
+        <span>
+          <span className="stoa-greek">Τακτικά</span> · Playbook
+        </span>
+      }
+    >
+      <div className="flex flex-col gap-2 mb-4">
+        <PedimentCap variant="rule" />
+        <span className="stoa-kicker">TRAINING · THE TACTICS</span>
+        <div className="flex items-baseline gap-3">
+          <h1 className="stoa-display text-3xl font-semibold">Playbook</h1>
+          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Τακτικά</span>
+        </div>
+        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>thy canon of setups</p>
+      </div>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -228,7 +245,7 @@ const Playbook = () => {
           </div>
         )}
       </div>
-    </PageShell>
+    </StoaShell>
   );
 };
 

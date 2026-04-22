@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 type StoaShellProps = {
   children: React.ReactNode;
   palette?: "delphi" | "pompeii";
-  crumb?: string;
+  crumb?: React.ReactNode;
   rightBar?: React.ReactNode;
 };
 

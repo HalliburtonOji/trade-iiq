@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuotes } from "@/hooks/use-quotes";
 import { toast } from "sonner";
-import PageShell from "@/components/PageShell";
+import StoaShell from "@/components/stoa/StoaShell";
+import PedimentCap from "@/components/stoa/PedimentCap";
 import GlassCard from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -237,7 +238,23 @@ const DemoTrading = () => {
   const quickSymbols = allSymbols[assetTab]?.slice(0, 8) || [];
 
   return (
-    <PageShell>
+    <StoaShell
+      palette="pompeii"
+      crumb={
+        <span>
+          <span className="stoa-greek">Γυμνάσιον</span> · Demo Trading
+        </span>
+      }
+    >
+      <div className="flex flex-col gap-2 mb-2">
+        <PedimentCap variant="rule" />
+        <span className="stoa-kicker">TRAINING · THE ARENA</span>
+        <div className="flex items-baseline gap-3">
+          <h1 className="stoa-display text-3xl font-semibold">Demo Trading</h1>
+          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Γυμνάσιον</span>
+        </div>
+        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>practice without peril</p>
+      </div>
       <div className="flex flex-col gap-3 pt-4 pb-24">
         <GuidedWalkthrough />
         <PositionAlerts positions={positions} quotes={quotes} balance={balance} />
@@ -472,7 +489,7 @@ const DemoTrading = () => {
 
       {/* AI Trade Review Modal */}
       {reviewTrade && <TradeReview trade={reviewTrade} onClose={() => setReviewTrade(null)} />}
-    </PageShell>
+    </StoaShell>
   );
 };
 
