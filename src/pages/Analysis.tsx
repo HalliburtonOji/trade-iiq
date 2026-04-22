@@ -4,8 +4,10 @@ import { Search, ArrowRight, Plus, Star, Camera, ExternalLink, Loader2, Calendar
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import StoaShell from "@/components/stoa/StoaShell";
 import PedimentCap from "@/components/stoa/PedimentCap";
+import Meander from "@/components/stoa/Meander";
 import GlassCard from "@/components/GlassCard";
 import VerdictBadge from "@/components/VerdictBadge";
 import SetupScoreMeter from "@/components/SetupScoreMeter";
@@ -32,6 +34,7 @@ const Analysis = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const isMobile = useIsMobile();
   const [assetType, setAssetType] = useState<AssetType>("stock");
   const [query, setQuery] = useState(searchParams.get("symbol") || "");
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -157,173 +160,426 @@ const Analysis = () => {
       <div className="flex flex-col gap-2 mb-2 min-w-0 max-w-full overflow-hidden">
         <PedimentCap variant="rule" />
         <span className="stoa-kicker">ACROPOLIS · THE ORACLE'S READING</span>
-        <div className="flex items-baseline gap-3">
-          <h1 className="stoa-display text-3xl font-semibold">Analysis</h1>
-          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Σκέψις</span>
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <h1 className="stoa-display font-semibold" style={{ fontSize: isMobile ? 28 : 34, lineHeight: 1.05, color: "var(--stoa-ink)" }}>Analysis</h1>
+          <span className="stoa-greek" style={{ fontSize: 18, color: "var(--stoa-muted)" }}>Σκέψις</span>
         </div>
-        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>enter a symbol — receive a verdict</p>
+        <p style={{ fontFamily: "Georgia, 'EB Garamond', serif", fontStyle: "italic", fontSize: 14, color: "var(--stoa-muted)" }}>
+          enter a symbol — receive a verdict
+        </p>
+        <div style={{ marginTop: 14, marginBottom: 4 }}>
+          <Meander height={18} opacity={0.55} />
+        </div>
       </div>
-      <div className="flex flex-col gap-4 px-4 pt-6 pb-24">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">Analysis</h1>
-          <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={() => setShowCalendar(!showCalendar)}>
+
+      <div className="flex flex-col gap-5 pb-24" style={{ minWidth: 0 }}>
+        {/* ---------- Calendar bar ---------- */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            padding: "10px 0",
+            borderTop: "1px solid var(--stoa-rule)",
+            borderBottom: "1px solid var(--stoa-rule)",
+          }}
+        >
+          <span className="stoa-kicker" style={{ fontSize: 11 }}>Economic calendar · Ἡμερολόγιον</span>
+          <button
+            onClick={() => setShowCalendar(!showCalendar)}
+            className="stoa-display"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 12px",
+              fontSize: 12,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: showCalendar ? "var(--stoa-ink)" : "var(--stoa-muted)",
+              background: "transparent",
+              border: "1px solid var(--stoa-rule)",
+              borderRadius: 2,
+              cursor: "pointer",
+            }}
+          >
             <Calendar className="h-3.5 w-3.5" />
-            Calendar
-          </Button>
+            {showCalendar ? "Close" : "Open"}
+          </button>
         </div>
 
         {/* Economic Calendar */}
         <AnimatePresence>
           {showCalendar && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} style={{ overflow: "hidden" }}>
               <EconomicCalendar />
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Mode toggle */}
-        <div className="flex gap-2">
-          <button onClick={() => setActiveTab("search")} className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === "search" ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.3)]" : "glass-card text-muted-foreground hover:text-foreground"}`}>
-            <Search className="h-3.5 w-3.5" /> Search
-          </button>
-          <button onClick={() => setActiveTab("chart")} className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === "chart" ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.3)]" : "glass-card text-muted-foreground hover:text-foreground"}`}>
-            <Camera className="h-3.5 w-3.5" /> 📸 Chart
-          </button>
+        {/* ---------- Mode toggle ---------- */}
+        <div style={{ borderTop: "1px solid var(--stoa-rule)", paddingTop: 10 }}>
+          <div className="stoa-kicker" style={{ fontSize: 10, marginBottom: 8 }}>Mode</div>
+          <div style={{ display: "flex", gap: 0, borderBottom: "1px solid var(--stoa-rule)" }}>
+            {[
+              { key: "search" as const, label: "Search", greek: "Ζήτησις", Icon: Search },
+              { key: "chart" as const, label: "Chart", greek: "Γραφή", Icon: Camera },
+            ].map(({ key, label, greek, Icon }) => {
+              const active = activeTab === key;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  className="stoa-display"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "10px 16px",
+                    fontSize: 13,
+                    letterSpacing: "0.06em",
+                    color: active ? "var(--stoa-ink)" : "var(--stoa-muted)",
+                    background: "transparent",
+                    border: "none",
+                    borderBottom: active ? "2px solid var(--stoa-accent)" : "2px solid transparent",
+                    marginBottom: -1,
+                    cursor: "pointer",
+                  }}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span>{label}</span>
+                  <span className="stoa-greek" style={{ fontSize: 12, color: active ? "var(--stoa-accent)" : "var(--stoa-muted)", opacity: active ? 0.85 : 0.6 }}>· {greek}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {activeTab === "chart" ? (
           <ChartAnalyzer />
         ) : (
           <>
-            {/* Asset type tabs */}
-            <div className="flex gap-2">
-              {(["stock", "crypto", "forex"] as AssetType[]).map((t) => (
-                <button key={t} onClick={() => { setAssetType(t); setResult(null); setQuery(""); }} className={`rounded-lg px-4 py-1.5 text-xs font-semibold capitalize transition-all ${assetType === t ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.3)]" : "glass-card text-muted-foreground hover:text-foreground"}`}>{t}</button>
-              ))}
-            </div>
+            {/* ---------- Pythia's Plinth ---------- */}
+            <div
+              style={{
+                position: "relative",
+                background: "var(--stoa-shine)",
+                border: "1px solid var(--stoa-rule)",
+                borderRadius: 2,
+                padding: isMobile ? "22px 16px" : "26px 22px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 18,
+              }}
+            >
+              {/* top + bottom gold rules */}
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "var(--stoa-accent)" }} />
+              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 2, background: "var(--stoa-accent)" }} />
 
-            {/* Searchable symbol dropdown */}
-            <Popover open={comboOpen} onOpenChange={setComboOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-between text-left font-normal bg-secondary/50 border-border/50">
-                  <div className="flex items-center gap-2">
-                    <Search className="h-4 w-4 text-muted-foreground" />
-                    <span className={query ? "text-foreground" : "text-muted-foreground"}>
-                      {query || "Search any symbol..."}
-                    </span>
-                  </div>
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4 text-muted-foreground" />}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
-                <Command>
-                  <CommandInput
-                    placeholder={`Search ${assetType} symbols...`}
-                    value={searchTerm}
-                    onValueChange={setSearchTerm}
-                  />
-                  <CommandList>
-                    <CommandEmpty>
-                      <div className="py-3 text-center">
-                        <p className="text-sm text-muted-foreground">No match found</p>
-                        {searchTerm && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="mt-2 text-xs"
-                            onClick={() => {
-                              setQuery(searchTerm.toUpperCase());
-                              setComboOpen(false);
-                              handleSearch(searchTerm);
-                            }}
-                          >
-                            Analyze "{searchTerm.toUpperCase()}" anyway →
-                          </Button>
-                        )}
-                      </div>
-                    </CommandEmpty>
-                    <CommandGroup heading={`${assetType.charAt(0).toUpperCase() + assetType.slice(1)} Symbols`}>
-                      {filteredSymbols.slice(0, 20).map((sym) => (
-                        <CommandItem
-                          key={sym.symbol}
-                          value={`${sym.symbol} ${sym.name}`}
-                          onSelect={() => {
-                            setQuery(sym.symbol);
-                            setSearchTerm("");
-                            setComboOpen(false);
-                            handleSearch(sym.symbol);
-                          }}
-                          className="flex items-center justify-between cursor-pointer"
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-sm">{sym.symbol}</span>
-                            <span className="text-xs text-muted-foreground truncate">{sym.name}</span>
+              <div className="stoa-kicker" style={{ fontSize: 11 }}>THE INQUIRY · Ζήτησις</div>
+
+              {/* Asset · Γένος */}
+              <div>
+                <div className="stoa-kicker" style={{ fontSize: 10, marginBottom: 8 }}>Asset · Γένος</div>
+                <div style={{ display: "flex", gap: 0, borderBottom: "1px solid var(--stoa-rule)" }}>
+                  {(["stock", "crypto", "forex"] as AssetType[]).map((t) => {
+                    const active = assetType === t;
+                    return (
+                      <button
+                        key={t}
+                        onClick={() => { setAssetType(t); setResult(null); setQuery(""); }}
+                        className="stoa-display"
+                        style={{
+                          flex: 1,
+                          padding: "10px 0",
+                          fontSize: 13,
+                          letterSpacing: "0.08em",
+                          textTransform: "uppercase",
+                          color: active ? "var(--stoa-ink)" : "var(--stoa-muted)",
+                          background: "transparent",
+                          border: "none",
+                          borderBottom: active ? "2px solid var(--stoa-accent)" : "2px solid transparent",
+                          marginBottom: -1,
+                          cursor: "pointer",
+                        }}
+                      >
+                        {t}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Symbol · Σύμβολον */}
+              <div>
+                <div className="stoa-kicker" style={{ fontSize: 10, marginBottom: 8 }}>Symbol · Σύμβολον</div>
+                <Popover open={comboOpen} onOpenChange={setComboOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      className="stoa-mono"
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 10,
+                        padding: "12px 14px",
+                        fontSize: 15,
+                        letterSpacing: "0.04em",
+                        color: query ? "var(--stoa-ink)" : "var(--stoa-muted)",
+                        background: "transparent",
+                        border: "1px solid var(--stoa-rule)",
+                        borderRadius: 2,
+                        cursor: "pointer",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                        <Search className="h-4 w-4" style={{ color: "var(--stoa-muted)", flexShrink: 0 }} />
+                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {query || "Consult any symbol…"}
+                        </span>
+                      </span>
+                      {loading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" style={{ color: "var(--stoa-accent)", flexShrink: 0 }} />
+                      ) : (
+                        <ArrowRight className="h-4 w-4" style={{ color: "var(--stoa-muted)", flexShrink: 0 }} />
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                    <Command>
+                      <CommandInput
+                        placeholder={`Search ${assetType} symbols…`}
+                        value={searchTerm}
+                        onValueChange={setSearchTerm}
+                      />
+                      <CommandList>
+                        <CommandEmpty>
+                          <div className="py-3 text-center" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                            <p className="stoa-kicker" style={{ fontSize: 10 }}>No match · Οὐδέν</p>
+                            {searchTerm && (
+                              <button
+                                onClick={() => {
+                                  setQuery(searchTerm.toUpperCase());
+                                  setComboOpen(false);
+                                  handleSearch(searchTerm);
+                                }}
+                                className="stoa-display"
+                                style={{
+                                  padding: "6px 12px",
+                                  fontSize: 11,
+                                  letterSpacing: "0.08em",
+                                  textTransform: "uppercase",
+                                  color: "var(--stoa-accent)",
+                                  background: "transparent",
+                                  border: "1px solid var(--stoa-accent)",
+                                  borderRadius: 2,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                Consult "{searchTerm.toUpperCase()}" anyway
+                              </button>
+                            )}
                           </div>
-                          {sym.category && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{sym.category}</span>
-                          )}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+                        </CommandEmpty>
+                        <CommandGroup
+                          heading={
+                            <div style={{ borderTop: "1px solid var(--stoa-rule)", paddingTop: 6 }}>
+                              <span className="stoa-kicker" style={{ fontSize: 10 }}>
+                                {assetType.charAt(0).toUpperCase() + assetType.slice(1)} · Σύμβολα
+                              </span>
+                            </div>
+                          }
+                        >
+                          {filteredSymbols.slice(0, 20).map((sym) => (
+                            <CommandItem
+                              key={sym.symbol}
+                              value={`${sym.symbol} ${sym.name}`}
+                              onSelect={() => {
+                                setQuery(sym.symbol);
+                                setSearchTerm("");
+                                setComboOpen(false);
+                                handleSearch(sym.symbol);
+                              }}
+                              className="flex items-center justify-between cursor-pointer"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="stoa-mono" style={{ fontSize: 13, fontWeight: 600, color: "var(--stoa-ink)" }}>{sym.symbol}</span>
+                                <span style={{ fontSize: 11, color: "var(--stoa-muted)", fontFamily: "Georgia, serif", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sym.name}</span>
+                              </div>
+                              {sym.category && (
+                                <span className="stoa-kicker" style={{ fontSize: 9, padding: "2px 6px", border: "1px solid var(--stoa-rule)", color: "var(--stoa-accent)", flexShrink: 0 }}>{sym.category}</span>
+                              )}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
 
-            {/* Quick chips */}
-            <div className="flex flex-wrap gap-1.5">
-              {allSymbols[assetType]?.slice(0, 8).map((s) => (
-                <button
-                  key={s.symbol}
-                  onClick={() => { setQuery(s.symbol); handleSearch(s.symbol); }}
-                  className="rounded-full px-3 py-1 text-[11px] font-mono font-medium glass-card glass-card-hover text-muted-foreground hover:text-foreground transition-all"
-                >
-                  {s.symbol}
-                </button>
-              ))}
+              {/* Previously consulted · Χρηστήριον */}
+              <div>
+                <div className="stoa-kicker" style={{ fontSize: 10, marginBottom: 8 }}>Previously consulted · Χρηστήριον</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {allSymbols[assetType]?.slice(0, 8).map((s) => (
+                    <button
+                      key={s.symbol}
+                      onClick={() => { setQuery(s.symbol); handleSearch(s.symbol); }}
+                      className="stoa-mono"
+                      style={{
+                        padding: "5px 10px",
+                        fontSize: 11,
+                        letterSpacing: "0.04em",
+                        color: "var(--stoa-muted)",
+                        background: "transparent",
+                        border: "1px solid var(--stoa-rule)",
+                        borderRadius: 2,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {s.symbol}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Loading state */}
+            {/* ---------- Loading state ---------- */}
             {loading && !result && (
-              <GlassCard className="flex flex-col items-center justify-center py-12 gap-3">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">Generating AI analysis for {query}...</p>
-                <p className="text-[10px] text-muted-foreground/60">Fetching live data & running analysis</p>
-              </GlassCard>
+              <div
+                style={{
+                  background: "var(--stoa-shine)",
+                  border: "1px solid var(--stoa-rule)",
+                  borderRadius: 2,
+                  padding: "44px 24px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 12,
+                }}
+              >
+                <Loader2 className="h-7 w-7 animate-spin" style={{ color: "var(--stoa-accent)" }} />
+                <p style={{ margin: 0, fontFamily: "Georgia, 'EB Garamond', serif", fontStyle: "italic", fontSize: 15, color: "var(--stoa-ink)" }}>
+                  Consulting the oracle on {query}…
+                </p>
+                <p style={{ margin: 0, fontSize: 11, color: "var(--stoa-muted)", fontStyle: "italic" }}>
+                  fetching live data &amp; running analysis
+                </p>
+              </div>
             )}
 
-            {/* Results */}
+            {/* ---------- Results ---------- */}
             {result && !loading && (
-              <motion.div key={result.symbol} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.2, 0.8, 0.2, 1] as const }} className="flex flex-col gap-3">
-                <GlassCard className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-bold">{result.symbol}</h2>
-                    <p className="text-2xl font-bold font-mono">
+              <motion.div
+                key={result.symbol}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: [0.2, 0.8, 0.2, 1] as const }}
+                style={{ display: "flex", flexDirection: "column", gap: 20 }}
+              >
+                {/* THE STELE · Στήλη */}
+                <div
+                  style={{
+                    position: "relative",
+                    background: "var(--stoa-shine)",
+                    border: "1px solid var(--stoa-rule)",
+                    borderRadius: 2,
+                    padding: isMobile ? "22px 18px" : "26px 24px",
+                    display: "flex",
+                    flexDirection: isMobile ? "column" : "row",
+                    alignItems: isMobile ? "flex-start" : "center",
+                    justifyContent: "space-between",
+                    gap: isMobile ? 18 : 24,
+                  }}
+                >
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "var(--stoa-accent)" }} />
+
+                  {/* LEFT */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 0, flex: 1 }}>
+                    <span className="stoa-kicker" style={{ fontSize: 10 }}>THE STELE · Στήλη</span>
+                    <h2
+                      className="stoa-display"
+                      style={{
+                        margin: 0,
+                        fontSize: isMobile ? 34 : 42,
+                        fontWeight: 600,
+                        letterSpacing: "0.02em",
+                        lineHeight: 1,
+                        color: "var(--stoa-ink)",
+                      }}
+                    >
+                      {result.symbol}
+                    </h2>
+                    <p className="stoa-mono" style={{ margin: 0, fontSize: 30, fontWeight: 600, color: "var(--stoa-ink)", lineHeight: 1.1 }}>
                       {typeof result.price === 'number' && result.price > 0
                         ? `$${result.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                        : <span className="text-muted-foreground text-base">Price unavailable</span>}
+                        : <span style={{ fontSize: 16, color: "var(--stoa-muted)", fontStyle: "italic", fontFamily: "Georgia, serif" }}>Price unavailable</span>}
                     </p>
                     {typeof result.price === 'number' && result.price > 0 && (
-                      <p className={`text-sm font-mono font-medium ${(result.change || 0) >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`}>
+                      <p
+                        className="stoa-mono"
+                        style={{
+                          margin: 0,
+                          fontSize: 13,
+                          fontWeight: 500,
+                          color: (result.change || 0) >= 0 ? "hsl(var(--verdict-buy))" : "hsl(var(--verdict-avoid))",
+                        }}
+                      >
                         {(result.change || 0) >= 0 ? "+" : ""}{(result.change || 0).toFixed(2)}%
                       </p>
                     )}
                     {(result as any).source && (
-                      <span className="text-[9px] text-muted-foreground/50 font-mono">
-                        {(result as any).source === "ai" ? "🤖 Live AI" : (result as any).source === "cache" ? `📦 Cached (${(result as any).cache_age_minutes}m)` : "📊 Static"}
+                      <span className="stoa-kicker" style={{ fontSize: 10, color: "var(--stoa-muted)", marginTop: 4 }}>
+                        {(result as any).source === "ai"
+                          ? "Live oracle"
+                          : (result as any).source === "cache"
+                          ? `Archived · ${(result as any).cache_age_minutes}m`
+                          : "Static reading"}
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-col items-center gap-2">
-                    <VerdictBadge verdict={result.verdict} size="lg" />
-                    <SetupScoreMeter score={result.setupScore} size="sm" />
-                    <span className="text-[10px] text-muted-foreground">Setup Score</span>
-                  </div>
-                </GlassCard>
 
-                <GlassCard className="bg-primary/3">
-                  <p className="text-sm text-foreground/80 leading-relaxed">{result.summary}</p>
-                </GlassCard>
+                  {/* RIGHT */}
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: isMobile ? "flex-start" : "center", gap: 10, flexShrink: 0 }}>
+                    <VerdictBadge verdict={result.verdict} size="lg" />
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <SetupScoreMeter score={result.setupScore} size="sm" />
+                      <span className="stoa-kicker" style={{ fontSize: 10 }}>Setup · Θεωρία</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* THE ORACLE'S WORD · Λόγος */}
+                <div
+                  style={{
+                    background: "var(--stoa-shine)",
+                    border: "1px solid var(--stoa-rule)",
+                    borderLeft: "3px solid var(--stoa-accent)",
+                    borderRadius: 2,
+                    padding: isMobile ? "18px 18px" : "22px 24px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                  }}
+                >
+                  <span className="stoa-kicker" style={{ fontSize: 10 }}>THE ORACLE'S WORD · Λόγος</span>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontFamily: "Georgia, 'EB Garamond', serif",
+                      fontStyle: "italic",
+                      fontSize: 15,
+                      lineHeight: 1.55,
+                      color: "var(--stoa-ink)",
+                    }}
+                  >
+                    {result.summary}
+                  </p>
+                </div>
 
                 <Tabs defaultValue="verdict" className="w-full">
                   <TabsList className="w-full bg-secondary/50">
