@@ -5,7 +5,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import StoaShell from "@/components/stoa/StoaShell";
 import PedimentCap from "@/components/stoa/PedimentCap";
-import GlassCard from "@/components/GlassCard";
 import StatCard from "@/components/StatCard";
 import SetupScoreMeter from "@/components/SetupScoreMeter";
 import PersonalitySelector from "@/components/PersonalitySelector";
@@ -234,7 +233,7 @@ const Portfolio = () => {
           }}
         >
           <span className="stoa-kicker">VITALS · Σῆμα</span>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             <StatCard label="Win Rate" value={`${stats.winRate}%`} trend={stats.winRate >= 50 ? "up" : stats.total > 0 ? "down" : "neutral"} />
             <StatCard label="Decisions" value={stats.total} />
             <StatCard label="Avg P&L" value={stats.avgPnl ? `${stats.avgPnl}%` : "—"} trend={stats.avgPnl > 0 ? "up" : stats.avgPnl < 0 ? "down" : "neutral"} />
