@@ -104,14 +104,14 @@ const Playbook = () => {
 
   return (
     <StoaShell
-      palette="pompeii"
+      palette="delphi"
       crumb={
         <span>
           <span className="stoa-greek">Τακτικά</span> · Playbook
         </span>
       }
     >
-      <div className="flex flex-col gap-2 mb-4">
+      <div className="flex flex-col gap-2 mb-4 min-w-0 max-w-full overflow-hidden">
         <PedimentCap variant="rule" />
         <span className="stoa-kicker">TRAINING · THE TACTICS</span>
         <div className="flex items-baseline gap-3">

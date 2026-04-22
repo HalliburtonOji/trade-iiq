@@ -105,14 +105,14 @@ const ScreenshotVault = () => {
 
   return (
     <StoaShell
-      palette="pompeii"
+      palette="delphi"
       crumb={
         <span>
           <span className="stoa-greek">Εἰκόνες</span> · Screenshots
         </span>
       }
     >
-      <div className="flex flex-col gap-2 mb-4">
+      <div className="flex flex-col gap-2 mb-4 min-w-0 max-w-full overflow-hidden">
         <PedimentCap variant="rule" />
         <span className="stoa-kicker">TRAINING · THE IMAGES</span>
         <div className="flex items-baseline gap-3">

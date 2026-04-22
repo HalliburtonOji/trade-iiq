@@ -20,6 +20,16 @@
 </head>
   <body>
     <div id="root"></div>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('tradeiq-theme');
+          if (t !== 'dark') {
+            document.documentElement.classList.add('theme-cream');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
