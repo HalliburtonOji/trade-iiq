@@ -146,7 +146,7 @@ const Index = () => {
   return (
     <StoaShell
       palette="delphi"
-      crumb={<span><span className="stoa-kicker">STOA</span> <span className="stoa-greek" style={{ marginLeft: 6 }}>Ναός · Temple</span></span> as unknown as string}
+      crumb="Ναός · Temple"
       rightBar={
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <span className="stoa-kicker" style={{ color: "var(--stoa-accent)" }}>{sessionLabel}</span>
