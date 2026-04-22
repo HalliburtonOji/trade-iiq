@@ -34,6 +34,7 @@ interface PaperTrade {
 const Portfolio = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [paperTrades, setPaperTrades] = useState<PaperTrade[]>(() => {
     const saved = localStorage.getItem("tradeiq_paper_trades_v2");
     return saved ? JSON.parse(saved) : [];
