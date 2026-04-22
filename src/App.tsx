@@ -72,6 +72,15 @@ const AppContent = () => {
         <Route path="/playbook" element={<ProtectedRoute><Playbook /></ProtectedRoute>} />
         <Route path="/screenshots" element={<ProtectedRoute><ScreenshotVault /></ProtectedRoute>} />
         <Route path="/review" element={<ProtectedRoute><ReviewWorkspace /></ProtectedRoute>} />
+
+        {/* Stoa routes */}
+        <Route path="/dashboard" element={<ProtectedRoute><Temple /></ProtectedRoute>} />
+        <Route path="/journal" element={<ProtectedRoute><StoaPlaceholder english="Scroll" greek="Βίβλος" pompeii /></ProtectedRoute>} />
+        <Route path="/markets" element={<ProtectedRoute><StoaPlaceholder english="Agora" greek="Ἀγορά" /></ProtectedRoute>} />
+        <Route path="/coach" element={<ProtectedRoute><StoaPlaceholder english="Sanctuary" greek="Πυθία" /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><StoaPlaceholder english="Ergon" greek="Ἔργον" /></ProtectedRoute>} />
+        <Route path="/style" element={<ProtectedRoute><StoaPlaceholder english="Kanon" greek="Κανών" /></ProtectedRoute>} />
+
         <Route path="*" element={<NotFound />} />
       </Routes>
       {user && <FloatingHub />}
