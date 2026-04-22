@@ -8,19 +8,23 @@ type MeanderProps = {
 };
 
 /**
- * A horizontal Greek-key (meander) ornament rendered as an SVG mask
- * so it inherits var(--stoa-accent) via background-color.
+ * A horizontal Greek-key (meander) ornament.
+ *
+ * Drawn as a stroked SVG path inside a mask so the visible color comes
+ * from `background-color: var(--stoa-accent)`. Tiles horizontally every
+ * 40px so it reads as a continuous spiral band regardless of width.
  */
 export default function Meander({
   width = "100%",
-  height = 18,
-  opacity = 0.6,
+  height = 20,
+  opacity = 0.7,
   className = "",
 }: MeanderProps) {
-  // A repeating Greek-key tile, drawn as a filled SVG path. Used as a CSS mask
-  // so the visible color comes from background-color = var(--stoa-accent).
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 18' width='40' height='18'>
-    <path fill='black' d='M0 16h40v2H0zM2 0h6v12H2V0zm2 2v8h2V2H4zm6-2h6v8h-2V2h-2v10H10V0zm10 0h6v12h-6V0zm2 2v8h2V2h-2zm6-2h6v8h-2V2h-2v10h-2V0z'/>
+  // Classic Greek-key spiral, 40x20 tile. Drawn with H/V shorthand for
+  // clarity; the last point (40,2) meets (0,2) of the next tile so the
+  // pattern is seamlessly continuous when tiled.
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 20'>
+    <path fill='none' stroke='black' stroke-width='2' stroke-linecap='square' stroke-linejoin='miter' d='M0 2 H8 V14 H4 V6 H16 V18 H24 V6 H36 V14 H32 V2 H40'/>
   </svg>`;
   const url = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
 
@@ -38,8 +42,8 @@ export default function Meander({
         maskImage: url,
         WebkitMaskRepeat: "repeat-x",
         maskRepeat: "repeat-x",
-        WebkitMaskSize: "auto 100%",
-        maskSize: "auto 100%",
+        WebkitMaskSize: "40px 100%",
+        maskSize: "40px 100%",
         WebkitMaskPosition: "left center",
         maskPosition: "left center",
       }}

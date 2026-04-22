@@ -66,15 +66,27 @@ export default function Altar({
         )}
 
         {(kicker || greek) && (
-          <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10 }}>
-            {kicker && <span className="stoa-kicker">{kicker}</span>}
-            {kicker && greek && (
-              <span style={{ color: "var(--stoa-muted)", fontSize: 11 }}>·</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: 10, minWidth: 0 }}>
+            {kicker && (
+              <span
+                className="stoa-kicker"
+                style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+              >
+                {kicker}
+              </span>
             )}
             {greek && (
               <span
                 className="stoa-greek"
-                style={{ color: "var(--stoa-muted)", fontSize: 13 }}
+                style={{
+                  color: "var(--stoa-accent)",
+                  opacity: 0.7,
+                  fontSize: 12,
+                  lineHeight: 1.1,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
               >
                 {greek}
               </span>
