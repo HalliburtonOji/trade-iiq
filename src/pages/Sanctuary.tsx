@@ -31,7 +31,7 @@ const Sanctuary = () => {
     if (!user) return;
     (async () => {
       const { data } = await supabase
-        .from("oracle_sessions" as never)
+        .from("oracle_sessions")
         .select("id")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
@@ -40,7 +40,7 @@ const Sanctuary = () => {
       if (data) {
         setSessionId((data as { id: string }).id);
         const msg = await supabase
-          .from("oracle_messages" as never)
+          .from("oracle_messages")
           .select("*")
           .eq("session_id", (data as { id: string }).id)
           .order("created_at", { ascending: true });
@@ -58,7 +58,7 @@ const Sanctuary = () => {
     let sid = sessionId;
     if (!sid) {
       const { data } = await supabase
-        .from("oracle_sessions" as never)
+        .from("oracle_sessions")
         .insert({ user_id: user.id, title: text.slice(0, 40) })
         .select("id")
         .single();
@@ -72,7 +72,7 @@ const Sanctuary = () => {
 
     // Store user message
     const { data: ins } = await supabase
-      .from("oracle_messages" as never)
+      .from("oracle_messages")
       .insert({ session_id: sid, user_id: user.id, role: "user", content: text, context_json: pills })
       .select()
       .single();
@@ -87,7 +87,7 @@ const Sanctuary = () => {
       ].filter(Boolean);
       const reply = `Read with ${ctxBits.join(", ") || "no context"} in mind: ${text} — pause first. The market does not reward hurry. Marcus says: "If it is not right, do not do it; if it is not true, do not say it." Apply both before sizing.`;
       const { data: oins } = await supabase
-        .from("oracle_messages" as never)
+        .from("oracle_messages")
         .insert({ session_id: sid, user_id: user.id, role: "oracle", content: reply })
         .select()
         .single();

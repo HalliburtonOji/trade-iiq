@@ -36,9 +36,9 @@ const Ergon = () => {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase.from("user_preferences" as never).select("*").eq("user_id", user.id).maybeSingle();
+      const { data } = await supabase.from("user_preferences").select("*").eq("user_id", user.id).maybeSingle();
       if (data) {
-        const d = data as Partial<Prefs>;
+        const d = data as unknown as Partial<Prefs>;
         setPrefs({
           identity: { ...DEFAULT_PREFS.identity, ...(d.identity ?? {}) },
           oracle: { ...DEFAULT_PREFS.oracle, ...(d.oracle ?? {}) },
@@ -47,7 +47,7 @@ const Ergon = () => {
         });
       } else {
         // Seed
-        await supabase.from("user_preferences" as never).insert({ user_id: user.id, ...DEFAULT_PREFS });
+        await supabase.from("user_preferences").insert({ user_id: user.id, ...DEFAULT_PREFS });
       }
     })();
   }, [user]);
@@ -55,7 +55,7 @@ const Ergon = () => {
   const save = async (next: Prefs) => {
     if (!user) return;
     setPrefs(next);
-    await supabase.from("user_preferences" as never).upsert({ user_id: user.id, ...next });
+    await supabase.from("user_preferences").upsert({ user_id: user.id, ...next });
   };
 
   return (

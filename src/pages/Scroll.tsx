@@ -77,7 +77,7 @@ const Scroll = () => {
 
       const [entryRes, tradesRes] = await Promise.all([
         supabase
-          .from("journal_entries" as never)
+          .from("journal_entries")
           .select("*")
           .eq("user_id", user.id)
           .eq("entry_date", date)
@@ -92,7 +92,7 @@ const Scroll = () => {
 
       if (cancelled) return;
 
-      let ent = (entryRes.data as JournalEntry | null) ?? null;
+      let ent = (entryRes.data as unknown as JournalEntry | null) ?? null;
       if (!ent) {
         const seed = {
           user_id: user.id,
@@ -107,11 +107,11 @@ const Scroll = () => {
           reflections: [],
         };
         const ins = await supabase
-          .from("journal_entries" as never)
+          .from("journal_entries")
           .insert(seed)
           .select()
           .single();
-        if (!ins.error) ent = ins.data as JournalEntry;
+        if (!ins.error) ent = ins.data as unknown as JournalEntry;
       }
       setEntry(ent);
       setTrades((tradesRes.data ?? []) as Trade[]);
@@ -150,7 +150,7 @@ const Scroll = () => {
     setEntry(next);
     setEditingKey(null);
     const { error } = await supabase
-      .from("journal_entries" as never)
+      .from("journal_entries")
       .update({ [editingKey]: draft })
       .eq("id", entry.id);
     if (error) toast.error("Could not save", { description: error.message });
@@ -164,8 +164,8 @@ const Scroll = () => {
     ];
     setEntry({ ...entry, reflections: next });
     await supabase
-      .from("journal_entries" as never)
-      .update({ reflections: next })
+      .from("journal_entries")
+      .update({ reflections: next as unknown as never })
       .eq("id", entry.id);
   };
 
@@ -174,8 +174,8 @@ const Scroll = () => {
     const next = entry.reflections.map((r, i) => (i === idx ? { ...r, body } : r));
     setEntry({ ...entry, reflections: next });
     await supabase
-      .from("journal_entries" as never)
-      .update({ reflections: next })
+      .from("journal_entries")
+      .update({ reflections: next as unknown as never })
       .eq("id", entry.id);
   };
 
