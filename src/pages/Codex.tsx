@@ -108,7 +108,7 @@ const Codex = () => {
   };
 
   // Split body roughly in half on a paragraph boundary for two-page spread
-  const splitBody = (md: string) => {
+  const splitBody = (md: string): [string, string] => {
     const paras = md.split(/\n\n+/);
     const mid = Math.ceil(paras.length / 2);
     return [paras.slice(0, mid).join("\n\n"), paras.slice(mid).join("\n\n")];
