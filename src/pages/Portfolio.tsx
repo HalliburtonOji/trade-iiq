@@ -459,86 +459,243 @@ const Portfolio = () => {
           </TabsContent>
 
           <TabsContent value="paper" className="mt-3 flex flex-col gap-3">
-            {/* Balance bar */}
-            <GlassCard>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs text-muted-foreground">Virtual Balance</span>
-                <span className="text-sm font-bold font-mono">£{remaining.toLocaleString()}</span>
+            {/* Virtual Balance */}
+            <div
+              style={{
+                padding: 16,
+                background: "var(--stoa-shine)",
+                border: "1px solid var(--stoa-rule)",
+                borderRadius: 2,
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span className="stoa-kicker">VIRTUAL BALANCE · Δραχμή</span>
+                <span className="stoa-mono" style={{ fontSize: 18, fontWeight: 600, color: "var(--stoa-ink)" }}>
+                  £{remaining.toLocaleString()}
+                </span>
               </div>
-              <div className="h-2 rounded-full bg-secondary overflow-hidden">
-                <motion.div className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
-                  initial={{ width: 0 }} animate={{ width: `${(remaining / startingBalance) * 100}%` }}
-                  transition={{ duration: 0.6 }} />
+              <div
+                className="h-2 rounded-full overflow-hidden"
+                style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)" }}
+              >
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: "var(--stoa-accent)" }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(remaining / startingBalance) * 100}%` }}
+                  transition={{ duration: 0.6 }}
+                />
               </div>
-              <div className="flex justify-between mt-1">
-                <p className="text-[10px] text-muted-foreground">£{usedBalance.toLocaleString()} invested</p>
-                <p className="text-[10px] text-muted-foreground">
-                  {paperWins}W / {paperLosses}L
-                </p>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span className="stoa-kicker" style={{ fontSize: 10 }}>£{usedBalance.toLocaleString()} invested</span>
+                <span className="stoa-kicker" style={{ fontSize: 10 }}>{paperWins}W / {paperLosses}L</span>
               </div>
-            </GlassCard>
+            </div>
 
-            {/* New trade form */}
-            <GlassCard className="flex flex-col gap-2">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">New Paper Trade</p>
-              <Input placeholder="Symbol" value={ptForm.symbol} onChange={(e) => setPtForm((p) => ({ ...p, symbol: e.target.value }))} className="bg-secondary/50" />
+            {/* New rehearsal form */}
+            <div
+              style={{
+                padding: 16,
+                background: "var(--stoa-shine)",
+                border: "1px solid var(--stoa-rule)",
+                borderRadius: 2,
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+              }}
+            >
+              <span className="stoa-kicker">NEW REHEARSAL · Γύμνασμα</span>
+              <Input
+                placeholder="Symbol"
+                value={ptForm.symbol}
+                onChange={(e) => setPtForm((p) => ({ ...p, symbol: e.target.value }))}
+                className="bg-transparent border-[color:var(--stoa-rule)] focus-visible:border-[color:var(--stoa-accent)]"
+              />
               <div className="grid grid-cols-2 gap-2">
-                <Input placeholder="Units" type="number" value={ptForm.units} onChange={(e) => setPtForm((p) => ({ ...p, units: e.target.value }))} className="bg-secondary/50" />
-                <Input placeholder="Price (£)" type="number" value={ptForm.price} onChange={(e) => setPtForm((p) => ({ ...p, price: e.target.value }))} className="bg-secondary/50" />
+                <Input
+                  placeholder="Units"
+                  type="number"
+                  value={ptForm.units}
+                  onChange={(e) => setPtForm((p) => ({ ...p, units: e.target.value }))}
+                  className="bg-transparent border-[color:var(--stoa-rule)] focus-visible:border-[color:var(--stoa-accent)]"
+                />
+                <Input
+                  placeholder="Price (£)"
+                  type="number"
+                  value={ptForm.price}
+                  onChange={(e) => setPtForm((p) => ({ ...p, price: e.target.value }))}
+                  className="bg-transparent border-[color:var(--stoa-rule)] focus-visible:border-[color:var(--stoa-accent)]"
+                />
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <Input placeholder="Stop Loss (£)" type="number" value={ptForm.stopLoss} onChange={(e) => setPtForm((p) => ({ ...p, stopLoss: e.target.value }))} className="bg-secondary/50" />
-                <Input placeholder="Take Profit (£)" type="number" value={ptForm.takeProfit} onChange={(e) => setPtForm((p) => ({ ...p, takeProfit: e.target.value }))} className="bg-secondary/50" />
+                <Input
+                  placeholder="Stop Loss (£)"
+                  type="number"
+                  value={ptForm.stopLoss}
+                  onChange={(e) => setPtForm((p) => ({ ...p, stopLoss: e.target.value }))}
+                  className="bg-transparent border-[color:var(--stoa-rule)] focus-visible:border-[color:var(--stoa-accent)]"
+                />
+                <Input
+                  placeholder="Take Profit (£)"
+                  type="number"
+                  value={ptForm.takeProfit}
+                  onChange={(e) => setPtForm((p) => ({ ...p, takeProfit: e.target.value }))}
+                  className="bg-transparent border-[color:var(--stoa-rule)] focus-visible:border-[color:var(--stoa-accent)]"
+                />
               </div>
-              <Textarea placeholder="Trade thesis — why are you entering?" value={ptForm.thesis} onChange={(e) => setPtForm((p) => ({ ...p, thesis: e.target.value }))} className="bg-secondary/50 min-h-[60px]" />
+              <Textarea
+                placeholder="Trade thesis — why are you entering?"
+                value={ptForm.thesis}
+                onChange={(e) => setPtForm((p) => ({ ...p, thesis: e.target.value }))}
+                className="bg-transparent border-[color:var(--stoa-rule)] focus-visible:border-[color:var(--stoa-accent)] min-h-[60px]"
+              />
               {ptForm.units && ptForm.price && (
-                <div className="flex justify-between text-xs text-muted-foreground font-mono">
-                  <span>Cost: £{((parseFloat(ptForm.units) || 0) * (parseFloat(ptForm.price) || 0)).toFixed(2)}</span>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span className="stoa-mono" style={{ fontSize: 11, color: "var(--stoa-muted)" }}>
+                    Cost: £{((parseFloat(ptForm.units) || 0) * (parseFloat(ptForm.price) || 0)).toFixed(2)}
+                  </span>
                   {ptForm.stopLoss && ptForm.price && (
-                    <span className="text-verdict-avoid">
+                    <span className="stoa-mono" style={{ fontSize: 11, color: "hsl(var(--verdict-avoid))" }}>
                       Risk: £{(((parseFloat(ptForm.price) - parseFloat(ptForm.stopLoss)) * (parseFloat(ptForm.units) || 0))).toFixed(2)}
                     </span>
                   )}
                 </div>
               )}
-              <Button onClick={addPaperTrade} size="sm">Open Position</Button>
-            </GlassCard>
+              <button
+                onClick={addPaperTrade}
+                className="stoa-display"
+                style={{
+                  marginTop: 4,
+                  minHeight: 42,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "0 18px",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: "var(--stoa-shine)",
+                  background: "var(--stoa-accent)",
+                  border: "none",
+                  borderRadius: 2,
+                  cursor: "pointer",
+                }}
+              >
+                Open position · Ἀνοίγω
+              </button>
+            </div>
 
             {/* Open positions */}
             {openTrades.length > 0 && (
               <>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Open Positions</p>
+                <span className="stoa-kicker">OPEN POSITIONS · Ἀνοικτά</span>
                 {openTrades.map((t) => (
-                  <GlassCard key={t.id} className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="text-sm font-bold font-mono">{t.symbol}</span>
-                        <p className="text-xs text-muted-foreground font-mono">{t.units} × £{t.price} = £{t.cost.toFixed(2)}</p>
+                  <div
+                    key={t.id}
+                    style={{
+                      padding: 14,
+                      background: "var(--stoa-shine)",
+                      border: "1px solid var(--stoa-rule)",
+                      borderRadius: 2,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div className="stoa-mono" style={{ fontSize: 16, fontWeight: 700, color: "var(--stoa-ink)" }}>
+                          {t.symbol}
+                        </div>
+                        <div className="stoa-mono" style={{ fontSize: 11, color: "var(--stoa-muted)" }}>
+                          {t.units} × £{t.price} = £{t.cost.toFixed(2)}
+                        </div>
                       </div>
-                      <div className="flex gap-1">
-                        <Button variant="outline" size="sm" className="text-[10px] h-7 text-verdict-buy border-verdict-buy/30"
-                          onClick={() => closeTrade(t.id, "closed-win")}>Win</Button>
-                        <Button variant="outline" size="sm" className="text-[10px] h-7 text-verdict-avoid border-verdict-avoid/30"
-                          onClick={() => closeTrade(t.id, "closed-loss")}>Loss</Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                          onClick={() => setPaperTrades((p) => p.filter((x) => x.id !== t.id))}>
+                      <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                        <button
+                          onClick={() => closeTrade(t.id, "closed-win")}
+                          className="stoa-display"
+                          style={{
+                            padding: "5px 9px",
+                            fontSize: 10,
+                            letterSpacing: "0.08em",
+                            textTransform: "uppercase",
+                            color: "hsl(var(--verdict-buy))",
+                            background: "transparent",
+                            border: "1px solid hsl(var(--verdict-buy))",
+                            borderRadius: 2,
+                            cursor: "pointer",
+                          }}
+                        >
+                          Win · Νίκη
+                        </button>
+                        <button
+                          onClick={() => closeTrade(t.id, "closed-loss")}
+                          className="stoa-display"
+                          style={{
+                            padding: "5px 9px",
+                            fontSize: 10,
+                            letterSpacing: "0.08em",
+                            textTransform: "uppercase",
+                            color: "hsl(var(--verdict-avoid))",
+                            background: "transparent",
+                            border: "1px solid hsl(var(--verdict-avoid))",
+                            borderRadius: 2,
+                            cursor: "pointer",
+                          }}
+                        >
+                          Loss · Ἧττα
+                        </button>
+                        <button
+                          onClick={() => setPaperTrades((p) => p.filter((x) => x.id !== t.id))}
+                          aria-label="Delete"
+                          style={{
+                            padding: 6,
+                            background: "transparent",
+                            border: "1px solid var(--stoa-rule)",
+                            borderRadius: 2,
+                            color: "var(--stoa-muted)",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                          onMouseEnter={(e) => { e.currentTarget.style.color = "var(--stoa-accent)"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.color = "var(--stoa-muted)"; }}
+                        >
                           <Trash2 className="h-3 w-3" />
-                        </Button>
+                        </button>
                       </div>
                     </div>
                     {(t.stopLoss || t.takeProfit) && (
-                      <div className="flex gap-3 text-[10px] text-muted-foreground">
-                        {t.stopLoss && <span>SL: £{t.stopLoss}</span>}
-                        {t.takeProfit && <span>TP: £{t.takeProfit}</span>}
+                      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                        {t.stopLoss && <span className="stoa-kicker" style={{ fontSize: 10 }}>SL £{t.stopLoss}</span>}
+                        {t.takeProfit && <span className="stoa-kicker" style={{ fontSize: 10 }}>TP £{t.takeProfit}</span>}
                         {t.stopLoss && t.takeProfit && (
-                          <span className="text-primary font-medium">
-                            R:R {((t.takeProfit - t.price) / (t.price - t.stopLoss)).toFixed(1)}
+                          <span className="stoa-kicker" style={{ fontSize: 10, color: "var(--stoa-accent)" }}>
+                            R:R {((t.takeProfit - t.price) / (t.price - t.stopLoss)).toFixed(1)} · Λόγος
                           </span>
                         )}
                       </div>
                     )}
-                    {t.thesis && <p className="text-[10px] text-muted-foreground/80 italic">{t.thesis}</p>}
-                  </GlassCard>
+                    {t.thesis && (
+                      <p
+                        style={{
+                          margin: 0,
+                          fontFamily: "Georgia, 'EB Garamond', serif",
+                          fontStyle: "italic",
+                          fontSize: 12,
+                          lineHeight: 1.5,
+                          color: "var(--stoa-muted)",
+                        }}
+                      >
+                        {t.thesis}
+                      </p>
+                    )}
+                  </div>
                 ))}
               </>
             )}
@@ -546,31 +703,87 @@ const Portfolio = () => {
             {/* Closed trades */}
             {closedTrades.length > 0 && (
               <>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Closed</p>
+                <span className="stoa-kicker">CLOSED · Κεκλεισμένα</span>
                 {closedTrades.slice(0, 10).map((t) => (
-                  <GlassCard key={t.id} className="flex items-center justify-between opacity-60">
+                  <div
+                    key={t.id}
+                    style={{
+                      padding: 10,
+                      background: "var(--stoa-shine)",
+                      border: "1px solid var(--stoa-rule)",
+                      borderRadius: 2,
+                      opacity: 0.75,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
                     <div>
-                      <span className="text-sm font-bold font-mono">{t.symbol}</span>
-                      <p className="text-xs text-muted-foreground font-mono">{t.units} × £{t.price}</p>
+                      <div className="stoa-mono" style={{ fontSize: 14, fontWeight: 700, color: "var(--stoa-ink)" }}>
+                        {t.symbol}
+                      </div>
+                      <div className="stoa-mono" style={{ fontSize: 10, color: "var(--stoa-muted)" }}>
+                        {t.units} × £{t.price}
+                      </div>
                     </div>
-                    <span className={`text-xs font-bold ${t.status === "closed-win" ? "text-verdict-buy" : "text-verdict-avoid"}`}>
-                      {t.status === "closed-win" ? "WIN" : "LOSS"}
+                    <span
+                      className="stoa-display"
+                      style={{
+                        fontSize: 11,
+                        letterSpacing: "0.08em",
+                        textTransform: "uppercase",
+                        color: t.status === "closed-win" ? "hsl(var(--verdict-buy))" : "hsl(var(--verdict-avoid))",
+                      }}
+                    >
+                      {t.status === "closed-win" ? "WIN · Νίκη" : "LOSS · Ἧττα"}
                     </span>
-                  </GlassCard>
+                  </div>
                 ))}
               </>
             )}
 
             {paperTrades.length === 0 && (
-              <GlassCard className="text-center py-6">
-                <p className="text-sm text-muted-foreground">No paper trades yet</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">Practice risk-free with a virtual £10,000</p>
-              </GlassCard>
+              <div
+                style={{
+                  padding: "24px 16px",
+                  background: "var(--stoa-shine)",
+                  border: "1px solid var(--stoa-rule)",
+                  borderRadius: 2,
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 6,
+                  alignItems: "center",
+                }}
+              >
+                <p style={{ margin: 0, fontFamily: "Georgia, 'EB Garamond', serif", fontStyle: "italic", fontSize: 14, color: "var(--stoa-muted)" }}>
+                  The sand is unbrushed · ἄγραφος
+                </p>
+                <span className="stoa-kicker" style={{ fontSize: 10 }}>practice risk-free with a virtual £10,000</span>
+              </div>
             )}
           </TabsContent>
 
           <TabsContent value="personality" className="mt-3">
-            <PersonalitySelector />
+            <div
+              style={{
+                padding: 16,
+                background: "var(--stoa-shine)",
+                border: "1px solid var(--stoa-rule)",
+                borderRadius: 2,
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+              }}
+            >
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <span className="stoa-kicker">TRADING CHARACTER · Ἦθος</span>
+                <p style={{ margin: 0, fontFamily: "Georgia, 'EB Garamond', serif", fontStyle: "italic", fontSize: 12, color: "var(--stoa-muted)" }}>
+                  choose the temperament that guides your hand
+                </p>
+              </div>
+              <PersonalitySelector />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
