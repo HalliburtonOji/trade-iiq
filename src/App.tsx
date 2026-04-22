@@ -23,7 +23,14 @@ import Playbook from "./pages/Playbook";
 import ScreenshotVault from "./pages/ScreenshotVault";
 import ReviewWorkspace from "./pages/ReviewWorkspace";
 import Temple from "./pages/Temple";
-import StoaPlaceholder from "./pages/StoaPlaceholder";
+import Scroll from "./pages/Scroll";
+import Codex from "./pages/Codex";
+import Agora from "./pages/Agora";
+import Amphitheater from "./pages/Amphitheater";
+import Sanctuary from "./pages/Sanctuary";
+import Ergon from "./pages/Ergon";
+import Kanon from "./pages/Kanon";
+import StoaLanding from "./pages/StoaLanding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -74,12 +81,15 @@ const AppContent = () => {
         <Route path="/review" element={<ProtectedRoute><ReviewWorkspace /></ProtectedRoute>} />
 
         {/* Stoa routes */}
+        <Route path="/stoa" element={<StoaLanding />} />
         <Route path="/dashboard" element={<ProtectedRoute><Temple /></ProtectedRoute>} />
-        <Route path="/journal" element={<ProtectedRoute><StoaPlaceholder english="Scroll" greek="Βίβλος" pompeii /></ProtectedRoute>} />
-        <Route path="/markets" element={<ProtectedRoute><StoaPlaceholder english="Agora" greek="Ἀγορά" /></ProtectedRoute>} />
-        <Route path="/coach" element={<ProtectedRoute><StoaPlaceholder english="Sanctuary" greek="Πυθία" /></ProtectedRoute>} />
-        <Route path="/settings" element={<ProtectedRoute><StoaPlaceholder english="Ergon" greek="Ἔργον" /></ProtectedRoute>} />
-        <Route path="/style" element={<ProtectedRoute><StoaPlaceholder english="Kanon" greek="Κανών" /></ProtectedRoute>} />
+        <Route path="/journal" element={<ProtectedRoute><Scroll /></ProtectedRoute>} />
+        <Route path="/learn-stoa" element={<ProtectedRoute><Codex /></ProtectedRoute>} />
+        <Route path="/markets" element={<ProtectedRoute><Agora /></ProtectedRoute>} />
+        <Route path="/review-stoa" element={<ProtectedRoute><Amphitheater /></ProtectedRoute>} />
+        <Route path="/coach" element={<ProtectedRoute><Sanctuary /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Ergon /></ProtectedRoute>} />
+        <Route path="/style" element={<ProtectedRoute><Kanon /></ProtectedRoute>} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>
