@@ -581,84 +581,270 @@ const Analysis = () => {
                   </p>
                 </div>
 
-                <Tabs defaultValue="verdict" className="w-full">
-                  <TabsList className="w-full bg-secondary/50">
-                    <TabsTrigger value="verdict" className="flex-1 text-xs">Verdict</TabsTrigger>
-                    <TabsTrigger value="technicals" className="flex-1 text-xs">Technicals</TabsTrigger>
-                    <TabsTrigger value="macro" className="flex-1 text-xs">Macro</TabsTrigger>
-                    <TabsTrigger value="targets" className="flex-1 text-xs">Targets</TabsTrigger>
-                  </TabsList>
+                {/* ---------- THE FOUR CHAMBERS · Θάλαμοι ---------- */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <span className="stoa-kicker" style={{ fontSize: 11 }}>THE FOUR CHAMBERS · Θάλαμοι</span>
 
-                  <TabsContent value="verdict" className="mt-3 flex flex-col gap-3">
-                    <GlassCard>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-muted-foreground">Risk Score</span>
-                        <span className="text-sm font-bold font-mono">{result.riskScore}/10</span>
-                      </div>
-                      <div className="h-2.5 rounded-full bg-secondary overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${result.riskScore * 10}%` }}
-                          transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
-                          className="h-full rounded-full transition-all"
-                          style={{ backgroundColor: result.riskScore <= 4 ? "hsl(var(--verdict-buy))" : result.riskScore <= 7 ? "hsl(var(--verdict-wait))" : "hsl(var(--verdict-avoid))" }}
-                        />
-                      </div>
-                    </GlassCard>
-                    <GlassCard>
-                      <span className="text-xs text-muted-foreground mb-2 block">Key Points</span>
-                      <ul className="space-y-1.5">
-                        {(result.macroPoints || []).map((p, i) => (
-                          <li key={i} className="text-xs text-foreground/80 flex items-start gap-2">
-                            <span className="text-primary mt-0.5">•</span> {p}
-                          </li>
-                        ))}
-                      </ul>
-                    </GlassCard>
-                  </TabsContent>
-
-                  <TabsContent value="technicals" className="mt-3">
-                    <div className="grid grid-cols-2 gap-2">
-                      {Object.entries(result.technicals || {}).map(([key, val]) => (
-                        <GlassCard key={key} className="p-3">
-                          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{key}</span>
-                          <p className="text-sm font-bold font-mono mt-0.5">{String(val)}</p>
-                        </GlassCard>
+                  <Tabs defaultValue="verdict" className="w-full">
+                    <TabsList
+                      className="w-full grid grid-cols-4 gap-0 p-0 bg-transparent rounded-none h-auto"
+                      style={{ borderBottom: "1px solid var(--stoa-rule)" }}
+                    >
+                      {[
+                        { value: "verdict", label: "Verdict", greek: "Κρίσις" },
+                        { value: "technicals", label: "Technicals", greek: "Τέχνη" },
+                        { value: "macro", label: "Macro", greek: "Κόσμος" },
+                        { value: "targets", label: "Targets", greek: "Τέλος" },
+                      ].map((t) => (
+                        <TabsTrigger
+                          key={t.value}
+                          value={t.value}
+                          className="flex flex-col items-center gap-0.5 py-2.5 px-1 rounded-none border-b-[2px] border-transparent text-[color:var(--stoa-muted)] bg-transparent data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                          style={{ marginBottom: -1 }}
+                        >
+                          <span className="stoa-display" style={{ fontSize: 13, letterSpacing: "0.06em" }}>{t.label}</span>
+                          <span className="stoa-greek" style={{ fontSize: 10, color: "var(--stoa-muted)", opacity: 0.75 }}>{t.greek}</span>
+                        </TabsTrigger>
                       ))}
-                    </div>
-                  </TabsContent>
+                    </TabsList>
 
-                  <TabsContent value="macro" className="mt-3 flex flex-col gap-2">
-                    {(result.macroFactors || []).map((f, i) => (
-                      <GlassCard key={i} className="flex items-start gap-3 p-3">
-                        <span className="text-lg">{f.icon}</span>
-                        <div>
-                          <p className="text-xs font-semibold">{f.label}</p>
-                          <p className="text-[11px] text-muted-foreground">{f.detail}</p>
+                    {/* ---------- Verdict ---------- */}
+                    <TabsContent value="verdict" className="mt-4 flex flex-col gap-3">
+                      {/* Risk gauge */}
+                      <div
+                        style={{
+                          background: "var(--stoa-shine)",
+                          border: "1px solid var(--stoa-rule)",
+                          borderRadius: 2,
+                          padding: "16px 18px",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 10,
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <span className="stoa-kicker" style={{ fontSize: 10 }}>Risk · Κίνδυνος</span>
+                          <span className="stoa-mono" style={{ fontSize: 14, fontWeight: 600, color: "var(--stoa-ink)" }}>
+                            {result.riskScore}/10
+                          </span>
                         </div>
-                      </GlassCard>
-                    ))}
-                  </TabsContent>
-
-                  <TabsContent value="targets" className="mt-3">
-                    <GlassCard>
-                      <div className="flex justify-between text-center">
-                        <div className="flex-1">
-                          <span className="text-[10px] text-verdict-avoid font-medium block">🐻 Bear</span>
-                          <p className="text-sm font-bold font-mono mt-1">${(result.targets?.bear || 0).toLocaleString()}</p>
+                        <div
+                          style={{
+                            height: 6,
+                            border: "1px solid var(--stoa-rule)",
+                            borderRadius: 999,
+                            overflow: "hidden",
+                            background: "transparent",
+                          }}
+                        >
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${result.riskScore * 10}%` }}
+                            transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
+                            style={{
+                              height: "100%",
+                              borderRadius: 999,
+                              backgroundColor:
+                                result.riskScore <= 4
+                                  ? "hsl(var(--verdict-buy))"
+                                  : result.riskScore <= 7
+                                  ? "hsl(var(--verdict-wait))"
+                                  : "hsl(var(--verdict-avoid))",
+                            }}
+                          />
                         </div>
-                        <div className="flex-1 border-x border-border/30">
-                          <span className="text-[10px] text-verdict-wait font-medium block">📊 Base</span>
-                          <p className="text-sm font-bold font-mono mt-1">${(result.targets?.base || 0).toLocaleString()}</p>
-                        </div>
-                        <div className="flex-1">
-                          <span className="text-[10px] text-verdict-buy font-medium block">🐂 Bull</span>
-                          <p className="text-sm font-bold font-mono mt-1">${(result.targets?.bull || 0).toLocaleString()}</p>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            fontFamily: "Georgia, 'EB Garamond', serif",
+                            fontSize: 11,
+                            fontStyle: "italic",
+                            color: "var(--stoa-muted)",
+                          }}
+                        >
+                          <span>Low</span>
+                          <span>Moderate</span>
+                          <span>Extreme</span>
                         </div>
                       </div>
-                    </GlassCard>
-                  </TabsContent>
-                </Tabs>
+
+                      {/* Key points */}
+                      <div
+                        style={{
+                          background: "var(--stoa-shine)",
+                          border: "1px solid var(--stoa-rule)",
+                          borderRadius: 2,
+                          padding: "16px 18px",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 10,
+                        }}
+                      >
+                        <span className="stoa-kicker" style={{ fontSize: 10 }}>Key points · Κεφάλαια</span>
+                        <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
+                          {(result.macroPoints || []).map((p, i) => (
+                            <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                              <span
+                                className="stoa-display"
+                                style={{
+                                  fontSize: 13,
+                                  fontWeight: 600,
+                                  letterSpacing: "0.04em",
+                                  color: "var(--stoa-accent)",
+                                  flexShrink: 0,
+                                  minWidth: 22,
+                                  lineHeight: 1.5,
+                                }}
+                              >
+                                {String(i + 1).padStart(2, "0")}
+                              </span>
+                              <span
+                                style={{
+                                  fontFamily: "Georgia, 'EB Garamond', serif",
+                                  fontStyle: "italic",
+                                  fontSize: 14,
+                                  lineHeight: 1.5,
+                                  color: "var(--stoa-ink)",
+                                }}
+                              >
+                                {p}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </TabsContent>
+
+                    {/* ---------- Technicals ---------- */}
+                    <TabsContent value="technicals" className="mt-4">
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: isMobile ? "repeat(2, minmax(0, 1fr))" : "repeat(3, minmax(0, 1fr))",
+                          gap: 8,
+                        }}
+                      >
+                        {Object.entries(result.technicals || {}).map(([key, val]) => (
+                          <div
+                            key={key}
+                            style={{
+                              background: "var(--stoa-shine)",
+                              border: "1px solid var(--stoa-rule)",
+                              borderRadius: 2,
+                              padding: "12px 14px",
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 4,
+                            }}
+                          >
+                            <span className="stoa-kicker" style={{ fontSize: 10 }}>{key}</span>
+                            <p className="stoa-mono" style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "var(--stoa-ink)" }}>
+                              {String(val)}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+
+                    {/* ---------- Macro ---------- */}
+                    <TabsContent value="macro" className="mt-4 flex flex-col gap-2">
+                      {(result.macroFactors || []).map((f, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            background: "var(--stoa-shine)",
+                            border: "1px solid var(--stoa-rule)",
+                            borderRadius: 2,
+                            padding: "14px 16px",
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: 14,
+                          }}
+                        >
+                          <span style={{ fontSize: 20, lineHeight: 1, flexShrink: 0 }}>{f.icon}</span>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}>
+                            <p className="stoa-display" style={{ margin: 0, fontSize: 13, fontWeight: 600, letterSpacing: "0.04em", color: "var(--stoa-ink)" }}>
+                              {f.label}
+                            </p>
+                            <p
+                              style={{
+                                margin: 0,
+                                fontFamily: "Georgia, 'EB Garamond', serif",
+                                fontStyle: "italic",
+                                fontSize: 13,
+                                lineHeight: 1.5,
+                                color: "var(--stoa-muted)",
+                              }}
+                            >
+                              {f.detail}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </TabsContent>
+
+                    {/* ---------- Targets ---------- */}
+                    <TabsContent value="targets" className="mt-4">
+                      <div
+                        style={{
+                          background: "var(--stoa-shine)",
+                          border: "1px solid var(--stoa-rule)",
+                          borderRadius: 2,
+                          padding: isMobile ? "16px 0" : "18px 0",
+                          display: "grid",
+                          gridTemplateColumns: isMobile ? "1fr" : "repeat(3, minmax(0, 1fr))",
+                        }}
+                      >
+                        {[
+                          { key: "bear", label: "Bear", greek: "Πτῶσις", color: "hsl(var(--verdict-avoid))", value: result.targets?.bear || 0 },
+                          { key: "base", label: "Base", greek: "Μέσον", color: "hsl(var(--verdict-wait))", value: result.targets?.base || 0 },
+                          { key: "bull", label: "Bull", greek: "Ὕψος", color: "hsl(var(--verdict-buy))", value: result.targets?.bull || 0 },
+                        ].map((t, i) => (
+                          <div
+                            key={t.key}
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              gap: 6,
+                              padding: isMobile ? "12px 14px" : "8px 14px",
+                              borderLeft: !isMobile && i > 0 ? "1px solid var(--stoa-rule)" : "none",
+                              borderTop: isMobile && i > 0 ? "1px solid var(--stoa-rule)" : "none",
+                            }}
+                          >
+                            <span
+                              className="stoa-display"
+                              style={{
+                                fontSize: 11,
+                                letterSpacing: "0.12em",
+                                textTransform: "uppercase",
+                                fontWeight: 600,
+                                color: t.color,
+                              }}
+                            >
+                              {t.label}
+                            </span>
+                            <span className="stoa-greek" style={{ fontSize: 12, color: "var(--stoa-muted)", opacity: 0.75 }}>
+                              {t.greek}
+                            </span>
+                            <span
+                              className="stoa-mono"
+                              style={{
+                                fontSize: isMobile ? 17 : 22,
+                                fontWeight: 700,
+                                color: "var(--stoa-ink)",
+                                lineHeight: 1.1,
+                              }}
+                            >
+                              ${t.value.toLocaleString()}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </div>
 
                 {/* AI Market Signals */}
                 <MarketSignals symbol={result.symbol} assetType={assetType} livePrice={result.price} />
@@ -666,28 +852,107 @@ const Analysis = () => {
                 {/* Community Sentiment */}
                 <SentimentPoll symbol={result.symbol} />
 
-                <div className="flex gap-2">
-                  <Button
-                    variant={watchlistSaved ? "default" : "outline"}
-                    className="flex-1 text-xs gap-1.5"
-                    size="sm"
+                {/* ---------- Action row ---------- */}
+                <div
+                  style={{
+                    borderTop: "1px solid var(--stoa-rule)",
+                    paddingTop: 16,
+                    display: "grid",
+                    gridTemplateColumns: isMobile ? "1fr" : "repeat(3, minmax(0, 1fr))",
+                    gap: 10,
+                  }}
+                >
+                  {/* Watchlist */}
+                  <button
                     onClick={addToWatchlist}
                     disabled={watchlistSaving || watchlistSaved}
+                    className="stoa-display"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 8,
+                      padding: "11px 14px",
+                      fontSize: 13,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      color: watchlistSaved ? "var(--stoa-accent)" : "var(--stoa-ink)",
+                      background: "transparent",
+                      border: `1px solid ${watchlistSaved ? "var(--stoa-accent)" : "var(--stoa-rule)"}`,
+                      borderRadius: 2,
+                      cursor: watchlistSaving || watchlistSaved ? "default" : "pointer",
+                      opacity: watchlistSaving ? 0.7 : 1,
+                    }}
                   >
                     {watchlistSaving ? (
-                      <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving...</>
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        <span>Saving</span>
+                      </>
                     ) : watchlistSaved ? (
-                      <><Star className="h-3.5 w-3.5 fill-current" /> Saved</>
+                      <>
+                        <Star className="h-3.5 w-3.5" style={{ fill: "var(--stoa-accent)", color: "var(--stoa-accent)" }} />
+                        <span>Saved</span>
+                        <span className="stoa-greek" style={{ fontSize: 11, opacity: 0.75 }}>· Φυλακή</span>
+                      </>
                     ) : (
-                      <><Star className="h-3.5 w-3.5" /> Watchlist</>
+                      <>
+                        <Star className="h-3.5 w-3.5" />
+                        <span>Watchlist</span>
+                        <span className="stoa-greek" style={{ fontSize: 11, color: "var(--stoa-muted)", opacity: 0.7 }}>· Φυλακή</span>
+                      </>
                     )}
-                  </Button>
-                  <Button variant="outline" className="flex-1 text-xs gap-1.5" size="sm" onClick={() => setBrokerOpen(true)}>
-                    <ExternalLink className="h-3.5 w-3.5" /> Execute
-                  </Button>
-                  <Button className="flex-1 text-xs" size="sm" onClick={() => navigate("/tracker")}>
-                    Log Decision
-                  </Button>
+                  </button>
+
+                  {/* Execute */}
+                  <button
+                    onClick={() => setBrokerOpen(true)}
+                    className="stoa-display"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 8,
+                      padding: "11px 14px",
+                      fontSize: 13,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      color: "var(--stoa-ink)",
+                      background: "transparent",
+                      border: "1px solid var(--stoa-rule)",
+                      borderRadius: 2,
+                      cursor: "pointer",
+                    }}
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    <span>Execute</span>
+                    <span className="stoa-greek" style={{ fontSize: 11, color: "var(--stoa-muted)", opacity: 0.7 }}>· Πρᾶξις</span>
+                  </button>
+
+                  {/* Log decision — gold-filled */}
+                  <button
+                    onClick={() => navigate("/tracker")}
+                    className="stoa-display"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 8,
+                      padding: "11px 14px",
+                      fontSize: 13,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      fontWeight: 600,
+                      color: "var(--stoa-shine)",
+                      background: "var(--stoa-accent)",
+                      border: "none",
+                      borderRadius: 2,
+                      cursor: "pointer",
+                    }}
+                  >
+                    <span>Log decision</span>
+                    <span className="stoa-greek" style={{ fontSize: 11, opacity: 0.85 }}>· Βίβλος</span>
+                  </button>
                 </div>
 
                 <BrokerLauncher
@@ -702,7 +967,10 @@ const Analysis = () => {
             )}
 
             {/* Symbol Compare */}
-            <SymbolCompare />
+            <div style={{ marginTop: 28 }}>
+              <SymbolCompare />
+            </div>
+
           </>
         )}
       </div>
