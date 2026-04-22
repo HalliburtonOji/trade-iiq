@@ -22,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
-import GlassCard from "@/components/GlassCard";
+
 import StatCard from "@/components/StatCard";
 import TickerMarquee from "@/components/TickerMarquee";
 import DailyMissions from "@/components/DailyMissions";
