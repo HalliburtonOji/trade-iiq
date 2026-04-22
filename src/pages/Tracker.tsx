@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useLearnNudges } from "@/hooks/use-learn-nudges";
 import CsvImport from "@/components/CsvImport";
 
 type Decision = "BUY" | "WAIT" | "AVOID";
@@ -54,7 +53,6 @@ const mistakes = ["entered_early", "ignored_macro", "fomo", "oversizing", "no_st
 const Tracker = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { checkDecisionForNudge, checkReviewForRemediation } = useLearnNudges();
   const [showForm, setShowForm] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showThesis, setShowThesis] = useState(false);
@@ -93,7 +91,6 @@ const Tracker = () => {
 
   const handleSave = async () => {
     if (!formData.symbol || !user) return;
-    const invalidation = parseFloat(formData.invalidationPoint) || null;
     const { error } = await supabase.from("trade_decisions").insert({
       user_id: user.id,
       symbol: formData.symbol.toUpperCase(),
@@ -104,7 +101,7 @@ const Tracker = () => {
       outcome: "PENDING",
       thesis_why: formData.thesisWhy,
       time_horizon: formData.timeHorizon || null,
-      invalidation_point: invalidation,
+      invalidation_point: parseFloat(formData.invalidationPoint) || null,
       confidence: formData.confidence,
       catalyst_date: formData.catalystDate || null,
       catalyst_note: formData.catalystNote,
@@ -115,8 +112,6 @@ const Tracker = () => {
     setShowThesis(false);
     fetchTrades();
     toast({ title: "Decision logged", description: "Your trade thesis has been saved." });
-    // Adaptive nudge: warn if no invalidation/stop plan
-    checkDecisionForNudge({ invalidation_point: invalidation, symbol: formData.symbol.toUpperCase() });
   };
 
   const updateOutcome = async (id: string, outcome: Outcome) => {
@@ -137,8 +132,6 @@ const Tracker = () => {
       ...reviewData,
     });
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
-    // Adaptive nudge: pin a remediation lesson when a known mistake is logged
-    await checkReviewForRemediation({ mistake_type: reviewData.mistake_type });
     setReviewingId(null);
     setReviewData({ verdict_correct: null, timing_correct: null, followed_plan: null, execution_quality: "followed", emotion: "calm", mistake_type: "none", lesson_learned: "" });
     toast({ title: "Review saved", description: "Post-mortem recorded. Learn from this." });
