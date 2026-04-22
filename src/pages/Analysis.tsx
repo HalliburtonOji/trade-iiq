@@ -4,8 +4,10 @@ import { Search, ArrowRight, Plus, Star, Camera, ExternalLink, Loader2, Calendar
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import StoaShell from "@/components/stoa/StoaShell";
 import PedimentCap from "@/components/stoa/PedimentCap";
+import Meander from "@/components/stoa/Meander";
 import GlassCard from "@/components/GlassCard";
 import VerdictBadge from "@/components/VerdictBadge";
 import SetupScoreMeter from "@/components/SetupScoreMeter";
