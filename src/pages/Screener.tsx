@@ -172,79 +172,153 @@ const Screener = () => {
     >
       <div className="flex flex-col gap-2 mb-2 min-w-0 max-w-full overflow-hidden">
         <PedimentCap variant="rule" />
-        <span className="stoa-kicker">ACROPOLIS · THE MARKET</span>
+        <span className="stoa-kicker">ACROPOLIS · THE AGORA</span>
         <div className="flex items-baseline gap-3">
           <h1 className="stoa-display text-3xl font-semibold">Screener</h1>
           <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Ἀγορά</span>
         </div>
-        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>sort the field by virtue</p>
+        <p className="text-sm italic" style={{ color: "var(--stoa-muted)", fontFamily: "Georgia, serif" }}>
+          scan the market for setups worth a reading
+        </p>
       </div>
       <div className="flex flex-col gap-4 pt-6 pb-24">
         {/* Sector Heatmap */}
         <SectorHeatmap onSelectSymbol={(sym) => { setSearch(sym); }} />
-        {/* Header */}
-        <div className={`flex items-center justify-between ${isMobile ? "px-4" : ""}`}>
-          <div>
-            <h1 className="text-xl font-bold">Screener</h1>
-            <p className="text-xs text-muted-foreground mt-0.5">Scan markets for high-quality setups</p>
-          </div>
-          {!isMobile && (
-            <div className="flex items-center gap-2">
-              <button onClick={() => setViewMode("cards")}
-                className={`p-2 rounded-lg transition-colors ${viewMode === "cards" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}>
-                <LayoutGrid className="h-4 w-4" />
+
+        {/* View-mode toggle (desktop only) */}
+        {!isMobile && (
+          <div className="flex justify-end">
+            <div
+              className="inline-flex"
+              style={{
+                border: "1px solid var(--stoa-rule)",
+                borderRadius: 2,
+                background: "transparent",
+              }}
+            >
+              <button
+                onClick={() => setViewMode("table")}
+                className={cn(
+                  "px-3 py-1 stoa-display uppercase inline-flex items-center gap-1.5",
+                  viewMode === "table"
+                    ? "text-[color:var(--stoa-ink)] border-b-[2px] border-[color:var(--stoa-accent)]"
+                    : "text-[color:var(--stoa-muted)]"
+                )}
+                style={{ fontSize: 11 }}
+              >
+                <LayoutList className="h-3.5 w-3.5" />
+                Table · Πίναξ
               </button>
-              <button onClick={() => setViewMode("table")}
-                className={`p-2 rounded-lg transition-colors ${viewMode === "table" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}>
-                <LayoutList className="h-4 w-4" />
+              <button
+                onClick={() => setViewMode("cards")}
+                className={cn(
+                  "px-3 py-1 stoa-display uppercase inline-flex items-center gap-1.5",
+                  viewMode === "cards"
+                    ? "text-[color:var(--stoa-ink)] border-b-[2px] border-[color:var(--stoa-accent)]"
+                    : "text-[color:var(--stoa-muted)]"
+                )}
+                style={{ fontSize: 11 }}
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
+                Cards · Ἰδέαι
               </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Summary stats */}
-        <div className={`grid ${isMobile ? "grid-cols-3 px-4" : "grid-cols-4"} gap-2`}>
-          <GlassCard className="flex flex-col items-center py-3">
-            <span className="text-lg font-bold font-mono">{filtered.length}</span>
-            <span className="text-[10px] text-muted-foreground">Total</span>
-          </GlassCard>
-          <GlassCard className="flex flex-col items-center py-3">
-            <span className="text-lg font-bold font-mono text-verdict-buy">{buyCount}</span>
-            <span className="text-[10px] text-muted-foreground">BUY</span>
-          </GlassCard>
-          <GlassCard className="flex flex-col items-center py-3">
-            <span className="text-lg font-bold font-mono text-verdict-wait">{waitCount}</span>
-            <span className="text-[10px] text-muted-foreground">WAIT</span>
-          </GlassCard>
-          {!isMobile && (
-            <GlassCard className="flex flex-col items-center py-3">
-              <span className="text-lg font-bold font-mono text-verdict-avoid">{avoidCount}</span>
-              <span className="text-[10px] text-muted-foreground">AVOID</span>
-            </GlassCard>
-          )}
-        </div>
-
-        {/* Tabs + Search + Filters */}
-        <div className={`${isMobile ? "px-4 space-y-3" : "flex items-end gap-4"}`}>
-          <div className={`flex gap-2 ${isMobile ? "" : "shrink-0"}`}>
-            {(["Stocks", "Crypto", "Forex"] as AssetTab[]).map((t) => (
-              <button key={t} onClick={() => setTab(t)}
-                className={`rounded-lg py-1.5 text-xs font-semibold transition-all ${isMobile ? "flex-1" : "px-4"} ${tab === t ? "bg-primary text-primary-foreground" : "glass-card text-muted-foreground"}`}>
-                {t}
-              </button>
+        {/* THE FIELD · Πλῆθος — stats strip */}
+        <div
+          style={{
+            background: "var(--stoa-shine)",
+            border: "1px solid var(--stoa-rule)",
+            borderRadius: 2,
+            padding: 16,
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+          }}
+        >
+          <span className="stoa-kicker">THE FIELD · Πλῆθος</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-0">
+            {[
+              { kicker: "TOTAL · Πλῆθος", value: filtered.length, color: "var(--stoa-ink)" },
+              { kicker: "BUY · Ἄξιον", value: buyCount, color: "hsl(var(--verdict-buy))" },
+              { kicker: "WAIT · Ἐπέχω", value: waitCount, color: "hsl(var(--verdict-wait))" },
+              { kicker: "AVOID · Φυγή", value: avoidCount, color: "hsl(var(--verdict-avoid))" },
+            ].map((cell, idx) => (
+              <div
+                key={cell.kicker}
+                className="flex flex-col items-center justify-center gap-1"
+                style={{
+                  padding: 12,
+                  borderLeft: idx > 0 ? "1px solid var(--stoa-rule)" : "none",
+                }}
+              >
+                <span className="stoa-kicker text-center">{cell.kicker}</span>
+                <span className="stoa-mono font-bold" style={{ fontSize: 22, color: cell.color }}>
+                  {cell.value}
+                </span>
+              </div>
             ))}
           </div>
+        </div>
 
-          <div className={`relative ${isMobile ? "" : "flex-1 max-w-sm"}`}>
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search symbol or name..." className="pl-9 bg-secondary/50 border-border/50" />
-          </div>
+        {/* Asset-class tabs */}
+        <div
+          className="grid grid-cols-3"
+          style={{ borderBottom: "1px solid var(--stoa-rule)" }}
+        >
+          {([
+            { v: "Stocks" as AssetTab, en: "Stocks", gr: "Μετοχαί" },
+            { v: "Crypto" as AssetTab, en: "Crypto", gr: "Κρυπτόν" },
+            { v: "Forex" as AssetTab, en: "Forex", gr: "Νόμισμα" },
+          ]).map((t) => (
+            <button
+              key={t.v}
+              onClick={() => setTab(t.v)}
+              className={cn(
+                "flex flex-col items-center gap-0.5 py-2 bg-transparent transition-colors",
+                tab === t.v
+                  ? "text-[color:var(--stoa-ink)] border-b-[2px] border-[color:var(--stoa-accent)] -mb-[1px]"
+                  : "text-[color:var(--stoa-muted)]"
+              )}
+            >
+              <span className="stoa-display" style={{ fontSize: 13 }}>{t.en}</span>
+              <span className="stoa-greek" style={{ fontSize: 10, color: "var(--stoa-muted)" }}>{t.gr}</span>
+            </button>
+          ))}
+        </div>
 
-          <div className={`grid ${isMobile ? "grid-cols-2" : "grid-cols-4"} gap-2`}>
-            <FilterSelect label="Verdict" value={verdictFilter} onChange={setVerdictFilter} options={["Any", "BUY", "WAIT", "AVOID"]} />
-            <FilterSelect label="Risk" value={riskFilter} onChange={setRiskFilter} options={["Any", "Low", "Medium", "High"]} />
-            <FilterSelect label="Momentum" value={momentumFilter} onChange={setMomentumFilter} options={["Any", "Strong", "Moderate", "Flat", "Weak"]} />
-            <FilterSelect label="Sentiment" value={sentimentFilter} onChange={setSentimentFilter} options={["Any", "Bullish", "Neutral", "Bearish"]} />
+        {/* Filters rail */}
+        <div
+          style={{
+            background: "var(--stoa-shine)",
+            border: "1px solid var(--stoa-rule)",
+            borderRadius: 2,
+            padding: 12,
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+          }}
+        >
+          <span className="stoa-kicker">FILTERS · Διάκρισις</span>
+          <div className={`${isMobile ? "space-y-3" : "flex items-end gap-3"}`}>
+            <div className={`relative ${isMobile ? "" : "flex-1 max-w-sm"}`}>
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--stoa-muted)" }} />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search symbol or name · Ζήτησις"
+                className="pl-9 bg-transparent border-[color:var(--stoa-rule)] focus-visible:border-[color:var(--stoa-accent)] text-[color:var(--stoa-ink)] placeholder:text-[color:var(--stoa-muted)]"
+              />
+            </div>
+
+            <div className={`grid ${isMobile ? "grid-cols-2" : "grid-cols-4 flex-1"} gap-2`}>
+              <FilterSelect label="Verdict" value={verdictFilter} onChange={setVerdictFilter} options={["Any", "BUY", "WAIT", "AVOID"]} />
+              <FilterSelect label="Risk" value={riskFilter} onChange={setRiskFilter} options={["Any", "Low", "Medium", "High"]} />
+              <FilterSelect label="Momentum" value={momentumFilter} onChange={setMomentumFilter} options={["Any", "Strong", "Moderate", "Flat", "Weak"]} />
+              <FilterSelect label="Sentiment" value={sentimentFilter} onChange={setSentimentFilter} options={["Any", "Bullish", "Neutral", "Bearish"]} />
+            </div>
           </div>
         </div>
 
