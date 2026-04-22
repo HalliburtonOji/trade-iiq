@@ -19,6 +19,11 @@ export interface LessonIllustrationData {
   afterSection?: number; // index of content section after which to show (default: 0)
 }
 
+export interface InteractiveElement {
+  type: "calculator" | "chart" | "chart_input";
+  config: Record<string, unknown>;
+}
+
 export interface Lesson {
   id: string;
   slug: string;
@@ -37,6 +42,8 @@ export interface Lesson {
   quiz: QuizQuestion[];
   related_lessons: string[];
   illustrations?: LessonIllustrationData[];
+  interactive_element?: InteractiveElement;
+  reflection_prompt?: string;
 }
 
 export const lessonsData: Lesson[] = [
