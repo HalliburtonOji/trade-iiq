@@ -129,7 +129,8 @@ const Screener = () => {
     <div className="flex flex-col gap-1">
       <label className="text-[10px] text-muted-foreground font-medium">{label}</label>
       <select value={value} onChange={(e) => onChange(e.target.value)}
-        className="rounded-lg bg-secondary/50 border border-border/50 px-2 py-1.5 text-xs text-foreground outline-none">
+        className="rounded-sm bg-transparent border border-[color:var(--stoa-rule)] focus:border-[color:var(--stoa-accent)] px-2 py-1.5 stoa-mono text-[color:var(--stoa-ink)] outline-none"
+        style={{ fontSize: 12 }}>
         {options.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>
     </div>
@@ -324,83 +325,126 @@ const Screener = () => {
 
         {/* TABLE VIEW (desktop) */}
         {viewMode === "table" && !isMobile ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-border/30">
-                  <th className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider py-3 px-3">Symbol</th>
-                  <th className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider py-3 px-3">Name</th>
-                  <th className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider py-3 px-3">Verdict</th>
-                  <th className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider py-3 px-3 text-right">Change</th>
-                  <th className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider py-3 px-3 text-right">RSI</th>
-                  <th className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider py-3 px-3">Momentum</th>
-                  <th className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider py-3 px-3">Risk</th>
-                  {fitData.bestAsset && (
-                    <th className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider py-3 px-3">Fit</th>
-                  )}
-                  <th className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider py-3 px-3"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((asset) => {
+          <div>
+            <div className="mb-2">
+              <span className="stoa-kicker">THE CATALOGUE · Κατάλογος</span>
+            </div>
+            <div
+              className="overflow-x-auto"
+              style={{
+                background: "var(--stoa-shine)",
+                border: "1px solid var(--stoa-rule)",
+                borderRadius: 2,
+              }}
+            >
+              <table className="w-full text-left">
+                <thead>
+                  <tr style={{ background: "var(--stoa-shine)", borderBottom: "1px solid var(--stoa-rule)" }}>
+                    <th className="stoa-kicker py-2 px-3 text-left">Symbol</th>
+                    <th className="stoa-kicker py-2 px-3 text-left">Name</th>
+                    <th className="stoa-kicker py-2 px-3 text-left">Verdict</th>
+                    <th className="stoa-kicker py-2 px-3 text-right">Change</th>
+                    <th className="stoa-kicker py-2 px-3 text-right">RSI</th>
+                    <th className="stoa-kicker py-2 px-3 text-left">Momentum</th>
+                    <th className="stoa-kicker py-2 px-3 text-left">Risk</th>
+                    {fitData.bestAsset && (
+                      <th className="stoa-kicker py-2 px-3 text-left">Fit</th>
+                    )}
+                    <th className="stoa-kicker py-2 px-3 text-left"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((asset) => {
+                    const fit = fitData.bestAsset ? getFitScore(asset) : null;
+                    return (
+                      <motion.tr key={asset.symbol} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                        className="transition-colors cursor-pointer group even:bg-transparent odd:bg-[color:var(--stoa-shine)] hover:bg-black/[0.03]"
+                        style={{ borderBottom: "1px solid var(--stoa-rule)" }}
+                        onClick={() => setExpanded(expanded === asset.symbol ? null : asset.symbol)}>
+                        <td className="py-2 px-3">
+                          <span className="stoa-mono font-bold text-[color:var(--stoa-ink)]" style={{ fontSize: 13 }}>{asset.symbol}</span>
+                        </td>
+                        <td
+                          className="py-2 px-3 truncate max-w-[180px]"
+                          style={{ fontFamily: "Georgia, serif", fontSize: 13, fontStyle: "italic", color: "var(--stoa-muted)" }}
+                        >
+                          {asset.name}
+                        </td>
+                        <td className="py-2 px-3"><VerdictBadge verdict={asset.verdict} size="sm" /></td>
+                        <td className="py-2 px-3 text-right">
+                          <span
+                            className={`stoa-mono font-bold ${asset.change >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`}
+                            style={{ fontSize: 13 }}
+                          >
+                            {asset.change >= 0 ? "+" : ""}{asset.change.toFixed(1)}%
+                          </span>
+                        </td>
+                        <td className="py-2 px-3 text-right">
+                          <span className="stoa-mono text-[color:var(--stoa-muted)]" style={{ fontSize: 12 }}>{asset.rsi}</span>
+                        </td>
+                        <td className="py-2 px-3"><MomentumPill value={asset.momentum} /></td>
+                        <td className="py-2 px-3"><RiskPill value={asset.risk} /></td>
+                        {fitData.bestAsset && (
+                          <td className="py-2 px-3"><FitPill asset={asset} /></td>
+                        )}
+                        <td className="py-2 px-3">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); navigate(`/analysis?symbol=${asset.symbol}`); }}
+                            className="opacity-0 group-hover:opacity-100 inline-flex items-center gap-1 stoa-display uppercase text-[color:var(--stoa-accent)] hover:underline transition-opacity"
+                            style={{ fontSize: 11 }}
+                          >
+                            Oracle · Χρησμός <ArrowRight className="h-3 w-3" />
+                          </button>
+                        </td>
+                      </motion.tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              <AnimatePresence>
+                {expanded && (() => {
+                  const asset = filtered.find((a) => a.symbol === expanded);
+                  if (!asset) return null;
                   const fit = fitData.bestAsset ? getFitScore(asset) : null;
                   return (
-                    <motion.tr key={asset.symbol} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                      className="border-b border-border/10 hover:bg-secondary/30 transition-colors cursor-pointer group"
-                      onClick={() => setExpanded(expanded === asset.symbol ? null : asset.symbol)}>
-                      <td className="py-3 px-3"><span className="text-sm font-bold font-mono">{asset.symbol}</span></td>
-                      <td className="py-3 px-3 text-xs text-muted-foreground">{asset.name}</td>
-                      <td className="py-3 px-3"><VerdictBadge verdict={asset.verdict} size="sm" /></td>
-                      <td className="py-3 px-3 text-right">
-                        <span className={`text-xs font-mono font-bold ${asset.change >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`}>
-                          {asset.change >= 0 ? "+" : ""}{asset.change.toFixed(1)}%
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-right"><span className="text-xs font-mono text-muted-foreground">{asset.rsi}</span></td>
-                      <td className="py-3 px-3"><MomentumPill value={asset.momentum} /></td>
-                      <td className="py-3 px-3"><RiskPill value={asset.risk} /></td>
-                      {fitData.bestAsset && (
-                        <td className="py-3 px-3"><FitPill asset={asset} /></td>
-                      )}
-                      <td className="py-3 px-3">
-                        <button onClick={(e) => { e.stopPropagation(); navigate(`/analysis?symbol=${asset.symbol}`); }}
-                          className="opacity-0 group-hover:opacity-100 flex items-center gap-1 text-xs text-primary font-medium hover:underline transition-opacity">
-                          Analyse <ArrowRight className="h-3 w-3" />
-                        </button>
-                      </td>
-                    </motion.tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            <AnimatePresence>
-              {expanded && (() => {
-                const asset = filtered.find((a) => a.symbol === expanded);
-                if (!asset) return null;
-                const fit = fitData.bestAsset ? getFitScore(asset) : null;
-                return (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-                    <GlassCard className="mx-3 my-2">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <p className="text-xs font-semibold mb-1">{asset.symbol} — AI Reasoning</p>
-                          <p className="text-xs text-muted-foreground mb-2">{asset.reason}</p>
-                          {fit && (
-                            <p className="text-[10px] text-muted-foreground/80">
-                              <Sparkles className="h-3 w-3 inline mr-1" />Personal fit: <span className="font-semibold text-foreground">{fit.score}/100</span> — {fit.reason}
-                            </p>
-                          )}
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                      <div
+                        style={{
+                          background: "var(--stoa-shine)",
+                          border: "1px solid var(--stoa-rule)",
+                          borderLeft: "3px solid var(--stoa-accent)",
+                          borderRadius: 2,
+                          padding: 16,
+                          margin: "6px 12px",
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="stoa-kicker">READING · Σκέψις</span>
+                          <button
+                            onClick={() => navigate(`/analysis?symbol=${asset.symbol}`)}
+                            className="shrink-0 inline-flex items-center gap-1 stoa-display uppercase text-[color:var(--stoa-accent)] hover:underline"
+                            style={{ fontSize: 12 }}
+                          >
+                            Open in Oracle · Χρησμός <ArrowRight className="h-3 w-3" />
+                          </button>
                         </div>
-                        <button onClick={() => navigate(`/analysis?symbol=${asset.symbol}`)}
-                          className="shrink-0 flex items-center gap-1 text-xs text-primary font-medium hover:underline">
-                          Full Analysis <ArrowRight className="h-3 w-3" />
-                        </button>
+                        <div style={{ marginTop: 6 }}>
+                          <span className="stoa-mono font-bold text-[color:var(--stoa-ink)]" style={{ fontSize: 13 }}>{asset.symbol}</span>
+                        </div>
+                        <p style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", color: "var(--stoa-muted)", marginTop: 6 }}>
+                          {asset.reason}
+                        </p>
+                        {fit && (
+                          <p className="stoa-kicker" style={{ color: "var(--stoa-muted)", marginTop: 10 }}>
+                            <Sparkles className="h-3 w-3 inline mr-1" />Personal fit: <span className="font-semibold text-foreground">{fit.score}/100</span> — {fit.reason}
+                          </p>
+                        )}
                       </div>
-                    </GlassCard>
-                  </motion.div>
-                );
-              })()}
-            </AnimatePresence>
+                    </motion.div>
+                  );
+                })()}
+              </AnimatePresence>
+            </div>
           </div>
         ) : (
           /* CARDS VIEW */
