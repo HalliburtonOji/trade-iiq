@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { Image, Upload, Trash2, Tag, Filter, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import PageShell from "@/components/PageShell";
+import StoaShell from "@/components/stoa/StoaShell";
+import PedimentCap from "@/components/stoa/PedimentCap";
 import GlassCard from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,7 +104,23 @@ const ScreenshotVault = () => {
   });
 
   return (
-    <PageShell>
+    <StoaShell
+      palette="pompeii"
+      crumb={
+        <span>
+          <span className="stoa-greek">Εἰκόνες</span> · Screenshots
+        </span>
+      }
+    >
+      <div className="flex flex-col gap-2 mb-4">
+        <PedimentCap variant="rule" />
+        <span className="stoa-kicker">TRAINING · THE IMAGES</span>
+        <div className="flex items-baseline gap-3">
+          <h1 className="stoa-display text-3xl font-semibold">Screenshots</h1>
+          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Εἰκόνες</span>
+        </div>
+        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>the chart, frozen in time</p>
+      </div>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -199,7 +216,7 @@ const ScreenshotVault = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </PageShell>
+    </StoaShell>
   );
 };
 

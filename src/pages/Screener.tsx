@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import PageShell from "@/components/PageShell";
+import StoaShell from "@/components/stoa/StoaShell";
+import PedimentCap from "@/components/stoa/PedimentCap";
 import GlassCard from "@/components/GlassCard";
 import VerdictBadge from "@/components/VerdictBadge";
 import { Input } from "@/components/ui/input";
@@ -161,7 +162,23 @@ const Screener = () => {
   };
 
   return (
-    <PageShell>
+    <StoaShell
+      palette="delphi"
+      crumb={
+        <span>
+          <span className="stoa-greek">Ἀγορά</span> · Screener
+        </span>
+      }
+    >
+      <div className="flex flex-col gap-2 mb-2">
+        <PedimentCap variant="rule" />
+        <span className="stoa-kicker">ACROPOLIS · THE MARKET</span>
+        <div className="flex items-baseline gap-3">
+          <h1 className="stoa-display text-3xl font-semibold">Screener</h1>
+          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Ἀγορά</span>
+        </div>
+        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>sort the field by virtue</p>
+      </div>
       <div className="flex flex-col gap-4 pt-6 pb-24">
         {/* Sector Heatmap */}
         <SectorHeatmap onSelectSymbol={(sym) => { setSearch(sym); }} />
@@ -366,7 +383,7 @@ const Screener = () => {
           </div>
         )}
       </div>
-    </PageShell>
+    </StoaShell>
   );
 };
 

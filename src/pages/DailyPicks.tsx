@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { Sparkles, Plus, RefreshCw } from "lucide-react";
 import { useState } from "react";
-import PageShell from "@/components/PageShell";
+import StoaShell from "@/components/stoa/StoaShell";
+import PedimentCap from "@/components/stoa/PedimentCap";
 import GlassCard from "@/components/GlassCard";
 import VerdictBadge from "@/components/VerdictBadge";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,23 @@ const DailyPicks = () => {
   const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
   return (
-    <PageShell>
+    <StoaShell
+      palette="delphi"
+      crumb={
+        <span>
+          <span className="stoa-greek">Οἰωνοί</span> · Daily Picks
+        </span>
+      }
+    >
+      <div className="flex flex-col gap-2 mb-2">
+        <PedimentCap variant="rule" />
+        <span className="stoa-kicker">ACROPOLIS · THE OMENS</span>
+        <div className="flex items-baseline gap-3">
+          <h1 className="stoa-display text-3xl font-semibold">Daily Picks</h1>
+          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Οἰωνοί</span>
+        </div>
+        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>six signs for today</p>
+      </div>
       <div className="flex flex-col gap-4 px-4 pt-6">
         <div className="flex items-center justify-between">
           <div>
@@ -83,7 +100,7 @@ const DailyPicks = () => {
           </motion.div>
         ))}
       </div>
-    </PageShell>
+    </StoaShell>
   );
 };
 

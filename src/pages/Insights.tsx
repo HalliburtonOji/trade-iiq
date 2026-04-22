@@ -4,7 +4,8 @@ import { TrendingUp, TrendingDown, Brain, Flame, Target, BarChart3, AlertTriangl
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
-import PageShell from "@/components/PageShell";
+import StoaShell from "@/components/stoa/StoaShell";
+import PedimentCap from "@/components/stoa/PedimentCap";
 import GlassCard from "@/components/GlassCard";
 import AiPatternInsights from "@/components/AiPatternInsights";
 import TradingDNACard from "@/components/TradingDNACard";
@@ -155,7 +156,23 @@ const Insights = () => {
   };
 
   return (
-    <PageShell>
+    <StoaShell
+      palette="delphi"
+      crumb={
+        <span>
+          <span className="stoa-greek">Γνῶσις</span> · Insights
+        </span>
+      }
+    >
+      <div className="flex flex-col gap-2 mb-2">
+        <PedimentCap variant="rule" />
+        <span className="stoa-kicker">GROW · THE KNOWLEDGE</span>
+        <div className="flex items-baseline gap-3">
+          <h1 className="stoa-display text-3xl font-semibold">Insights</h1>
+          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Γνῶσις</span>
+        </div>
+        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>patterns in thy conduct</p>
+      </div>
       <motion.div variants={stagger} initial="hidden" animate="show" className="flex flex-col gap-4 px-4 pt-6 pb-24">
         <motion.div variants={fadeUp}>
           <h1 className="text-xl font-bold">Insights</h1>
@@ -368,7 +385,7 @@ const Insights = () => {
           </TabsContent>
         </Tabs>
       </motion.div>
-    </PageShell>
+    </StoaShell>
   );
 };
 

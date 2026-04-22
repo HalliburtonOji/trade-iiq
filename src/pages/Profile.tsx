@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { User, Trophy, Flame, BookOpen, Target, BarChart3, Wallet, Settings, LogOut, ChevronRight, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import PageShell from "@/components/PageShell";
+import StoaShell from "@/components/stoa/StoaShell";
+import PedimentCap from "@/components/stoa/PedimentCap";
 import GlassCard from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -84,20 +85,35 @@ const Profile = () => {
     setResetting(false);
   };
 
+  const stoaCrumb = (
+    <span>
+      <span className="stoa-greek">Ἔργον</span> · Profile
+    </span>
+  );
+
   if (loading || !profile) {
     return (
-      <PageShell>
+      <StoaShell palette="delphi" crumb={stoaCrumb}>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
         </div>
-      </PageShell>
+      </StoaShell>
     );
   }
 
   const initials = (profile.display_name || user?.email || "U").slice(0, 2).toUpperCase();
 
   return (
-    <PageShell>
+    <StoaShell palette="delphi" crumb={stoaCrumb}>
+      <div className="flex flex-col gap-2 mb-4">
+        <PedimentCap variant="rule" />
+        <span className="stoa-kicker">GROW · THE WORK</span>
+        <div className="flex items-baseline gap-3">
+          <h1 className="stoa-display text-3xl font-semibold">Profile</h1>
+          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Ἔργον</span>
+        </div>
+        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>thy record and thy rites</p>
+      </div>
       <div className="space-y-6 pb-8">
         {/* Header */}
         <GlassCard className="flex items-center gap-4 p-5">
@@ -230,7 +246,7 @@ const Profile = () => {
           </Button>
         </div>
       </div>
-    </PageShell>
+    </StoaShell>
   );
 };
 

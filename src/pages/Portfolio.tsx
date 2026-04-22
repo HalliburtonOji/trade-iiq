@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import PageShell from "@/components/PageShell";
+import StoaShell from "@/components/stoa/StoaShell";
+import PedimentCap from "@/components/stoa/PedimentCap";
 import GlassCard from "@/components/GlassCard";
 import StatCard from "@/components/StatCard";
 import SetupScoreMeter from "@/components/SetupScoreMeter";
@@ -140,7 +141,23 @@ const Portfolio = () => {
   };
 
   return (
-    <PageShell>
+    <StoaShell
+      palette="pompeii"
+      crumb={
+        <span>
+          <span className="stoa-greek">Θησαυρός</span> · Portfolio
+        </span>
+      }
+    >
+      <div className="flex flex-col gap-2 mb-2">
+        <PedimentCap variant="rule" />
+        <span className="stoa-kicker">TRAINING · THE TREASURY</span>
+        <div className="flex items-baseline gap-3">
+          <h1 className="stoa-display text-3xl font-semibold">Portfolio</h1>
+          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Θησαυρός</span>
+        </div>
+        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>thy paper coin</p>
+      </div>
       <div className="flex flex-col gap-4 px-4 pt-6 pb-24">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold">Portfolio</h1>
@@ -388,7 +405,7 @@ const Portfolio = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </PageShell>
+    </StoaShell>
   );
 };
 

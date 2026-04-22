@@ -4,7 +4,8 @@ import { Search, ArrowRight, Plus, Star, Camera, ExternalLink, Loader2, Calendar
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import PageShell from "@/components/PageShell";
+import StoaShell from "@/components/stoa/StoaShell";
+import PedimentCap from "@/components/stoa/PedimentCap";
 import GlassCard from "@/components/GlassCard";
 import VerdictBadge from "@/components/VerdictBadge";
 import SetupScoreMeter from "@/components/SetupScoreMeter";
@@ -145,7 +146,23 @@ const Analysis = () => {
   const filteredSymbols = searchSymbols(searchTerm, assetType);
 
   return (
-    <PageShell>
+    <StoaShell
+      palette="delphi"
+      crumb={
+        <span>
+          <span className="stoa-greek">Σκέψις</span> · Analysis
+        </span>
+      }
+    >
+      <div className="flex flex-col gap-2 mb-2">
+        <PedimentCap variant="rule" />
+        <span className="stoa-kicker">ACROPOLIS · THE ORACLE'S READING</span>
+        <div className="flex items-baseline gap-3">
+          <h1 className="stoa-display text-3xl font-semibold">Analysis</h1>
+          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Σκέψις</span>
+        </div>
+        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>enter a symbol — receive a verdict</p>
+      </div>
       <div className="flex flex-col gap-4 px-4 pt-6 pb-24">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold">Analysis</h1>
@@ -433,7 +450,7 @@ const Analysis = () => {
           </>
         )}
       </div>
-    </PageShell>
+    </StoaShell>
   );
 };
 
