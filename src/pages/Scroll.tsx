@@ -77,7 +77,7 @@ const Scroll = () => {
 
       const [entryRes, tradesRes] = await Promise.all([
         supabase
-          .from("journal_entries" as never)
+          .from("journal_entries")
           .select("*")
           .eq("user_id", user.id)
           .eq("entry_date", date)
@@ -107,7 +107,7 @@ const Scroll = () => {
           reflections: [],
         };
         const ins = await supabase
-          .from("journal_entries" as never)
+          .from("journal_entries")
           .insert(seed)
           .select()
           .single();
@@ -150,7 +150,7 @@ const Scroll = () => {
     setEntry(next);
     setEditingKey(null);
     const { error } = await supabase
-      .from("journal_entries" as never)
+      .from("journal_entries")
       .update({ [editingKey]: draft })
       .eq("id", entry.id);
     if (error) toast.error("Could not save", { description: error.message });
@@ -164,7 +164,7 @@ const Scroll = () => {
     ];
     setEntry({ ...entry, reflections: next });
     await supabase
-      .from("journal_entries" as never)
+      .from("journal_entries")
       .update({ reflections: next })
       .eq("id", entry.id);
   };
@@ -174,7 +174,7 @@ const Scroll = () => {
     const next = entry.reflections.map((r, i) => (i === idx ? { ...r, body } : r));
     setEntry({ ...entry, reflections: next });
     await supabase
-      .from("journal_entries" as never)
+      .from("journal_entries")
       .update({ reflections: next })
       .eq("id", entry.id);
   };

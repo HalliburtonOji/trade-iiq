@@ -54,8 +54,8 @@ const Codex = () => {
     (async () => {
       setLoading(true);
       const [lr, pr] = await Promise.all([
-        supabase.from("codex_lessons" as never).select("*").order("folio_number", { ascending: true }),
-        supabase.from("codex_lesson_progress" as never).select("*").eq("user_id", user.id),
+        supabase.from("codex_lessons").select("*").order("folio_number", { ascending: true }),
+        supabase.from("codex_lesson_progress").select("*").eq("user_id", user.id),
       ]);
       if (cancelled) return;
       setLessons((lr.data ?? []) as Lesson[]);
@@ -79,7 +79,7 @@ const Codex = () => {
     const existing = progressFor(lessonId);
     if (existing) return;
     const { data } = await supabase
-      .from("codex_lesson_progress" as never)
+      .from("codex_lesson_progress")
       .insert({ user_id: user.id, lesson_id: lessonId })
       .select()
       .single();
@@ -92,13 +92,13 @@ const Codex = () => {
     if (existing?.completed_at) return;
     if (existing) {
       await supabase
-        .from("codex_lesson_progress" as never)
+        .from("codex_lesson_progress")
         .update({ completed_at: new Date().toISOString(), scroll_pct: 100 })
         .eq("user_id", user.id)
         .eq("lesson_id", lessonId);
     } else {
       await supabase
-        .from("codex_lesson_progress" as never)
+        .from("codex_lesson_progress")
         .insert({ user_id: user.id, lesson_id: lessonId, completed_at: new Date().toISOString(), scroll_pct: 100 });
     }
     setProgress((p) => {
