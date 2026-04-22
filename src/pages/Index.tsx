@@ -22,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
-import GlassCard from "@/components/GlassCard";
+
 import StatCard from "@/components/StatCard";
 import TickerMarquee from "@/components/TickerMarquee";
 import DailyMissions from "@/components/DailyMissions";
@@ -293,7 +293,12 @@ const Index = () => {
             </div>
           </motion.div>
           <motion.div variants={fadeUp}>
-            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Coach Insights</h2>
+            <div className="mb-2">
+              <span className="stoa-kicker">COACH INSIGHTS · Διδαχή</span>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: 12, fontStyle: "italic", color: "var(--stoa-muted)", marginTop: 2 }}>
+                counsel drawn from thy ledger
+              </div>
+            </div>
             <CoachCards />
           </motion.div>
         </div>
@@ -305,35 +310,57 @@ const Index = () => {
 
         {/* Economic Calendar */}
         <motion.div variants={fadeUp}>
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Economic Calendar</h2>
+          <div className="mb-2">
+            <span className="stoa-kicker">ECONOMIC CALENDAR · Ἡμερολόγιον</span>
+            <div style={{ fontFamily: "Georgia, serif", fontSize: 12, fontStyle: "italic", color: "var(--stoa-muted)", marginTop: 2 }}>
+              the days the market watches
+            </div>
+          </div>
           <EconomicCalendar />
         </motion.div>
 
         {/* Market Overview + Quick Actions side by side on desktop */}
         <div className={isMobile ? "space-y-4" : "grid grid-cols-2 gap-4"}>
           <motion.div variants={fadeUp}>
-            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Market Overview</h2>
+            <div className="mb-2">
+              <span className="stoa-kicker">MARKET OVERVIEW · Θέαμα</span>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: 12, fontStyle: "italic", color: "var(--stoa-muted)", marginTop: 2 }}>
+                a glance at today's prices
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-2">
               {marketData.map((m) => (
-                <GlassCard key={m.label} className="flex flex-col gap-0.5 p-3">
-                  <span className="text-[10px] text-muted-foreground font-medium">{m.label}</span>
-                  <span className="text-sm font-bold font-mono">{m.value}</span>
-                  <span className={`text-[10px] font-mono font-medium ${m.up ? "text-verdict-buy" : "text-verdict-avoid"}`}>{m.change}</span>
-                </GlassCard>
+                <div key={m.label} className="flex flex-col gap-0.5" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2, padding: 12 }}>
+                  <span className="stoa-kicker">{m.label}</span>
+                  <span className="stoa-mono font-bold text-[color:var(--stoa-ink)]" style={{ fontSize: 15 }}>{m.value}</span>
+                  <span className={`stoa-mono ${m.up ? "text-verdict-buy" : "text-verdict-avoid"}`} style={{ fontSize: 11 }}>{m.change}</span>
+                </div>
               ))}
             </div>
           </motion.div>
 
           <motion.div variants={fadeUp}>
-            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Quick Actions</h2>
+            <div className="mb-2">
+              <span className="stoa-kicker">QUICK ACTIONS · Κίνησις</span>
+              <div style={{ fontFamily: "Georgia, serif", fontSize: 12, fontStyle: "italic", color: "var(--stoa-muted)", marginTop: 2 }}>
+                next steps at a single tap
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-2">
               {quickActions.map((a) => (
-                <GlassCard key={a.label} hoverable onClick={() => navigate(a.path)} className="flex items-center gap-3 p-3 cursor-pointer">
-                  <div className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${a.gradient}`}>
-                    <a.icon className="h-4 w-4 text-foreground" />
+                <button
+                  key={a.label}
+                  onClick={() => navigate(a.path)}
+                  className="flex items-center gap-3 cursor-pointer text-left transition-colors"
+                  style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2, padding: 12 }}
+                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--stoa-accent)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--stoa-rule)")}
+                >
+                  <div className="flex h-9 w-9 items-center justify-center" style={{ border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
+                    <a.icon className="h-4 w-4" style={{ color: "var(--stoa-accent)" }} />
                   </div>
-                  <span className="text-xs font-medium text-foreground">{a.label}</span>
-                </GlassCard>
+                  <span className="stoa-display text-[color:var(--stoa-ink)]" style={{ fontSize: 12 }}>{a.label}</span>
+                </button>
               ))}
             </div>
           </motion.div>
@@ -343,24 +370,34 @@ const Index = () => {
         <div className={isMobile ? "space-y-4" : "grid grid-cols-3 gap-4"}>
           <motion.div variants={fadeUp} className={isMobile ? "" : "col-span-2"}>
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Watchlist</h2>
+              <span className="stoa-kicker">WATCHLIST · Φυλακή</span>
+              {watchlist.length > 0 && (
+                <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>{watchlist.length} held</span>
+              )}
             </div>
             {watchlist.length === 0 ? (
-              <GlassCard className="flex flex-col items-center justify-center py-8 text-center">
-                <Gauge className="h-8 w-8 text-muted-foreground/20 mb-2" />
-                <p className="text-sm text-muted-foreground">No watchlist items yet</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">Analyse a ticker to add it</p>
-              </GlassCard>
+              <div className="flex flex-col items-center justify-center text-center" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2, padding: 20 }}>
+                <Gauge className="h-8 w-8 mb-2" style={{ color: "var(--stoa-rule)" }} />
+                <p style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", color: "var(--stoa-muted)" }}>The watch is empty · κενόν</p>
+                <p className="stoa-kicker" style={{ color: "var(--stoa-muted)", marginTop: 6 }}>consult the oracle to add a ticker</p>
+              </div>
             ) : (
               <div className="flex flex-col gap-2">
                 {watchlist.map((w) => (
-                  <GlassCard key={w.id} hoverable onClick={() => navigate("/analysis")} className="flex items-center justify-between p-3 cursor-pointer">
+                  <button
+                    key={w.id}
+                    onClick={() => navigate("/analysis")}
+                    className="flex items-center justify-between cursor-pointer transition-colors text-left"
+                    style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2, padding: 12 }}
+                    onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--stoa-accent)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--stoa-rule)")}
+                  >
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold font-mono">{w.symbol}</span>
-                      <span className="text-[10px] text-muted-foreground capitalize">{w.type}</span>
+                      <span className="stoa-mono font-bold text-[color:var(--stoa-ink)]" style={{ fontSize: 14 }}>{w.symbol}</span>
+                      <span className="stoa-kicker capitalize" style={{ color: "var(--stoa-muted)" }}>{w.type}</span>
                     </div>
-                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-                  </GlassCard>
+                    <ChevronRight className="h-3.5 w-3.5" style={{ color: "var(--stoa-muted)" }} />
+                  </button>
                 ))}
               </div>
             )}
@@ -368,33 +405,41 @@ const Index = () => {
 
           <div className="flex flex-col gap-4">
             <motion.div variants={fadeUp}>
-              <GlassCard hoverable onClick={() => navigate("/insights")} className="flex items-center justify-between p-4 bg-gradient-to-r from-accent/5 to-primary/5 border-accent/10">
+              <button
+                onClick={() => navigate("/insights")}
+                className="flex items-center justify-between cursor-pointer transition-colors text-left w-full"
+                style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderLeft: "3px solid var(--stoa-accent)", borderRadius: 2, padding: 16 }}
+              >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accent/20 to-primary/20">
-                    <Lightbulb className="h-5 w-5 text-accent" />
+                  <div className="flex h-10 w-10 items-center justify-center" style={{ border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
+                    <Lightbulb className="h-5 w-5" style={{ color: "var(--stoa-accent)" }} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold">Your Insights</p>
-                    <p className="text-[10px] text-muted-foreground">Strategy & habits</p>
+                    <p className="stoa-display text-[color:var(--stoa-ink)]" style={{ fontSize: 13 }}>Your insights · Νόησις</p>
+                    <p className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Strategy & habits</p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </GlassCard>
+                <ChevronRight className="h-4 w-4" style={{ color: "var(--stoa-muted)" }} />
+              </button>
             </motion.div>
 
             <motion.div variants={fadeUp}>
-              <GlassCard hoverable onClick={() => navigate("/daily-picks")} className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-accent/5 border-primary/10">
+              <button
+                onClick={() => navigate("/daily-picks")}
+                className="flex items-center justify-between cursor-pointer transition-opacity hover:opacity-90 text-left w-full"
+                style={{ background: "var(--stoa-accent)", border: "none", borderRadius: 2, padding: 16 }}
+              >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
-                    <Sparkles className="h-5 w-5 text-primary" />
+                  <div className="flex h-10 w-10 items-center justify-center" style={{ background: "var(--stoa-shine)", borderRadius: 2 }}>
+                    <Sparkles className="h-5 w-5" style={{ color: "var(--stoa-accent)" }} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold">Today's AI Picks</p>
-                    <p className="text-[10px] text-muted-foreground">6 curated opportunities</p>
+                    <p className="stoa-display" style={{ fontSize: 13, color: "var(--stoa-shine)" }}>Today's picks · Αἱρέσεις</p>
+                    <p className="stoa-kicker" style={{ color: "var(--stoa-shine)", opacity: 0.8 }}>6 curated opportunities</p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </GlassCard>
+                <ChevronRight className="h-4 w-4" style={{ color: "var(--stoa-shine)" }} />
+              </button>
             </motion.div>
           </div>
         </div>
