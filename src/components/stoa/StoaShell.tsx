@@ -110,7 +110,13 @@ export default function StoaShell({
               <span className="stoa-kicker">{section.title}</span>
               <span
                 className="stoa-greek"
-                style={{ color: "var(--stoa-muted)", marginLeft: 6, fontSize: 12 }}
+                style={{
+                  color: "var(--stoa-accent)",
+                  opacity: 0.55,
+                  marginLeft: 6,
+                  fontSize: 11,
+                  whiteSpace: "nowrap",
+                }}
               >
                 · {section.greek}
               </span>
@@ -146,7 +152,13 @@ export default function StoaShell({
                   </span>
                   <span
                     className="stoa-greek"
-                    style={{ fontSize: 12, color: "var(--stoa-muted)" }}
+                    style={{
+                      fontSize: 11,
+                      color: "var(--stoa-accent)",
+                      opacity: active ? 0.75 : 0.5,
+                      letterSpacing: "0.02em",
+                      whiteSpace: "nowrap",
+                    }}
                   >
                     {item.greek}
                   </span>
