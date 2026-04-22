@@ -1,11 +1,27 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, BarChart3, ClipboardList, GraduationCap, Sparkles, ChevronRight, TrendingUp, Activity, Shield, Gauge, LogOut, Lightbulb } from "lucide-react";
+import {
+  Search,
+  BarChart3,
+  ClipboardList,
+  GraduationCap,
+  Sparkles,
+  ChevronRight,
+  TrendingUp,
+  Activity,
+  Shield,
+  Gauge,
+  LogOut,
+  Lightbulb,
+  Flame,
+  Target,
+  Scale,
+  Compass,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
-import PageShell from "@/components/PageShell";
 import GlassCard from "@/components/GlassCard";
 import StatCard from "@/components/StatCard";
 import TickerMarquee from "@/components/TickerMarquee";
@@ -15,6 +31,10 @@ import CoachCards from "@/components/CoachCards";
 import SmartAlerts from "@/components/SmartAlerts";
 import NotificationPanel from "@/components/NotificationPanel";
 import EconomicCalendar from "@/components/EconomicCalendar";
+import StoaShell from "@/components/stoa/StoaShell";
+import Altar from "@/components/stoa/Altar";
+import PedimentCap from "@/components/stoa/PedimentCap";
+import Meander from "@/components/stoa/Meander";
 
 const getGreeting = () => {
   const h = new Date().getHours();
@@ -91,38 +111,172 @@ const Index = () => {
     load();
   }, [user]);
 
+  // Stoa — derived Moirai values from existing state
+  const wins = (() => {
+    const n = parseInt(winRate);
+    if (Number.isNaN(n)) return 0;
+    return Math.round((n / 100) * totalDecisions);
+  })();
+  const losses = Math.max(0, totalDecisions - wins);
+  const winRateNumeric = (() => {
+    const n = parseInt(winRate);
+    return Number.isNaN(n) ? null : n;
+  })();
+  const edgeState: "strong" | "neutral" | "weak" =
+    winRateNumeric === null
+      ? "neutral"
+      : winRateNumeric >= 60
+      ? "strong"
+      : winRateNumeric >= 45
+      ? "neutral"
+      : "weak";
+  const sessionLabel = (() => {
+    const h = new Date().getUTCHours();
+    if (h >= 13 && h < 21) return "NY OPEN";
+    if (h >= 7 && h < 13) return "LONDON";
+    if (h >= 0 && h < 7) return "TOKYO";
+    return "AFTER HOURS";
+  })();
+  const clockLabel = new Date().toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
   return (
-    <PageShell>
-      <motion.div variants={stagger} initial="hidden" animate="show" className="flex flex-col gap-4 pt-6">
-        {/* Header — hide sign-out on desktop (it's in sidebar) */}
-        <motion.div variants={fadeUp} className="flex items-start justify-between">
-          <div>
-            {isMobile && (
-              <h1 className="text-2xl font-bold tracking-tight">
-                Trade<span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">IQ</span>
-              </h1>
-            )}
-            <p className={`text-muted-foreground ${isMobile ? "text-sm mt-0.5" : "text-lg font-semibold text-foreground"}`}>
-              {getGreeting()}, {displayName}
-            </p>
-            <p className="text-[10px] text-muted-foreground/60">{formatDate()}</p>
+    <StoaShell
+      palette="delphi"
+      crumb="Ναός · Temple"
+      rightBar={
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <span className="stoa-kicker" style={{ color: "var(--stoa-accent)" }}>{sessionLabel}</span>
+          <span className="stoa-mono" style={{ fontSize: 13, color: "var(--stoa-ink)" }}>{clockLabel}</span>
+          <NotificationPanel />
+        </div>
+      }
+    >
+      <motion.div variants={stagger} initial="hidden" animate="show" className="flex flex-col gap-6">
+        {/* Temple — Pediment */}
+        <motion.div variants={fadeUp} style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", paddingTop: 8 }}>
+          <PedimentCap variant="triangle" width={180} />
+          <div style={{ marginTop: 14 }}>
+            <div className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>{formatDate()}</div>
+            <h1
+              className="stoa-display"
+              style={{
+                fontSize: "clamp(34px, 5vw, 52px)",
+                fontWeight: 500,
+                margin: "6px 0 4px",
+                color: "var(--stoa-ink)",
+                letterSpacing: "0.01em",
+              }}
+            >
+              {getGreeting()},{" "}
+              <span style={{ color: "var(--stoa-accent)", fontStyle: "italic" }}>{displayName}</span>
+            </h1>
+            <div className="stoa-greek" style={{ color: "var(--stoa-muted)", fontSize: 16 }}>
+              Ναός · the temple of decisions
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <NotificationPanel />
-            {isMobile && (
-              <button onClick={signOut} className="text-muted-foreground hover:text-foreground transition-colors mt-1">
-                <LogOut className="h-4 w-4" />
-              </button>
-            )}
+          <div style={{ width: "min(100%, 520px)", marginTop: 14 }}>
+            <Meander height={16} opacity={0.55} />
           </div>
         </motion.div>
 
-        {/* Stats */}
-        <motion.div variants={fadeUp} className={`grid ${isMobile ? "grid-cols-4" : "grid-cols-4"} gap-2`}>
-          <StatCard label="Win Rate" value={winRate} icon={<TrendingUp className="h-3.5 w-3.5" />} trend={winRate !== "—" && parseInt(winRate) >= 50 ? "up" : winRate !== "—" ? "down" : "neutral"} />
-          <StatCard label="Decisions" value={totalDecisions} icon={<Activity className="h-3.5 w-3.5" />} />
-          <StatCard label="Lessons" value={lessonsCompleted} icon={<GraduationCap className="h-3.5 w-3.5" />} />
-          <StatCard label="XP" value={totalXp} icon={<Shield className="h-3.5 w-3.5" />} />
+        {/* Temple — Entablature (hero edge reading) */}
+        <motion.div variants={fadeUp}>
+          <Altar capped={false} className="">
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "8px 0" }}>
+              <div className="stoa-kicker">EDGE · WIN RATE ON CLOSED DECISIONS</div>
+              <div
+                className="stoa-mono"
+                style={{
+                  fontSize: "clamp(56px, 12vw, 132px)",
+                  lineHeight: 1,
+                  marginTop: 10,
+                  color: "var(--stoa-ink)",
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {winRate === "—" ? "—" : winRate}
+              </div>
+              <div style={{ marginTop: 12, color: "var(--stoa-muted)", fontSize: 13 }}>
+                {totalDecisions} decisions logged · {lessonsCompleted} lessons · {totalXp} XP
+              </div>
+              <div style={{ width: "min(100%, 360px)", marginTop: 16 }}>
+                <Meander height={12} opacity={0.4} />
+              </div>
+              <div
+                className="stoa-greek"
+                style={{
+                  marginTop: 12,
+                  color:
+                    edgeState === "strong"
+                      ? "var(--stoa-secondary)"
+                      : edgeState === "weak"
+                      ? "var(--stoa-signal)"
+                      : "var(--stoa-muted)",
+                  fontSize: 15,
+                }}
+              >
+                {edgeState === "strong"
+                  ? "Ἐπίκουρος — the edge favours thee"
+                  : edgeState === "weak"
+                  ? "Ἀδικία — the ledger is unjust, review thy reasoning"
+                  : "Ἰσορροπία — balance; let the evidence speak"}
+              </div>
+            </div>
+          </Altar>
+        </motion.div>
+
+        {/* Moirai colonnade — six altars */}
+        <motion.div variants={fadeUp}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile ? "repeat(2, minmax(0,1fr))" : "repeat(6, minmax(0,1fr))",
+              gap: 12,
+            }}
+          >
+            <Altar
+              kicker="DECISIONS"
+              greek="Κλωθώ"
+              value={<span className="stoa-mono">{totalDecisions}</span>}
+              sub="logged"
+            />
+            <Altar
+              kicker="WINS"
+              greek="Λάχεσις"
+              value={<span className="stoa-mono">{wins}</span>}
+              sub="closed favourable"
+              alert={wins > 0 ? false : false}
+            />
+            <Altar
+              kicker="LOSSES"
+              greek="Ἄτροπος"
+              value={<span className="stoa-mono">{losses}</span>}
+              sub="closed adverse"
+              alert={losses > 0}
+            />
+            <Altar
+              kicker="WIN RATE"
+              greek="Νίκη"
+              value={<span className="stoa-mono">{winRate}</span>}
+              sub="of closed"
+            />
+            <Altar
+              kicker="LESSONS"
+              greek="Λόγος"
+              value={<span className="stoa-mono">{lessonsCompleted}</span>}
+              sub="studied"
+            />
+            <Altar
+              kicker="XP"
+              greek="Ἐλπίς"
+              value={<span className="stoa-mono">{totalXp}</span>}
+              sub="earned"
+            />
+          </div>
         </motion.div>
 
         {/* Ticker */}
@@ -245,7 +399,7 @@ const Index = () => {
           </div>
         </div>
       </motion.div>
-    </PageShell>
+    </StoaShell>
   );
 };
 
