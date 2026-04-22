@@ -105,7 +105,7 @@ const ScreenshotVault = () => {
 
   return (
     <StoaShell
-      palette="pompeii"
+      palette="delphi"
       crumb={
         <span>
           <span className="stoa-greek">Εἰκόνες</span> · Screenshots

@@ -104,7 +104,7 @@ const Playbook = () => {
 
   return (
     <StoaShell
-      palette="pompeii"
+      palette="delphi"
       crumb={
         <span>
           <span className="stoa-greek">Τακτικά</span> · Playbook

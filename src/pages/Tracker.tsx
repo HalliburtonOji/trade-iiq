@@ -147,7 +147,7 @@ const Tracker = () => {
 
   return (
     <StoaShell
-      palette="pompeii"
+      palette="delphi"
       crumb={
         <span>
           <span className="stoa-greek">Βίβλος</span> · Trade Tracker
