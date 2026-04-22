@@ -22,6 +22,8 @@ import Profile from "./pages/Profile";
 import Playbook from "./pages/Playbook";
 import ScreenshotVault from "./pages/ScreenshotVault";
 import ReviewWorkspace from "./pages/ReviewWorkspace";
+import Temple from "./pages/Temple";
+import StoaPlaceholder from "./pages/StoaPlaceholder";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
