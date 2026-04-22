@@ -79,6 +79,82 @@
   .dark {
     /* Already dark by default */
   }
+
+  /* =========================================================================
+     Cream theme (default). Applied when <html> has class "theme-cream".
+     Overrides every token the app uses with parchment / ink / muted-gold
+     values. Existing :root tokens above define the DARK theme and remain
+     the fallback when .theme-cream is absent.
+     ========================================================================= */
+  .theme-cream {
+    --background: 42 42% 92%;
+    --foreground: 25 35% 12%;
+
+    --card: 36 30% 87%;
+    --card-foreground: 25 35% 12%;
+
+    --popover: 36 30% 87%;
+    --popover-foreground: 25 35% 12%;
+
+    --primary: 239 55% 38%;
+    --primary-foreground: 42 42% 95%;
+
+    --secondary: 36 20% 82%;
+    --secondary-foreground: 25 35% 20%;
+
+    --muted: 36 25% 85%;
+    --muted-foreground: 33 22% 38%;
+
+    --accent: 42 55% 45%;
+    --accent-foreground: 25 40% 15%;
+
+    --destructive: 7 68% 38%;
+    --destructive-foreground: 42 42% 95%;
+
+    --border: 30 18% 75%;
+    --input: 30 18% 75%;
+    --ring: 239 55% 38%;
+
+    --sidebar-background: 36 32% 86%;
+    --sidebar-foreground: 25 35% 15%;
+    --sidebar-primary: 239 55% 38%;
+    --sidebar-primary-foreground: 42 42% 95%;
+    --sidebar-accent: 36 25% 85%;
+    --sidebar-accent-foreground: 25 35% 20%;
+    --sidebar-border: 30 18% 75%;
+    --sidebar-ring: 239 55% 38%;
+
+    --glass-bg: 25 35% 12% / 0.04;
+    --glass-border: 25 35% 12% / 0.10;
+    --glass-bg-hover: 25 35% 12% / 0.07;
+    --verdict-buy: 142 55% 28%;
+    --verdict-wait: 40 88% 35%;
+    --verdict-avoid: 7 68% 38%;
+    --gradient-primary: linear-gradient(135deg, hsl(239 55% 38%), hsl(258 55% 45%));
+    --gradient-bg: linear-gradient(180deg, hsl(42 42% 92%), hsl(36 30% 87%));
+    --shadow-glow: 0 0 30px -5px hsl(239 55% 38% / 0.2);
+
+    --stoa-bg: #EFE6D2;
+    --stoa-ink: #2B1D13;
+    --stoa-muted: #6B5A43;
+    --stoa-accent: #C19A3A;
+    --stoa-secondary: #7A7A3A;
+    --stoa-signal: #9A2A1E;
+    --stoa-rule: rgba(43, 29, 19, 0.14);
+    --stoa-gold-rule: rgba(193, 154, 58, 0.45);
+    --stoa-shine: rgba(43, 29, 19, 0.04);
+  }
+
+  .theme-cream .glass-card-hover:hover {
+    border-color: hsl(25 35% 12% / 0.18);
+  }
+
+  html {
+    transition: background-color 160ms ease, color 160ms ease;
+  }
+  body {
+    transition: background 160ms ease, color 160ms ease;
+  }
 }
 
 @layer base {
@@ -160,19 +236,6 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-/* ---------- Stoa scoped palette overrides ---------- */
-.stoa-pompeii {
-  --stoa-bg: #EFE6D2;
-  --stoa-ink: #2B1D13;
-  --stoa-muted: #6B5A43;
-  --stoa-accent: #C19A3A;
-  --stoa-secondary: #7A7A3A;
-  --stoa-signal: #9A2A1E;
-  --stoa-rule: rgba(43, 29, 19, 0.14);
-  --stoa-gold-rule: rgba(193, 154, 58, 0.45);
-  --stoa-shine: rgba(43, 29, 19, 0.04);
 }
 
 /* ---------- Stoa base typography helpers (opt-in only) ---------- */
