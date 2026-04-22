@@ -34,6 +34,7 @@ const Analysis = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const isMobile = useIsMobile();
   const [assetType, setAssetType] = useState<AssetType>("stock");
   const [query, setQuery] = useState(searchParams.get("symbol") || "");
   const [result, setResult] = useState<AnalysisResult | null>(null);
