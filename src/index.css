@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Serif:wght@400;500;600&family=Inter:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -55,6 +56,24 @@
     --gradient-primary: linear-gradient(135deg, hsl(239 84% 67%), hsl(258 90% 66%));
     --gradient-bg: linear-gradient(180deg, hsl(222 50% 6%), hsl(216 43% 9%));
     --shadow-glow: 0 0 30px -5px hsl(239 84% 67% / 0.3);
+
+    /* ---------- Stoa design kit (additive, namespaced) ---------- */
+    /* Delphi Night palette (default). Use via var(--stoa-*) in Stoa components only.     */
+    /* These are NAMESPACED with --stoa-* so they cannot collide with Tailwind's         */
+    /* HSL-based tokens above. Existing components keep using --primary / --accent etc.  */
+    --stoa-bg: #0E1116;
+    --stoa-ink: #F2EAD7;
+    --stoa-muted: #9AA0A6;
+    --stoa-accent: #D4A94A;
+    --stoa-secondary: #6F7B3F;
+    --stoa-signal: #C1440E;
+    --stoa-rule: rgba(242, 234, 215, 0.12);
+    --stoa-gold-rule: rgba(212, 169, 74, 0.35);
+    --stoa-shine: rgba(242, 234, 215, 0.04);
+    --stoa-font-display: 'Cormorant Garamond', 'Georgia', serif;
+    --stoa-font-body: 'IBM Plex Serif', 'Georgia', serif;
+    --stoa-font-kicker: 'Inter', 'Space Grotesk', system-ui, sans-serif;
+    --stoa-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
   }
 
   .dark {
@@ -141,4 +160,47 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ---------- Stoa scoped palette overrides ---------- */
+.stoa-pompeii {
+  --stoa-bg: #EFE6D2;
+  --stoa-ink: #2B1D13;
+  --stoa-muted: #6B5A43;
+  --stoa-accent: #C19A3A;
+  --stoa-secondary: #7A7A3A;
+  --stoa-signal: #9A2A1E;
+  --stoa-rule: rgba(43, 29, 19, 0.14);
+  --stoa-gold-rule: rgba(193, 154, 58, 0.45);
+  --stoa-shine: rgba(43, 29, 19, 0.04);
+}
+
+/* ---------- Stoa base typography helpers (opt-in only) ---------- */
+.stoa-root {
+  background: var(--stoa-bg);
+  color: var(--stoa-ink);
+  font-family: var(--stoa-font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+.stoa-display { font-family: var(--stoa-font-display); letter-spacing: 0.01em; }
+.stoa-kicker  { font-family: var(--stoa-font-kicker); text-transform: uppercase; letter-spacing: 0.14em; font-size: 11px; font-weight: 600; color: var(--stoa-muted); }
+.stoa-greek   { font-family: var(--stoa-font-display); font-style: italic; letter-spacing: 0.02em; }
+.stoa-mono    { font-family: var(--stoa-font-mono); font-variant-numeric: tabular-nums; }
+
+/* ---------- Stoa focus ring (only applies inside .stoa-root) ---------- */
+.stoa-root :focus-visible {
+  outline: 2px solid var(--stoa-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Stoa reduced-motion pulse (used by Sanctuary etc., opt-in) ---------- */
+@keyframes stoa-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1.0; }
+}
+.stoa-pulse { animation: stoa-pulse 1800ms ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .stoa-pulse { animation: none; opacity: 0.8; }
 }
