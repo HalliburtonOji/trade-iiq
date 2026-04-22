@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_snapshots: {
+        Row: {
+          equity_usd: number
+          id: string
+          recorded_at: string
+          user_id: string
+        }
+        Insert: {
+          equity_usd?: number
+          id?: string
+          recorded_at?: string
+          user_id: string
+        }
+        Update: {
+          equity_usd?: number
+          id?: string
+          recorded_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       accountability_streaks: {
         Row: {
           current_streak: number
@@ -203,6 +224,36 @@ export type Database = {
           forex?: Json
           id?: string
           stocks?: Json
+        }
+        Relationships: []
+      }
+      daily_rules: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          rules_followed: number
+          rules_total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          rules_followed?: number
+          rules_total?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          rules_followed?: number
+          rules_total?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -806,6 +857,57 @@ export type Database = {
           thesis?: string
           user_id?: string
           verdict?: string
+        }
+        Relationships: []
+      }
+      trades: {
+        Row: {
+          closed_at: string | null
+          created_at: string
+          entry_price: number | null
+          exit_price: number | null
+          id: string
+          note: string | null
+          opened_at: string
+          pnl_usd: number | null
+          r_multiple: number | null
+          setup_grade: string | null
+          side: string
+          symbol: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string
+          entry_price?: number | null
+          exit_price?: number | null
+          id?: string
+          note?: string | null
+          opened_at?: string
+          pnl_usd?: number | null
+          r_multiple?: number | null
+          setup_grade?: string | null
+          side?: string
+          symbol: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string
+          entry_price?: number | null
+          exit_price?: number | null
+          id?: string
+          note?: string | null
+          opened_at?: string
+          pnl_usd?: number | null
+          r_multiple?: number | null
+          setup_grade?: string | null
+          side?: string
+          symbol?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
