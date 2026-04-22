@@ -143,6 +143,83 @@ export type Database = {
         }
         Relationships: []
       }
+      codex_lesson_progress: {
+        Row: {
+          completed_at: string | null
+          id: string
+          lesson_id: string
+          scroll_pct: number
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          lesson_id: string
+          scroll_pct?: number
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          lesson_id?: string
+          scroll_pct?: number
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "codex_lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "codex_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      codex_lessons: {
+        Row: {
+          body_markdown: string | null
+          chapter_kicker: string
+          created_at: string
+          folio_number: number
+          greek_label: string | null
+          id: string
+          marginalia_author: string | null
+          marginalia_quote: string | null
+          read_minutes: number | null
+          teaser: string | null
+          title: string
+        }
+        Insert: {
+          body_markdown?: string | null
+          chapter_kicker: string
+          created_at?: string
+          folio_number: number
+          greek_label?: string | null
+          id?: string
+          marginalia_author?: string | null
+          marginalia_quote?: string | null
+          read_minutes?: number | null
+          teaser?: string | null
+          title: string
+        }
+        Update: {
+          body_markdown?: string | null
+          chapter_kicker?: string
+          created_at?: string
+          folio_number?: number
+          greek_label?: string | null
+          id?: string
+          marginalia_author?: string | null
+          marginalia_quote?: string | null
+          read_minutes?: number | null
+          teaser?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       community_votes: {
         Row: {
           id: string
@@ -336,6 +413,48 @@ export type Database = {
           },
         ]
       }
+      journal_entries: {
+        Row: {
+          closing_note: string | null
+          created_at: string
+          entry_date: string
+          id: string
+          lessons: string | null
+          morning_prep: string | null
+          reflections: Json
+          setups: string | null
+          updated_at: string
+          user_id: string
+          what_happened: string | null
+        }
+        Insert: {
+          closing_note?: string | null
+          created_at?: string
+          entry_date?: string
+          id?: string
+          lessons?: string | null
+          morning_prep?: string | null
+          reflections?: Json
+          setups?: string | null
+          updated_at?: string
+          user_id: string
+          what_happened?: string | null
+        }
+        Update: {
+          closing_note?: string | null
+          created_at?: string
+          entry_date?: string
+          id?: string
+          lessons?: string | null
+          morning_prep?: string | null
+          reflections?: Json
+          setups?: string | null
+          updated_at?: string
+          user_id?: string
+          what_happened?: string | null
+        }
+        Relationships: []
+      }
       learning_progress: {
         Row: {
           category: string
@@ -401,6 +520,68 @@ export type Database = {
           read?: boolean
           title?: string
           type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      oracle_messages: {
+        Row: {
+          content: string
+          context_json: Json | null
+          created_at: string
+          id: string
+          role: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          context_json?: Json | null
+          created_at?: string
+          id?: string
+          role: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          context_json?: Json | null
+          created_at?: string
+          id?: string
+          role?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oracle_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "oracle_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oracle_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          title?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -976,6 +1157,33 @@ export type Database = {
           id?: string
           is_active?: boolean
           rule_text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          alerts: Json
+          identity: Json
+          markets: Json
+          oracle: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alerts?: Json
+          identity?: Json
+          markets?: Json
+          oracle?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alerts?: Json
+          identity?: Json
+          markets?: Json
+          oracle?: Json
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
