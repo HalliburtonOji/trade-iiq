@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_snapshots: {
+        Row: {
+          equity_usd: number
+          id: string
+          recorded_at: string
+          user_id: string
+        }
+        Insert: {
+          equity_usd?: number
+          id?: string
+          recorded_at?: string
+          user_id: string
+        }
+        Update: {
+          equity_usd?: number
+          id?: string
+          recorded_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       accountability_streaks: {
         Row: {
           current_streak: number
@@ -122,6 +143,83 @@ export type Database = {
         }
         Relationships: []
       }
+      codex_lesson_progress: {
+        Row: {
+          completed_at: string | null
+          id: string
+          lesson_id: string
+          scroll_pct: number
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          lesson_id: string
+          scroll_pct?: number
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          lesson_id?: string
+          scroll_pct?: number
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "codex_lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "codex_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      codex_lessons: {
+        Row: {
+          body_markdown: string | null
+          chapter_kicker: string
+          created_at: string
+          folio_number: number
+          greek_label: string | null
+          id: string
+          marginalia_author: string | null
+          marginalia_quote: string | null
+          read_minutes: number | null
+          teaser: string | null
+          title: string
+        }
+        Insert: {
+          body_markdown?: string | null
+          chapter_kicker: string
+          created_at?: string
+          folio_number: number
+          greek_label?: string | null
+          id?: string
+          marginalia_author?: string | null
+          marginalia_quote?: string | null
+          read_minutes?: number | null
+          teaser?: string | null
+          title: string
+        }
+        Update: {
+          body_markdown?: string | null
+          chapter_kicker?: string
+          created_at?: string
+          folio_number?: number
+          greek_label?: string | null
+          id?: string
+          marginalia_author?: string | null
+          marginalia_quote?: string | null
+          read_minutes?: number | null
+          teaser?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       community_votes: {
         Row: {
           id: string
@@ -206,6 +304,36 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_rules: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          rules_followed: number
+          rules_total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          rules_followed?: number
+          rules_total?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          rules_followed?: number
+          rules_total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       decision_reviews: {
         Row: {
           emotion: string | null
@@ -285,6 +413,48 @@ export type Database = {
           },
         ]
       }
+      journal_entries: {
+        Row: {
+          closing_note: string | null
+          created_at: string
+          entry_date: string
+          id: string
+          lessons: string | null
+          morning_prep: string | null
+          reflections: Json
+          setups: string | null
+          updated_at: string
+          user_id: string
+          what_happened: string | null
+        }
+        Insert: {
+          closing_note?: string | null
+          created_at?: string
+          entry_date?: string
+          id?: string
+          lessons?: string | null
+          morning_prep?: string | null
+          reflections?: Json
+          setups?: string | null
+          updated_at?: string
+          user_id: string
+          what_happened?: string | null
+        }
+        Update: {
+          closing_note?: string | null
+          created_at?: string
+          entry_date?: string
+          id?: string
+          lessons?: string | null
+          morning_prep?: string | null
+          reflections?: Json
+          setups?: string | null
+          updated_at?: string
+          user_id?: string
+          what_happened?: string | null
+        }
+        Relationships: []
+      }
       learning_progress: {
         Row: {
           category: string
@@ -350,6 +520,68 @@ export type Database = {
           read?: boolean
           title?: string
           type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      oracle_messages: {
+        Row: {
+          content: string
+          context_json: Json | null
+          created_at: string
+          id: string
+          role: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          context_json?: Json | null
+          created_at?: string
+          id?: string
+          role: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          context_json?: Json | null
+          created_at?: string
+          id?: string
+          role?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oracle_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "oracle_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oracle_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          title?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -639,6 +871,33 @@ export type Database = {
         }
         Relationships: []
       }
+      recommended_lessons: {
+        Row: {
+          created_at: string
+          dismissed_at: string | null
+          id: string
+          lesson_id: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dismissed_at?: string | null
+          id?: string
+          lesson_id: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dismissed_at?: string | null
+          id?: string
+          lesson_id?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       screenshot_vault: {
         Row: {
           annotation: string | null
@@ -782,6 +1041,57 @@ export type Database = {
         }
         Relationships: []
       }
+      trades: {
+        Row: {
+          closed_at: string | null
+          created_at: string
+          entry_price: number | null
+          exit_price: number | null
+          id: string
+          note: string | null
+          opened_at: string
+          pnl_usd: number | null
+          r_multiple: number | null
+          setup_grade: string | null
+          side: string
+          symbol: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string
+          entry_price?: number | null
+          exit_price?: number | null
+          id?: string
+          note?: string | null
+          opened_at?: string
+          pnl_usd?: number | null
+          r_multiple?: number | null
+          setup_grade?: string | null
+          side?: string
+          symbol: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string
+          entry_price?: number | null
+          exit_price?: number | null
+          id?: string
+          note?: string | null
+          opened_at?: string
+          pnl_usd?: number | null
+          r_multiple?: number | null
+          setup_grade?: string | null
+          side?: string
+          symbol?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       trading_dna: {
         Row: {
           best_asset_class: string | null
@@ -847,6 +1157,33 @@ export type Database = {
           id?: string
           is_active?: boolean
           rule_text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          alerts: Json
+          identity: Json
+          markets: Json
+          oracle: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alerts?: Json
+          identity?: Json
+          markets?: Json
+          oracle?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alerts?: Json
+          identity?: Json
+          markets?: Json
+          oracle?: Json
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
