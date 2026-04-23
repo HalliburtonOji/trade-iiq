@@ -136,9 +136,9 @@ const Profile = () => {
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <h1 className="stoa-display font-bold truncate" style={{ fontSize: 18, color: "var(--stoa-ink)" }}>
+            <h2 className="stoa-display font-bold truncate" style={{ fontSize: 18, color: "var(--stoa-ink)" }}>
               {profile.display_name || "Trader"}
-            </h1>
+            </h2>
             <p className="stoa-mono truncate" style={{ fontSize: 11, color: "var(--stoa-muted)" }}>{user?.email}</p>
             <div className="flex items-center gap-2 mt-1.5">
               <Badge variant="secondary" className="text-[10px]">{profile.level}</Badge>

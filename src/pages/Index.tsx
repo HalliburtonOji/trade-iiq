@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useQuotes } from "@/hooks/use-quotes";
 import { motion } from "framer-motion";
 import {
   Search,
@@ -75,12 +76,53 @@ const Index = () => {
   const [lessonsCompleted, setLessonsCompleted] = useState(0);
   const [totalXp, setTotalXp] = useState(0);
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
-  const [marketData] = useState([
-    { label: "S&P 500", value: "—", change: "—", up: true },
-    { label: "NASDAQ", value: "—", change: "—", up: true },
-    { label: "BTC Dom.", value: "52.3%", change: "-0.4%", up: false },
-    { label: "Fear & Greed", value: "62", change: "Greed", up: true },
-  ]);
+
+  const { quotes: idxQuotes } = useQuotes(["SPY", "QQQ"], "stock", 5 * 60 * 1000);
+  const [btcDom, setBtcDom] = useState({ value: "—", change: "—", up: true });
+  const [fgi, setFgi] = useState({ value: "—", change: "—", up: true });
+
+  useEffect(() => {
+    fetch("https://api.coingecko.com/api/v3/global")
+      .then(r => r.json())
+      .then(d => {
+        const btc = d?.data?.market_cap_percentage?.btc;
+        const chg = d?.data?.market_cap_change_percentage_24h_usd;
+        if (typeof btc === "number") setBtcDom({
+          value: `${btc.toFixed(1)}%`,
+          change: typeof chg === "number" ? `${chg >= 0 ? "+" : ""}${chg.toFixed(2)}%` : "—",
+          up: typeof chg === "number" ? chg >= 0 : true,
+        });
+      }).catch(() => {});
+    fetch("https://api.alternative.me/fng/?limit=1")
+      .then(r => r.json())
+      .then(d => {
+        const e = d?.data?.[0];
+        if (e?.value && e?.value_classification) setFgi({
+          value: String(e.value),
+          change: String(e.value_classification),
+          up: parseInt(e.value) >= 50,
+        });
+      }).catch(() => {});
+  }, []);
+
+  const marketData = useMemo(() => {
+    const fmt = (q: any, label: string) => {
+      if (!q || q.current_price == null) return { label, value: "—", change: "—", up: true };
+      const pct = q.percent_change;
+      return {
+        label,
+        value: `$${q.current_price.toFixed(2)}`,
+        change: pct == null ? "—" : `${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%`,
+        up: pct == null ? true : pct >= 0,
+      };
+    };
+    return [
+      fmt(idxQuotes["SPY"], "S&P 500"),
+      fmt(idxQuotes["QQQ"], "NASDAQ"),
+      { label: "BTC Dom.", ...btcDom },
+      { label: "Fear & Greed", ...fgi },
+    ];
+  }, [idxQuotes, btcDom, fgi]);
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Trader";
 
