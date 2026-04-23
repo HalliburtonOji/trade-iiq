@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import StoaShell from "@/components/stoa/StoaShell";
 import PedimentCap from "@/components/stoa/PedimentCap";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { seedCodexInitiates } from "@/scripts/seed-codex-initiates";
+import { toast } from "sonner";
 
 type LearnModule = {
   id: string;
@@ -49,7 +51,40 @@ const Learn = () => {
   const [loading, setLoading] = useState(true);
   const [masteredL1, setMasteredL1] = useState(0);
   const [tradeCount, setTradeCount] = useState(0);
+  const seedRanRef = useRef(false);
 
+  useEffect(() => {
+    if (!user) return;
+    if (seedRanRef.current) return;
+    const isAdmin = user.email === "halliburtonoji@gmail.com";
+    if (!isAdmin) return;
+
+    (async () => {
+      const { count, error } = await supabase
+        .from("learn_modules")
+        .select("id", { count: "exact", head: true })
+        .eq("is_published", true);
+      if (error) return;
+      if ((count ?? 0) > 0) return;
+      seedRanRef.current = true;
+      toast("Seeding Codex…", { description: "Generating the five Initiate modules. One moment." });
+      try {
+        await seedCodexInitiates();
+        toast("Codex seeded", { description: "Refresh if modules don't appear." });
+        const { data: mods } = await supabase
+          .from("learn_modules")
+          .select("id,track,level,slug,title_en,title_gr,summary,ordinal,learn_minutes,xp_reward")
+          .eq("is_published", true)
+          .lte("level", 2)
+          .order("track", { ascending: true })
+          .order("level", { ascending: true })
+          .order("ordinal", { ascending: true });
+        if (mods) setModules(mods as LearnModule[]);
+      } catch (e: any) {
+        toast.error("Seed failed", { description: e?.message || "Check the generate-codex-module function logs." });
+      }
+    })();
+  }, [user]);
   useEffect(() => {
     let cancelled = false;
     (async () => {
