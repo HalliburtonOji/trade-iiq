@@ -67,6 +67,9 @@ const Tracker = () => {
     verdict_correct: null, timing_correct: null, followed_plan: null,
     execution_quality: "followed", emotion: "calm", mistake_type: "none", lesson_learned: "",
   });
+  const [pendingViolations, setPendingViolations] = useState<{ rule_id: string; reason: string }[]>([]);
+  const [ruleTitleById, setRuleTitleById] = useState<Record<string, string>>({});
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     symbol: "", assetType: "stock" as AssetType, decision: "BUY" as Decision,
     entryPrice: "", notes: "", thesisWhy: "", timeHorizon: "",
@@ -95,7 +98,7 @@ const Tracker = () => {
 
   const handleSave = async () => {
     if (!formData.symbol || !user) return;
-    const { error } = await supabase.from("trade_decisions").insert({
+    const { data: inserted, error } = await supabase.from("trade_decisions").insert({
       user_id: user.id,
       symbol: formData.symbol.toUpperCase(),
       asset_type: formData.assetType,
@@ -109,12 +112,40 @@ const Tracker = () => {
       confidence: formData.confidence,
       catalyst_date: formData.catalystDate || null,
       catalyst_note: formData.catalystNote,
-    });
+    }).select().single();
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     setFormData({ symbol: "", assetType: "stock", decision: "BUY", entryPrice: "", notes: "", thesisWhy: "", timeHorizon: "", invalidationPoint: "", confidence: 3, catalystDate: "", catalystNote: "" });
     setShowForm(false);
     setShowThesis(false);
     fetchTrades();
+
+    // Discipline check against playbook rules (soft, non-blocking)
+    if (inserted) {
+      try {
+        const { data: check } = await supabase.functions.invoke("check-trade-against-rules", {
+          body: { trade: inserted, user_id: user.id },
+        });
+        const violations = (check as any)?.violations || [];
+        if (violations.length > 0) {
+          for (const v of violations) {
+            await supabase.from("rule_violations").insert({
+              user_id: user.id, rule_id: v.rule_id, trade_id: inserted.id, reason: v.reason,
+            });
+          }
+          // Fetch rule titles for display
+          const ids = Array.from(new Set(violations.map((v: any) => v.rule_id).filter(Boolean)));
+          if (ids.length > 0) {
+            const { data: rules } = await supabase.from("playbooks").select("id, name").in("id", ids as string[]);
+            const dict: Record<string, string> = {};
+            (rules || []).forEach((r: any) => { dict[r.id] = r.name; });
+            setRuleTitleById(dict);
+          }
+          setPendingViolations(violations);
+          return;
+        }
+      } catch { /* silent: discipline check is best-effort */ }
+    }
+
     toast({ title: "Decision logged", description: "Your trade thesis has been saved." });
   };
 
