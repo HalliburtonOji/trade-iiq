@@ -1215,6 +1215,48 @@ const Tracker = () => {
           );
         })}
       </div>
+
+      {pendingViolations.length > 0 && (
+        <div style={{
+          position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+          background: "rgba(26,20,12,0.55)", zIndex: 50, padding: 16,
+        }}>
+          <div style={{
+            background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderLeft: "3px solid var(--stoa-accent)",
+            borderRadius: 2, padding: 24, maxWidth: 520, width: "100%",
+          }}>
+            <div className="stoa-kicker" style={{ color: "var(--stoa-accent)" }}>
+              DISCIPLINE CHECK · ΚΡΙΣΙΣ
+            </div>
+            <h2 className="stoa-display text-xl font-semibold" style={{ color: "var(--stoa-ink)", marginTop: 4 }}>
+              Your Playbook flagged this trade
+            </h2>
+            <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
+              {pendingViolations.map((v, i) => (
+                <div key={i} style={{ fontFamily: "Georgia, serif", fontSize: 14, color: "var(--stoa-ink)" }}>
+                  • <strong>{ruleTitleById[v.rule_id] || "Rule"}</strong>: {v.reason}
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 20 }}>
+              <button
+                style={{ background: "var(--stoa-shine)", color: "var(--stoa-ink)", border: "1px solid var(--stoa-rule)", borderRadius: 2, padding: "10px 20px", cursor: "pointer" }}
+                className="stoa-kicker"
+                onClick={() => navigate("/playbook")}
+              >
+                Revisit Rule
+              </button>
+              <button
+                style={{ background: "var(--stoa-accent)", color: "var(--stoa-ink)", border: "none", borderRadius: 2, padding: "10px 20px", cursor: "pointer" }}
+                className="stoa-display font-semibold"
+                onClick={() => { setPendingViolations([]); toast({ title: "Decision logged", description: "Your trade thesis has been saved." }); }}
+              >
+                Continue anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </StoaShell>
   );
 };
