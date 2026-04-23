@@ -268,6 +268,29 @@ const Profile = () => {
             Sign Out
           </Button>
         </div>
+
+        {/* TODO: remove after seeding */}
+        {user?.email === "halliburtonoji@gmail.com" && (
+          <div className="pt-2">
+            <Button
+              size="sm"
+              className="stoa-display"
+              style={{ background: "var(--stoa-accent)", color: "var(--stoa-ink)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}
+              onClick={async () => {
+                toast({ title: "Seeding...", description: "Generating 5 Codex Initiates." });
+                const { seedCodexInitiates } = await import("@/scripts/seed-codex-initiates");
+                const { error } = await seedCodexInitiates();
+                if (error) {
+                  toast({ title: "Seed failed", description: String(error.message ?? error), variant: "destructive" });
+                } else {
+                  toast({ title: "Seeded 5 modules", description: "Codex Initiates generated." });
+                }
+              }}
+            >
+              Seed Codex Initiates (dev)
+            </Button>
+          </div>
+        )}
       </div>
     </StoaShell>
   );
