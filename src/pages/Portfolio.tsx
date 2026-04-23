@@ -577,7 +577,7 @@ const Portfolio = () => {
                   fontWeight: 600,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
-                  color: "var(--stoa-shine)",
+                  color: "var(--stoa-ink)",
                   background: "var(--stoa-accent)",
                   border: "none",
                   borderRadius: 2,

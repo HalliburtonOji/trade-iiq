@@ -135,8 +135,8 @@
     --shadow-glow: 0 0 30px -5px hsl(239 55% 38% / 0.2);
 
     --stoa-bg: #EFE6D2;
-    --stoa-ink: #2B1D13;
-    --stoa-muted: #6B5A43;
+    --stoa-ink: #1A140C;
+    --stoa-muted: #6B5A44;
     --stoa-accent: #C19A3A;
     --stoa-secondary: #7A7A3A;
     --stoa-signal: #9A2A1E;
@@ -247,10 +247,10 @@
   line-height: 1.55;
   font-variant-numeric: tabular-nums;
 }
-.stoa-display { font-family: var(--stoa-font-display); letter-spacing: 0.01em; }
-.stoa-kicker  { font-family: var(--stoa-font-kicker); text-transform: uppercase; letter-spacing: 0.14em; font-size: 11px; font-weight: 600; color: var(--stoa-muted); }
+.stoa-display { font-family: var(--stoa-font-display); letter-spacing: 0.01em; color: var(--stoa-ink); }
+.stoa-kicker  { font-family: var(--stoa-font-kicker); text-transform: uppercase; letter-spacing: 0.12em; font-size: 11px; font-weight: 600; color: var(--stoa-muted); }
 .stoa-greek   { font-family: var(--stoa-font-display); font-style: italic; letter-spacing: 0.02em; }
-.stoa-mono    { font-family: var(--stoa-font-mono); font-variant-numeric: tabular-nums; }
+.stoa-mono    { font-family: var(--stoa-font-mono); font-variant-numeric: tabular-nums; color: var(--stoa-ink); }
 
 /* ---------- Stoa focus ring (only applies inside .stoa-root) ---------- */
 .stoa-root :focus-visible {
