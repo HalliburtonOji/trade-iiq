@@ -274,7 +274,7 @@ const DemoTrading = () => {
           {(["stock", "crypto", "forex"] as AssetTab[]).map((t) => (
             <button key={t} onClick={() => setAssetTab(t)}
               className="px-4 py-1.5 text-xs capitalize stoa-kicker"
-              style={{ background: assetTab === t ? "var(--stoa-accent)" : "var(--stoa-shine)", color: assetTab === t ? "var(--stoa-shine)" : "var(--stoa-muted)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
+              style={{ background: assetTab === t ? "var(--stoa-accent)" : "var(--stoa-shine)", color: assetTab === t ? "var(--stoa-ink)" : "var(--stoa-muted)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
               {t}
             </button>
           ))}
@@ -284,7 +284,7 @@ const DemoTrading = () => {
           {quickSymbols.map((s) => (
             <button key={s.symbol} onClick={() => setSymbol(s.symbol)}
               className="px-3 py-1 text-[11px] stoa-mono font-bold"
-              style={{ background: symbol === s.symbol ? "var(--stoa-accent)" : "var(--stoa-shine)", color: symbol === s.symbol ? "var(--stoa-shine)" : "var(--stoa-ink)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
+              style={{ background: symbol === s.symbol ? "var(--stoa-accent)" : "var(--stoa-shine)", color: symbol === s.symbol ? "var(--stoa-ink)" : "var(--stoa-ink)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
               {s.symbol}
             </button>
           ))}
@@ -342,7 +342,7 @@ const DemoTrading = () => {
                   {(["market", "limit"] as const).map((t) => (
                     <button key={t} onClick={() => setOrderType(t)}
                       className="text-[10px] px-2 py-0.5 capitalize"
-                      style={{ background: orderType === t ? "var(--stoa-accent)" : "var(--stoa-shine)", color: orderType === t ? "var(--stoa-shine)" : "var(--stoa-muted)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
+                      style={{ background: orderType === t ? "var(--stoa-accent)" : "var(--stoa-shine)", color: orderType === t ? "var(--stoa-ink)" : "var(--stoa-muted)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
                       {t}
                     </button>
                   ))}
@@ -419,7 +419,7 @@ const DemoTrading = () => {
           {/* Thesis builder */}
           <ThesisBuilder thesis={thesis} onChange={setThesis} direction={direction} />
 
-          <Button onClick={attemptPlaceOrder} disabled={placing || !units || !stopLoss} className="w-full mt-3 stoa-display" style={{ background: "var(--stoa-accent)", color: "var(--stoa-shine)", border: "none", borderRadius: 2 }} id="demo-place-order">
+          <Button onClick={attemptPlaceOrder} disabled={placing || !units || !stopLoss} className="w-full mt-3 stoa-display" style={{ background: "var(--stoa-accent)", color: "var(--stoa-ink)", border: "none", borderRadius: 2 }} id="demo-place-order">
             {placing ? "Placing..." : `Place ${direction === "long" ? "Buy" : "Sell"} Order`}
           </Button>
         </div>

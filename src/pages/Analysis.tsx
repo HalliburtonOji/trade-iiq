@@ -943,7 +943,7 @@ const Analysis = () => {
                       letterSpacing: "0.08em",
                       textTransform: "uppercase",
                       fontWeight: 600,
-                      color: "var(--stoa-shine)",
+                      color: "var(--stoa-ink)",
                       background: "var(--stoa-accent)",
                       border: "none",
                       borderRadius: 2,
