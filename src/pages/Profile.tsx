@@ -289,6 +289,19 @@ const Profile = () => {
             >
               Seed Codex Initiates (dev)
             </Button>
+            <Button
+              size="sm"
+              className="stoa-kicker ml-2"
+              style={{ background: "var(--stoa-shine)", color: "var(--stoa-ink)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}
+              onClick={async () => {
+                toast({ title: "Regenerating...", description: "Computing signature + recommendation." });
+                const { error } = await supabase.functions.invoke("generate-codex-recommendation", { body: { user_id: user!.id } });
+                if (error) toast({ title: "Failed", description: String(error.message ?? error), variant: "destructive" });
+                else toast({ title: "Recommendation regenerated" });
+              }}
+            >
+              Regenerate recommendations (dev)
+            </Button>
           </div>
         )}
       </div>

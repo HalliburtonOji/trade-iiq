@@ -1081,6 +1081,44 @@ export type Database = {
           },
         ]
       }
+      scenario_memory: {
+        Row: {
+          created_at: string | null
+          embedding: string | null
+          feature_json: Json | null
+          id: string
+          module_id: string | null
+          trade_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          embedding?: string | null
+          feature_json?: Json | null
+          id?: string
+          module_id?: string | null
+          trade_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          embedding?: string | null
+          feature_json?: Json | null
+          id?: string
+          module_id?: string | null
+          trade_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scenario_memory_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "learn_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       screenshot_vault: {
         Row: {
           annotation: string | null
@@ -1340,6 +1378,27 @@ export type Database = {
           id?: string
           is_active?: boolean
           rule_text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trading_signatures: {
+        Row: {
+          computed_at: string | null
+          embedding: string | null
+          signature: Json
+          user_id: string
+        }
+        Insert: {
+          computed_at?: string | null
+          embedding?: string | null
+          signature: Json
+          user_id: string
+        }
+        Update: {
+          computed_at?: string | null
+          embedding?: string | null
+          signature?: Json
           user_id?: string
         }
         Relationships: []

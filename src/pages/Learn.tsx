@@ -47,6 +47,8 @@ const Learn = () => {
   const [progress, setProgress] = useState<Record<string, ProgressRow[]>>({});
   const [rec, setRec] = useState<Recommendation | null>(null);
   const [loading, setLoading] = useState(true);
+  const [masteredL1, setMasteredL1] = useState(0);
+  const [tradeCount, setTradeCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,8 +58,9 @@ const Learn = () => {
         .from("learn_modules")
         .select("id,track,level,slug,title_en,title_gr,summary,ordinal,learn_minutes,xp_reward")
         .eq("is_published", true)
-        .eq("level", 1)
+        .lte("level", 2)
         .order("track", { ascending: true })
+        .order("level", { ascending: true })
         .order("ordinal", { ascending: true });
       if (!cancelled && mods) setModules(mods as LearnModule[]);
 
@@ -73,7 +76,20 @@ const Learn = () => {
             grouped[p.module_id].push(p);
           });
           setProgress(grouped);
+
+          // Count L1 mastered (quiz completed on a level-1 module)
+          const l1Ids = new Set((mods || []).filter((m: any) => m.level === 1).map((m: any) => m.id));
+          const mastered = (prog as ProgressRow[]).filter(
+            (p) => p.mode === "quiz" && p.status === "completed" && l1Ids.has(p.module_id)
+          ).length;
+          if (!cancelled) setMasteredL1(mastered);
         }
+
+        const { count } = await supabase
+          .from("paper_trades")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id);
+        if (!cancelled) setTradeCount(count || 0);
 
         const { data: recs } = await supabase
           .from("learn_recommendations")
@@ -89,6 +105,8 @@ const Learn = () => {
     })();
     return () => { cancelled = true; };
   }, [user?.id]);
+
+  const practitionerUnlocked = masteredL1 >= 5 && tradeCount >= 20;
 
   const modStatus = (id: string): "mastered" | "started" | "new" => {
     const rows = progress[id];
@@ -152,6 +170,10 @@ const Learn = () => {
 
       {!loading && TRACKS.map((t) => {
         const trackMods = modules.filter((m) => m.track === t.key);
+        const l1Mods = trackMods.filter((m) => m.level === 1);
+        const l2Mods = trackMods.filter((m) => m.level === 2);
+        const visibleMods = practitionerUnlocked ? trackMods : l1Mods;
+        const showLockedCard = !practitionerUnlocked && l2Mods.length > 0;
         return (
           <section key={t.key} style={{ marginBottom: 32 }}>
             <div
@@ -176,13 +198,13 @@ const Learn = () => {
               </span>
             </div>
 
-            {trackMods.length === 0 ? (
+            {visibleMods.length === 0 && !showLockedCard ? (
               <div style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", color: "var(--stoa-muted)" }}>
                 Coming soon.
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {trackMods.map((m) => {
+                {visibleMods.map((m) => {
                   const st = modStatus(m.id);
                   const badge = st === "mastered" ? "✓ Mastered" : st === "started" ? "· In progress" : "New";
                   return (
@@ -207,7 +229,7 @@ const Learn = () => {
                           marginBottom: 6,
                         }}
                       >
-                        {badge}
+                        {badge} {m.level === 2 ? "· L2" : ""}
                       </div>
                       <div className="stoa-display font-semibold" style={{ color: "var(--stoa-ink)", fontSize: 15 }}>
                         {m.title_en}
@@ -226,6 +248,30 @@ const Learn = () => {
                     </div>
                   );
                 })}
+                {showLockedCard && (
+                  <div
+                    style={{
+                      background: "var(--stoa-shine)",
+                      border: "1px dashed var(--stoa-rule)",
+                      borderRadius: 2,
+                      padding: 14,
+                      opacity: 0.85,
+                    }}
+                  >
+                    <div className="stoa-kicker" style={{ color: "var(--stoa-muted)", marginBottom: 6 }}>
+                      🔒 PRACTITIONER · ΑΣΚΗΤΗΣ
+                    </div>
+                    <div className="stoa-display font-semibold" style={{ color: "var(--stoa-ink)", fontSize: 15 }}>
+                      Level 2 — Locked
+                    </div>
+                    <div style={{ fontFamily: "Georgia, serif", fontSize: 13, fontStyle: "italic", color: "var(--stoa-muted)", marginTop: 8 }}>
+                      Practitioner (Ἀσκητής) unlocks after 5 mastered Initiate quizzes and 20 logged trades.
+                    </div>
+                    <div className="stoa-kicker" style={{ color: "var(--stoa-muted)", marginTop: 10, fontSize: 11 }}>
+                      {masteredL1}/5 mastered · {tradeCount}/20 trades
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </section>
