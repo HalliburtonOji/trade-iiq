@@ -430,7 +430,7 @@ const Index = () => {
                 style={{ background: "var(--stoa-accent)", border: "none", borderRadius: 2, padding: 16 }}
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center" style={{ background: "var(--stoa-shine)", borderRadius: 2 }}>
+                  <div className="flex h-10 w-10 items-center justify-center text-slate-950" style={{ background: "var(--stoa-shine)", borderRadius: 2 }}>
                     <Sparkles className="h-5 w-5" style={{ color: "var(--stoa-accent)" }} />
                   </div>
                   <div>
