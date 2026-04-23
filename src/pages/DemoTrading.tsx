@@ -7,7 +7,7 @@ import { useQuotes } from "@/hooks/use-quotes";
 import { toast } from "sonner";
 import StoaShell from "@/components/stoa/StoaShell";
 import PedimentCap from "@/components/stoa/PedimentCap";
-import GlassCard from "@/components/GlassCard";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
