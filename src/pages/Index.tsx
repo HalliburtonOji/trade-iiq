@@ -434,11 +434,11 @@ const Index = () => {
                     <Sparkles className="h-5 w-5" style={{ color: "var(--stoa-accent)" }} />
                   </div>
                   <div>
-                    <p className="stoa-display" style={{ fontSize: 13, color: "var(--stoa-shine)" }}>Today's picks · Αἱρέσεις</p>
-                    <p className="stoa-kicker" style={{ color: "var(--stoa-shine)", opacity: 0.8 }}>6 curated opportunities</p>
+                    <p className="stoa-display font-semibold" style={{ fontSize: 14, color: "var(--stoa-ink)" }}>Today's picks · Αἱρέσεις</p>
+                    <p className="stoa-kicker" style={{ color: "var(--stoa-ink)", opacity: 0.75 }}>6 curated opportunities</p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4" style={{ color: "var(--stoa-shine)" }} />
+                <ChevronRight className="h-4 w-4" style={{ color: "var(--stoa-ink)" }} />
               </button>
             </motion.div>
           </div>
