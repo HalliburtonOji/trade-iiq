@@ -47,6 +47,8 @@ const Learn = () => {
   const [progress, setProgress] = useState<Record<string, ProgressRow[]>>({});
   const [rec, setRec] = useState<Recommendation | null>(null);
   const [loading, setLoading] = useState(true);
+  const [masteredL1, setMasteredL1] = useState(0);
+  const [tradeCount, setTradeCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,8 +58,9 @@ const Learn = () => {
         .from("learn_modules")
         .select("id,track,level,slug,title_en,title_gr,summary,ordinal,learn_minutes,xp_reward")
         .eq("is_published", true)
-        .eq("level", 1)
+        .lte("level", 2)
         .order("track", { ascending: true })
+        .order("level", { ascending: true })
         .order("ordinal", { ascending: true });
       if (!cancelled && mods) setModules(mods as LearnModule[]);
 
@@ -73,7 +76,20 @@ const Learn = () => {
             grouped[p.module_id].push(p);
           });
           setProgress(grouped);
+
+          // Count L1 mastered (quiz completed on a level-1 module)
+          const l1Ids = new Set((mods || []).filter((m: any) => m.level === 1).map((m: any) => m.id));
+          const mastered = (prog as ProgressRow[]).filter(
+            (p) => p.mode === "quiz" && p.status === "completed" && l1Ids.has(p.module_id)
+          ).length;
+          if (!cancelled) setMasteredL1(mastered);
         }
+
+        const { count } = await supabase
+          .from("paper_trades")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id);
+        if (!cancelled) setTradeCount(count || 0);
 
         const { data: recs } = await supabase
           .from("learn_recommendations")
@@ -89,6 +105,8 @@ const Learn = () => {
     })();
     return () => { cancelled = true; };
   }, [user?.id]);
+
+  const practitionerUnlocked = masteredL1 >= 5 && tradeCount >= 20;
 
   const modStatus = (id: string): "mastered" | "started" | "new" => {
     const rows = progress[id];
