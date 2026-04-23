@@ -423,7 +423,7 @@ const Index = () => {
               </button>
             </motion.div>
 
-            <motion.div variants={fadeUp}>
+            <motion.div variants={fadeUp} className="pr-0 md:pr-16 lg:pr-0">
               <button
                 onClick={() => navigate("/daily-picks")}
                 className="flex items-center justify-between cursor-pointer transition-opacity hover:opacity-90 text-left w-full"
