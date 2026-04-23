@@ -295,6 +295,48 @@ export default function LearnModule() {
           </div>
         </div>
       )}
+
+      {showRuleModal && (
+        <div style={{
+          position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+          background: "rgba(26,20,12,0.55)", zIndex: 50, padding: 16,
+        }}>
+          <div style={{
+            background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2,
+            padding: 24, maxWidth: 520, width: "100%",
+          }}>
+            <div className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>
+              CLOSE THE LOOP · ΚΥΚΛΟΣ
+            </div>
+            <h2 className="stoa-display text-2xl font-semibold" style={{ color: "var(--stoa-ink)", marginTop: 4 }}>
+              Add a rule to your Playbook?
+            </h2>
+            <p style={{ fontFamily: "Georgia, serif", fontStyle: "italic", color: "var(--stoa-muted)", marginTop: 8 }}>
+              Turn this lesson into a rule your future trades will be checked against.
+            </p>
+            <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+              <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Title</span>
+                <input value={ruleTitle} onChange={(e) => setRuleTitle(e.target.value)}
+                  style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", padding: "6px 10px", fontFamily: "Georgia, serif", fontSize: 15, color: "var(--stoa-ink)", borderRadius: 2, width: "100%" }} />
+              </label>
+              <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Rule</span>
+                <textarea rows={4} value={ruleBody} onChange={(e) => setRuleBody(e.target.value)}
+                  style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", padding: "6px 10px", fontFamily: "Georgia, serif", fontSize: 15, color: "var(--stoa-ink)", borderRadius: 2, width: "100%", resize: "vertical" }} />
+              </label>
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 20 }}>
+              <button style={creamCta} className="stoa-kicker" onClick={() => setShowRuleModal(false)}>
+                Skip
+              </button>
+              <button style={goldCta} className="stoa-display font-semibold" onClick={saveRule}>
+                Save rule
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </StoaShell>
   );
 }
