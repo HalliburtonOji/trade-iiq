@@ -1043,6 +1043,44 @@ export type Database = {
         }
         Relationships: []
       }
+      rule_violations: {
+        Row: {
+          created_at: string | null
+          dismissed: boolean | null
+          id: string
+          reason: string | null
+          rule_id: string | null
+          trade_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          dismissed?: boolean | null
+          id?: string
+          reason?: string | null
+          rule_id?: string | null
+          trade_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          dismissed?: boolean | null
+          id?: string
+          reason?: string | null
+          rule_id?: string | null
+          trade_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rule_violations_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "playbooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       screenshot_vault: {
         Row: {
           annotation: string | null
