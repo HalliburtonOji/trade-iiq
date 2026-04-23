@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import StoaShell from "@/components/stoa/StoaShell";
 import PedimentCap from "@/components/stoa/PedimentCap";
-import GlassCard from "@/components/GlassCard";
+
 import AiPatternInsights from "@/components/AiPatternInsights";
 import TradingDNACard from "@/components/TradingDNACard";
 import Rulebook from "@/components/Rulebook";
