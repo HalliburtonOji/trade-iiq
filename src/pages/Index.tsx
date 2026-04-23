@@ -155,7 +155,7 @@ const Index = () => {
         </div>
       }
     >
-      <motion.div variants={stagger} initial="hidden" animate="show" className="flex flex-col gap-6">
+      <motion.div variants={stagger} initial="hidden" animate="show" className="flex flex-col gap-6 pb-32 md:pb-24">
         {/* Temple — Pediment */}
         <motion.div variants={fadeUp} style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", paddingTop: 8 }}>
           <PedimentCap variant="triangle" width={180} />
@@ -423,7 +423,7 @@ const Index = () => {
               </button>
             </motion.div>
 
-            <motion.div variants={fadeUp}>
+            <motion.div variants={fadeUp} className="pr-0 md:pr-16 lg:pr-0">
               <button
                 onClick={() => navigate("/daily-picks")}
                 className="flex items-center justify-between cursor-pointer transition-opacity hover:opacity-90 text-left w-full"

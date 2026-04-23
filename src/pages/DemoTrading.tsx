@@ -260,15 +260,11 @@ const DemoTrading = () => {
         <PositionAlerts positions={positions} quotes={quotes} balance={balance} />
 
         {/* Header with level */}
-        <div className="flex items-center justify-between gap-3" id="demo-header">
-          <div className="flex-1">
-            <h1 className="text-lg font-bold">Demo Trading</h1>
-            <p className="text-[10px] text-muted-foreground">Practice risk-free with virtual money</p>
+        <div className="flex items-center justify-end gap-3" id="demo-header">
+          <div className="shrink-0" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2, padding: "6px 12px" }}>
+            <p className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Balance</p>
+            <p className="stoa-mono font-bold text-verdict-buy" style={{ fontSize: 14 }}>£{balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
           </div>
-          <GlassCard className="px-3 py-1.5 shrink-0">
-            <p className="text-[9px] text-muted-foreground">Balance</p>
-            <p className="text-sm font-bold font-mono text-verdict-buy">£{balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-          </GlassCard>
         </div>
 
         <TradingLevel level={level} totalTrades={totalTrades} xp={xp} />
@@ -277,7 +273,8 @@ const DemoTrading = () => {
         <div className="flex gap-2" id="demo-asset-tabs">
           {(["stock", "crypto", "forex"] as AssetTab[]).map((t) => (
             <button key={t} onClick={() => setAssetTab(t)}
-              className={`rounded-lg px-4 py-1.5 text-xs font-semibold capitalize transition-all ${assetTab === t ? "bg-primary text-primary-foreground" : "glass-card text-muted-foreground"}`}>
+              className="px-4 py-1.5 text-xs capitalize stoa-kicker"
+              style={{ background: assetTab === t ? "var(--stoa-accent)" : "var(--stoa-shine)", color: assetTab === t ? "var(--stoa-shine)" : "var(--stoa-muted)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
               {t}
             </button>
           ))}
@@ -286,14 +283,15 @@ const DemoTrading = () => {
         <div className="flex flex-wrap gap-1.5">
           {quickSymbols.map((s) => (
             <button key={s.symbol} onClick={() => setSymbol(s.symbol)}
-              className={`rounded-full px-3 py-1 text-[11px] font-mono font-medium transition-all ${symbol === s.symbol ? "bg-primary/20 text-primary border border-primary/30" : "glass-card text-muted-foreground"}`}>
+              className="px-3 py-1 text-[11px] stoa-mono font-bold"
+              style={{ background: symbol === s.symbol ? "var(--stoa-accent)" : "var(--stoa-shine)", color: symbol === s.symbol ? "var(--stoa-shine)" : "var(--stoa-ink)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
               {s.symbol}
             </button>
           ))}
         </div>
 
         {/* Chart */}
-        <div id="demo-chart" className="rounded-2xl overflow-hidden border border-border/30 bg-card" style={{ height: "clamp(280px, 40vh, 450px)" }}>
+        <div id="demo-chart" className="overflow-hidden" style={{ border: "1px solid var(--stoa-rule)", borderRadius: 2, background: "var(--stoa-shine)", height: "clamp(280px, 40vh, 450px)" }}>
           <div ref={chartRef} style={{ height: "100%", width: "100%" }} />
         </div>
 
@@ -427,36 +425,36 @@ const DemoTrading = () => {
 
         {/* Tabs: Open / Journal / Stats */}
         <Tabs defaultValue="open">
-          <TabsList className="w-full bg-secondary/50">
-            <TabsTrigger value="open" className="flex-1 text-xs">Open ({positions.length})</TabsTrigger>
-            <TabsTrigger value="journal" className="flex-1 text-xs">Journal ({history.length})</TabsTrigger>
-            <TabsTrigger value="stats" className="flex-1 text-xs">Stats</TabsTrigger>
+          <TabsList className="w-full" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
+            <TabsTrigger value="open" className="flex-1 text-xs stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">Open ({positions.length})</TabsTrigger>
+            <TabsTrigger value="journal" className="flex-1 text-xs stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">Journal ({history.length})</TabsTrigger>
+            <TabsTrigger value="stats" className="flex-1 text-xs stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">Stats</TabsTrigger>
           </TabsList>
 
           <TabsContent value="open" className="mt-3 flex flex-col gap-2">
             {positions.length === 0 && (
-              <GlassCard className="text-center py-8">
-                <p className="text-sm text-muted-foreground">No open positions</p>
-                <p className="text-[10px] text-muted-foreground/60 mt-1">Place your first trade above!</p>
-              </GlassCard>
+              <div className="text-center" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2, padding: "32px 16px" }}>
+                <p style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", color: "var(--stoa-muted)" }}>No open positions · κενόν</p>
+                <p className="stoa-kicker" style={{ marginTop: 6, color: "var(--stoa-muted)" }}>Place your first trade above!</p>
+              </div>
             )}
             {positions.map(pos => {
               const live = quotes[pos.symbol]?.current_price || pos.entry_price;
               const pnl = pos.direction === "long" ? (live - pos.entry_price) * pos.quantity : (pos.entry_price - live) * pos.quantity;
               return (
-                <GlassCard key={pos.id} className={`flex items-center justify-between ${pnl >= 0 ? "border-verdict-buy/10" : "border-verdict-avoid/10"}`}>
+                <div key={pos.id} className="flex items-center justify-between" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderLeft: `3px solid ${pnl >= 0 ? "hsl(var(--verdict-buy))" : "hsl(var(--verdict-avoid))"}`, borderRadius: 2, padding: 12 }}>
                   <div>
-                    <span className="text-sm font-bold font-mono">{pos.symbol}</span>
+                    <span className="stoa-mono font-bold" style={{ fontSize: 14, color: "var(--stoa-ink)" }}>{pos.symbol}</span>
                     <span className={`ml-2 text-[10px] ${pos.direction === "long" ? "text-verdict-buy" : "text-verdict-avoid"}`}>{pos.direction.toUpperCase()}</span>
-                    <p className="text-[10px] text-muted-foreground">@ ${pos.entry_price.toFixed(2)} · {pos.quantity} units</p>
+                    <p className="stoa-kicker" style={{ color: "var(--stoa-muted)", marginTop: 2 }}>@ ${pos.entry_price.toFixed(2)} · {pos.quantity} units</p>
                   </div>
                   <div className="text-right">
-                    <p className={`text-sm font-bold font-mono ${pnl >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`}>
+                    <p className={`stoa-mono font-bold ${pnl >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`} style={{ fontSize: 14 }}>
                       {pnl >= 0 ? "+" : ""}${pnl.toFixed(2)}
                     </p>
                     <Button size="sm" variant="ghost" className="text-[10px] h-5" onClick={() => closePosition(pos)}>Close</Button>
                   </div>
-                </GlassCard>
+                </div>
               );
             })}
           </TabsContent>
