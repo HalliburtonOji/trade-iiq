@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { Image, Upload, Trash2, Tag, Filter, X } from "lucide-react";
+import { Image, Upload, Trash2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import StoaShell from "@/components/stoa/StoaShell";
 import PedimentCap from "@/components/stoa/PedimentCap";
-import GlassCard from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,6 +23,7 @@ interface Screenshot {
 }
 
 const PHASES = ["pre_trade", "post_trade", "general"];
+const cream = { background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2 } as const;
 
 const ScreenshotVault = () => {
   const { user } = useAuth();
@@ -114,7 +114,7 @@ const ScreenshotVault = () => {
     >
       <div className="flex flex-col gap-2 mb-4 min-w-0 max-w-full overflow-hidden">
         <PedimentCap variant="rule" />
-        <span className="stoa-kicker">TRAINING · THE IMAGES</span>
+        <span className="stoa-kicker">GROW · THE ICONS · Εἰκόνες</span>
         <div className="flex items-baseline gap-3">
           <h1 className="stoa-display text-3xl font-semibold">Screenshots</h1>
           <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Εἰκόνες</span>
@@ -122,28 +122,37 @@ const ScreenshotVault = () => {
         <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>the chart, frozen in time</p>
       </div>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Screenshot Vault</h1>
-            <p className="text-sm text-muted-foreground">Pre/post-trade chart screenshots with annotations</p>
-          </div>
-          <Button onClick={() => setShowUpload(true)} size="sm" className="gap-1.5"><Upload className="h-4 w-4" /> Upload</Button>
+        <div className="flex items-center justify-end">
+          <Button
+            onClick={() => setShowUpload(true)}
+            size="sm"
+            className="gap-1.5 stoa-display"
+            style={{ background: "var(--stoa-accent)", color: "var(--stoa-ink)", border: "none", borderRadius: 2 }}
+          >
+            <Upload className="h-4 w-4" /> Upload
+          </Button>
         </div>
 
         {showUpload && (
-          <GlassCard className="space-y-4">
+          <div style={{ ...cream, padding: 14 }} className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="font-semibold">Upload Screenshot</h3>
-              <button onClick={() => setShowUpload(false)}><X className="h-4 w-4 text-muted-foreground" /></button>
+              <span className="stoa-kicker">UPLOAD · Ἀνάθεσις</span>
+              <button onClick={() => setShowUpload(false)}><X className="h-4 w-4" style={{ color: "var(--stoa-muted)" }} /></button>
             </div>
-            <div onClick={() => fileRef.current?.click()} className="border-2 border-dashed border-border/40 rounded-xl p-6 text-center cursor-pointer hover:border-primary/30 transition-all">
+            <div
+              onClick={() => fileRef.current?.click()}
+              className="p-6 text-center cursor-pointer transition-all"
+              style={{ border: "1px dashed var(--stoa-rule)", background: "var(--stoa-shine)", borderRadius: 2 }}
+            >
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={e => setFile(e.target.files?.[0] || null)} />
-              {file ? <p className="text-sm text-foreground">{file.name}</p> : <p className="text-sm text-muted-foreground">Click to select image</p>}
+              {file
+                ? <p className="text-sm" style={{ color: "var(--stoa-ink)" }}>{file.name}</p>
+                : <p style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", color: "var(--stoa-muted)" }}>Click to select image</p>}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <Input value={symbol} onChange={e => setSymbol(e.target.value)} placeholder="Symbol (e.g. AAPL)" />
+              <Input value={symbol} onChange={e => setSymbol(e.target.value)} placeholder="Symbol (e.g. AAPL)" style={cream} />
               <Select value={phase} onValueChange={setPhase}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger style={cream}><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="pre_trade">Pre-Trade</SelectItem>
                   <SelectItem value="post_trade">Post-Trade</SelectItem>
@@ -151,7 +160,7 @@ const ScreenshotVault = () => {
                 </SelectContent>
               </Select>
               <div className="flex gap-1">
-                <Input value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={e => e.key === "Enter" && addTag()} placeholder="Add tag..." />
+                <Input value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={e => e.key === "Enter" && addTag()} placeholder="Add tag..." style={cream} />
               </div>
             </div>
             {tags.length > 0 && (
@@ -159,14 +168,21 @@ const ScreenshotVault = () => {
                 {tags.map(t => <Badge key={t} variant="secondary" className="text-[10px] gap-1">{t}<button onClick={() => setTags(tags.filter(x => x !== t))}><X className="h-2.5 w-2.5" /></button></Badge>)}
               </div>
             )}
-            <Textarea value={annotation} onChange={e => setAnnotation(e.target.value)} placeholder="What do you see? Annotation..." rows={3} />
-            <Button onClick={upload} disabled={!file || uploading} className="w-full">{uploading ? "Uploading..." : "Save Screenshot"}</Button>
-          </GlassCard>
+            <Textarea value={annotation} onChange={e => setAnnotation(e.target.value)} placeholder="What do you see? Annotation..." rows={3} style={cream} />
+            <Button
+              onClick={upload}
+              disabled={!file || uploading}
+              className="w-full stoa-display"
+              style={{ background: "var(--stoa-accent)", color: "var(--stoa-ink)", border: "none", borderRadius: 2 }}
+            >
+              {uploading ? "Uploading..." : "Save Screenshot"}
+            </Button>
+          </div>
         )}
 
         <div className="flex gap-2 items-center">
           <Select value={filterPhase} onValueChange={setFilterPhase}>
-            <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-32" style={cream}><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
               <SelectItem value="pre_trade">Pre-Trade</SelectItem>
@@ -174,26 +190,31 @@ const ScreenshotVault = () => {
               <SelectItem value="general">General</SelectItem>
             </SelectContent>
           </Select>
-          <Input value={filterSymbol} onChange={e => setFilterSymbol(e.target.value)} placeholder="Filter symbol..." className="w-32" />
+          <Input value={filterSymbol} onChange={e => setFilterSymbol(e.target.value)} placeholder="Filter symbol..." className="w-32" style={cream} />
         </div>
 
         {loading ? (
           <div className="flex justify-center py-12"><div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>
         ) : filtered.length === 0 ? (
-          <GlassCard className="text-center py-12">
-            <Image className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-            <p className="text-muted-foreground">No screenshots yet.</p>
-          </GlassCard>
+          <div style={{ ...cream, padding: 32 }} className="text-center">
+            <Image className="h-12 w-12 mx-auto mb-4" style={{ color: "var(--stoa-rule)" }} />
+            <p style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", color: "var(--stoa-muted)" }}>No screenshots yet · κενόν</p>
+          </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {filtered.map(s => (
-              <div key={s.id} className="group relative rounded-xl overflow-hidden border border-border/20 bg-card/50 cursor-pointer" onClick={() => setViewItem(s)}>
+              <div
+                key={s.id}
+                className="group relative overflow-hidden cursor-pointer"
+                style={{ ...cream }}
+                onClick={() => setViewItem(s)}
+              >
                 <img src={s.image_url} alt={s.symbol} className="w-full aspect-video object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-all flex flex-col justify-end p-2">
-                  <p className="text-xs font-semibold">{s.symbol}</p>
+                  <p className="stoa-mono font-bold" style={{ fontSize: 12, color: "#fff" }}>{s.symbol}</p>
                   <Badge variant="outline" className="text-[9px] w-fit">{s.phase.replace("_", " ")}</Badge>
                 </div>
-                <button onClick={e => { e.stopPropagation(); deleteScreenshot(s.id); }} className="absolute top-1 right-1 p-1 rounded bg-background/80 opacity-0 group-hover:opacity-100 transition-all">
+                <button onClick={e => { e.stopPropagation(); deleteScreenshot(s.id); }} className="absolute top-1 right-1 p-1 bg-background/80 opacity-0 group-hover:opacity-100 transition-all" style={{ borderRadius: 2 }}>
                   <Trash2 className="h-3 w-3 text-destructive" />
                 </button>
               </div>
@@ -207,7 +228,7 @@ const ScreenshotVault = () => {
               <>
                 <DialogHeader><DialogTitle>{viewItem.symbol} — {viewItem.phase.replace("_", " ")}</DialogTitle></DialogHeader>
                 <img src={viewItem.image_url} alt={viewItem.symbol} className="w-full rounded-lg" />
-                {viewItem.annotation && <p className="text-sm text-muted-foreground">{viewItem.annotation}</p>}
+                {viewItem.annotation && <p className="text-sm" style={{ fontFamily: "Georgia, serif", color: "var(--stoa-ink)" }}>{viewItem.annotation}</p>}
                 {viewItem.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1">{viewItem.tags.map(t => <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>)}</div>
                 )}

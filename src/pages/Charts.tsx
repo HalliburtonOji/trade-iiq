@@ -25,6 +25,8 @@ const quickChips: Record<AssetTab, string[]> = {
   forex: ["EURUSD", "GBPUSD", "USDJPY"],
 };
 
+const cream = { background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2 } as const;
+
 const Charts = () => {
   const [assetTab, setAssetTab] = useState<AssetTab>("stock");
   const [symbol, setSymbol] = useState(defaultSymbols.stock);
@@ -91,7 +93,7 @@ const Charts = () => {
     >
       <div className="flex flex-col gap-2 mb-2 min-w-0 max-w-full overflow-hidden">
         <PedimentCap variant="rule" />
-        <span className="stoa-kicker">ACROPOLIS · THE LINES</span>
+        <span className="stoa-kicker">ACROPOLIS · THE LINES · Γραμμαί</span>
         <div className="flex items-baseline gap-3">
           <h1 className="stoa-display text-3xl font-semibold">Charts</h1>
           <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Γραμμαί</span>
@@ -99,59 +101,75 @@ const Charts = () => {
         <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>TradingView under the colonnade</p>
       </div>
       <div className="flex flex-col gap-4 px-4 pt-6 pb-24">
-        <h1 className="text-xl font-bold">Live Charts</h1>
-
         {/* Asset tabs */}
         <div className="flex gap-2">
-          {(["stock", "crypto", "forex"] as AssetTab[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => setAssetTab(t)}
-              className={`rounded-lg px-4 py-1.5 text-xs font-semibold capitalize transition-all ${
-                assetTab === t
-                  ? "bg-primary text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.3)]"
-                  : "glass-card text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t}
-            </button>
-          ))}
+          {(["stock", "crypto", "forex"] as AssetTab[]).map((t) => {
+            const active = assetTab === t;
+            return (
+              <button
+                key={t}
+                onClick={() => setAssetTab(t)}
+                className="px-4 py-1.5 text-xs capitalize stoa-kicker transition-all"
+                style={{
+                  background: active ? "var(--stoa-accent)" : "var(--stoa-shine)",
+                  color: active ? "var(--stoa-ink)" : "var(--stoa-muted)",
+                  border: "1px solid var(--stoa-rule)",
+                  borderRadius: 2,
+                }}
+              >
+                {t}
+              </button>
+            );
+          })}
         </div>
 
         {/* Search */}
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--stoa-muted)" }} />
             <Input
               value={inputVal}
               onChange={(e) => setInputVal(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               placeholder="Search symbol..."
-              className="pl-9 bg-secondary/50 border-border/50"
+              className="pl-9"
+              style={cream}
             />
           </div>
-          <Button onClick={handleSearch} size="sm">Go</Button>
+          <Button
+            onClick={handleSearch}
+            size="sm"
+            className="stoa-display"
+            style={{ background: "var(--stoa-accent)", color: "var(--stoa-ink)", border: "none", borderRadius: 2 }}
+          >
+            Go
+          </Button>
         </div>
 
         {/* Quick chips */}
         <div className="flex flex-wrap gap-1.5">
-          {quickChips[assetTab].map((s) => (
-            <button
-              key={s}
-              onClick={() => { setSymbol(s); setInputVal(""); }}
-              className={`rounded-full px-3 py-1 text-[11px] font-mono font-medium transition-all ${
-                symbol === s
-                  ? "bg-primary/20 text-primary border border-primary/30"
-                  : "glass-card glass-card-hover text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {s}
-            </button>
-          ))}
+          {quickChips[assetTab].map((s) => {
+            const active = symbol === s;
+            return (
+              <button
+                key={s}
+                onClick={() => { setSymbol(s); setInputVal(""); }}
+                className="px-3 py-1 text-[11px] stoa-mono font-medium transition-all"
+                style={{
+                  background: active ? "var(--stoa-accent)" : "var(--stoa-shine)",
+                  color: active ? "var(--stoa-ink)" : "var(--stoa-ink)",
+                  border: "1px solid var(--stoa-rule)",
+                  borderRadius: 2,
+                }}
+              >
+                {s}
+              </button>
+            );
+          })}
         </div>
 
         {/* TradingView chart */}
-        <div className="rounded-2xl overflow-hidden border border-border/30 bg-card" style={{ height: "clamp(400px, 60vh, 700px)" }}>
+        <div style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2, overflow: "hidden", height: "clamp(400px, 60vh, 700px)" }}>
           <div
             ref={containerRef}
             className="tradingview-widget-container"
@@ -159,7 +177,7 @@ const Charts = () => {
           />
         </div>
 
-        <p className="text-[10px] text-muted-foreground/50 text-center">
+        <p className="text-[10px] text-center stoa-kicker">
           Charts powered by TradingView. Not financial advice.
         </p>
       </div>

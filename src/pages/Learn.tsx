@@ -148,12 +148,12 @@ const Learn = () => {
         <LearnHeader totalXp={totalXp} streak={streak} completedCount={completedLessons.length} />
 
         <Tabs defaultValue="foryou">
-          <TabsList className="w-full bg-secondary/50 h-10">
-            <TabsTrigger value="foryou" className="flex-1 text-[11px]">✨ For You</TabsTrigger>
-            <TabsTrigger value="lessons" className="flex-1 text-[11px]">Lessons</TabsTrigger>
-            <TabsTrigger value="practice" className="flex-1 text-[11px]">Practice</TabsTrigger>
-            <TabsTrigger value="review" className="flex-1 text-[11px]">Review</TabsTrigger>
-            <TabsTrigger value="badges" className="flex-1 text-[11px]">Badges</TabsTrigger>
+          <TabsList className="w-full h-10" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
+            <TabsTrigger value="foryou" className="flex-1 text-[11px] stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">✨ For You</TabsTrigger>
+            <TabsTrigger value="lessons" className="flex-1 text-[11px] stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">Lessons</TabsTrigger>
+            <TabsTrigger value="practice" className="flex-1 text-[11px] stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">Practice</TabsTrigger>
+            <TabsTrigger value="review" className="flex-1 text-[11px] stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">Review</TabsTrigger>
+            <TabsTrigger value="badges" className="flex-1 text-[11px] stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">Badges</TabsTrigger>
           </TabsList>
 
           <TabsContent value="foryou">
