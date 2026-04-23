@@ -170,6 +170,10 @@ const Learn = () => {
 
       {!loading && TRACKS.map((t) => {
         const trackMods = modules.filter((m) => m.track === t.key);
+        const l1Mods = trackMods.filter((m) => m.level === 1);
+        const l2Mods = trackMods.filter((m) => m.level === 2);
+        const visibleMods = practitionerUnlocked ? trackMods : l1Mods;
+        const showLockedCard = !practitionerUnlocked && l2Mods.length > 0;
         return (
           <section key={t.key} style={{ marginBottom: 32 }}>
             <div
@@ -194,13 +198,13 @@ const Learn = () => {
               </span>
             </div>
 
-            {trackMods.length === 0 ? (
+            {visibleMods.length === 0 && !showLockedCard ? (
               <div style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", color: "var(--stoa-muted)" }}>
                 Coming soon.
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {trackMods.map((m) => {
+                {visibleMods.map((m) => {
                   const st = modStatus(m.id);
                   const badge = st === "mastered" ? "✓ Mastered" : st === "started" ? "· In progress" : "New";
                   return (
@@ -225,7 +229,7 @@ const Learn = () => {
                           marginBottom: 6,
                         }}
                       >
-                        {badge}
+                        {badge} {m.level === 2 ? "· L2" : ""}
                       </div>
                       <div className="stoa-display font-semibold" style={{ color: "var(--stoa-ink)", fontSize: 15 }}>
                         {m.title_en}
@@ -244,6 +248,30 @@ const Learn = () => {
                     </div>
                   );
                 })}
+                {showLockedCard && (
+                  <div
+                    style={{
+                      background: "var(--stoa-shine)",
+                      border: "1px dashed var(--stoa-rule)",
+                      borderRadius: 2,
+                      padding: 14,
+                      opacity: 0.85,
+                    }}
+                  >
+                    <div className="stoa-kicker" style={{ color: "var(--stoa-muted)", marginBottom: 6 }}>
+                      🔒 PRACTITIONER · ΑΣΚΗΤΗΣ
+                    </div>
+                    <div className="stoa-display font-semibold" style={{ color: "var(--stoa-ink)", fontSize: 15 }}>
+                      Level 2 — Locked
+                    </div>
+                    <div style={{ fontFamily: "Georgia, serif", fontSize: 13, fontStyle: "italic", color: "var(--stoa-muted)", marginTop: 8 }}>
+                      Practitioner (Ἀσκητής) unlocks after 5 mastered Initiate quizzes and 20 logged trades.
+                    </div>
+                    <div className="stoa-kicker" style={{ color: "var(--stoa-muted)", marginTop: 10, fontSize: 11 }}>
+                      {masteredL1}/5 mastered · {tradeCount}/20 trades
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </section>
