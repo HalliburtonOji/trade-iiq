@@ -53,6 +53,9 @@ export default function LearnModule() {
   const [answers, setAnswers] = useState<number[]>([]);
   const [score, setScore] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showRuleModal, setShowRuleModal] = useState(false);
+  const [ruleTitle, setRuleTitle] = useState("");
+  const [ruleBody, setRuleBody] = useState("");
 
   useEffect(() => {
     if (!slug) return;
@@ -104,9 +107,31 @@ export default function LearnModule() {
       );
     }
     if (passed) {
-      // TODO(P7): show playbook rule modal on pass
       toast({ title: "Quiz passed", description: `+${mod.xp_reward ?? 50} XP` });
+      setRuleTitle(`Rule from ${mod.title_en}`);
+      setRuleBody(`Based on "${mod.title_en}" (${mod.title_gr}): ${mod.summary || ""}\n\nWhen this situation arises, I will: `);
+      setShowRuleModal(true);
     }
+  };
+
+  const saveRule = async () => {
+    if (!user || !mod) return;
+    const { error } = await supabase.from("playbooks").insert({
+      user_id: user.id,
+      name: ruleTitle,
+      notes: ruleBody,
+      strategy_type: "codex",
+      checklist: [],
+      conditions: { source_module_id: mod.id },
+    });
+    if (!error) {
+      await supabase.from("learn_progress").update({ playbook_rule_created: true })
+        .eq("user_id", user.id).eq("module_id", mod.id).eq("mode", "quiz");
+      toast({ title: "Rule added", description: "Saved to your Playbook." });
+    } else {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+    setShowRuleModal(false);
   };
 
   const stoaCrumb = (
@@ -165,7 +190,7 @@ export default function LearnModule() {
             >
               ← Back to Codex
             </button>
-            <div style={{ display: "flex", gap: 12 }}>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
               <button
                 style={creamCta}
                 className="stoa-kicker"
@@ -173,6 +198,15 @@ export default function LearnModule() {
               >
                 Drill (Γύμνασμα)
               </button>
+              {mod.scenario_json && (
+                <button
+                  style={creamCta}
+                  className="stoa-kicker"
+                  onClick={() => navigate(`/learn/${slug}/scenario`)}
+                >
+                  Scenario (Ἀγών)
+                </button>
+              )}
               <button
                 style={goldCta}
                 className="stoa-display font-semibold"
@@ -258,6 +292,48 @@ export default function LearnModule() {
                 Re-read Lesson
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {showRuleModal && (
+        <div style={{
+          position: "fixed", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+          background: "rgba(26,20,12,0.55)", zIndex: 50, padding: 16,
+        }}>
+          <div style={{
+            background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2,
+            padding: 24, maxWidth: 520, width: "100%",
+          }}>
+            <div className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>
+              CLOSE THE LOOP · ΚΥΚΛΟΣ
+            </div>
+            <h2 className="stoa-display text-2xl font-semibold" style={{ color: "var(--stoa-ink)", marginTop: 4 }}>
+              Add a rule to your Playbook?
+            </h2>
+            <p style={{ fontFamily: "Georgia, serif", fontStyle: "italic", color: "var(--stoa-muted)", marginTop: 8 }}>
+              Turn this lesson into a rule your future trades will be checked against.
+            </p>
+            <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+              <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Title</span>
+                <input value={ruleTitle} onChange={(e) => setRuleTitle(e.target.value)}
+                  style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", padding: "6px 10px", fontFamily: "Georgia, serif", fontSize: 15, color: "var(--stoa-ink)", borderRadius: 2, width: "100%" }} />
+              </label>
+              <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Rule</span>
+                <textarea rows={4} value={ruleBody} onChange={(e) => setRuleBody(e.target.value)}
+                  style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", padding: "6px 10px", fontFamily: "Georgia, serif", fontSize: 15, color: "var(--stoa-ink)", borderRadius: 2, width: "100%", resize: "vertical" }} />
+              </label>
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 20 }}>
+              <button style={creamCta} className="stoa-kicker" onClick={() => setShowRuleModal(false)}>
+                Skip
+              </button>
+              <button style={goldCta} className="stoa-display font-semibold" onClick={saveRule}>
+                Save rule
+              </button>
+            </div>
           </div>
         </div>
       )}

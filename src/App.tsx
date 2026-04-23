@@ -12,6 +12,7 @@ import Tracker from "./pages/Tracker";
 import Learn from "./pages/Learn";
 import LearnModule from "./pages/LearnModule";
 import LearnDrill from "./pages/LearnDrill";
+import LearnScenario from "./pages/LearnScenario";
 import Portfolio from "./pages/Portfolio";
 import Screener from "./pages/Screener";
 import DailyPicks from "./pages/DailyPicks";
@@ -64,6 +65,7 @@ const AppContent = () => {
         <Route path="/learn" element={<ProtectedRoute><Learn /></ProtectedRoute>} />
         <Route path="/learn/:slug" element={<ProtectedRoute><LearnModule /></ProtectedRoute>} />
         <Route path="/learn/:slug/drill" element={<ProtectedRoute><LearnDrill /></ProtectedRoute>} />
+        <Route path="/learn/:slug/scenario" element={<ProtectedRoute><LearnScenario /></ProtectedRoute>} />
         <Route path="/portfolio" element={<ProtectedRoute><Portfolio /></ProtectedRoute>} />
         <Route path="/screener" element={<ProtectedRoute><Screener /></ProtectedRoute>} />
         <Route path="/daily-picks" element={<ProtectedRoute><DailyPicks /></ProtectedRoute>} />
