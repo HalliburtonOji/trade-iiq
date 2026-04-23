@@ -160,25 +160,20 @@ const Insights = () => {
       palette="delphi"
       crumb={
         <span>
-          <span className="stoa-greek">Γνῶσις</span> · Insights
+          <span className="stoa-greek">Νόησις</span> · Insights
         </span>
       }
     >
       <div className="flex flex-col gap-2 mb-2 min-w-0 max-w-full overflow-hidden">
         <PedimentCap variant="rule" />
-        <span className="stoa-kicker">GROW · THE KNOWLEDGE</span>
+        <span className="stoa-kicker">GROW · THE NOESIS</span>
         <div className="flex items-baseline gap-3">
           <h1 className="stoa-display text-3xl font-semibold">Insights</h1>
-          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Γνῶσις</span>
+          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Νόησις</span>
         </div>
         <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>patterns in thy conduct</p>
       </div>
       <motion.div variants={stagger} initial="hidden" animate="show" className="flex flex-col gap-4 px-4 pt-6 pb-24">
-        <motion.div variants={fadeUp}>
-          <h1 className="text-xl font-bold">Insights</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Your trading intelligence dashboard</p>
-        </motion.div>
-
         {/* Top Stats */}
         <motion.div variants={fadeUp} className="grid grid-cols-4 gap-2">
           <StatCard label="Win Rate" value={`${analysis.winRate}%`} icon={<TrendingUp className="h-3.5 w-3.5" />} trend={analysis.winRate >= 50 ? "up" : analysis.total > 0 ? "down" : "neutral"} />
@@ -188,16 +183,16 @@ const Insights = () => {
         </motion.div>
 
         <Tabs defaultValue="dna">
-          <TabsList className="w-full bg-secondary/50 flex-wrap h-auto gap-0.5 p-1">
-            <TabsTrigger value="dna" className="flex-1 text-xs">🧬 DNA</TabsTrigger>
-            <TabsTrigger value="bias" className="flex-1 text-xs">🛡️ Bias</TabsTrigger>
-            <TabsTrigger value="ai" className="flex-1 text-xs">🧠 AI</TabsTrigger>
-            <TabsTrigger value="charts" className="flex-1 text-xs">📊 Charts</TabsTrigger>
-            <TabsTrigger value="performance" className="flex-1 text-xs">🏆 Perf</TabsTrigger>
-            <TabsTrigger value="psychology" className="flex-1 text-xs">🧘 Psych</TabsTrigger>
-            <TabsTrigger value="rules" className="flex-1 text-xs">📖 Rules</TabsTrigger>
-            <TabsTrigger value="weekly" className="flex-1 text-xs">📅 Week</TabsTrigger>
-            <TabsTrigger value="monthly" className="flex-1 text-xs">📈 Month</TabsTrigger>
+          <TabsList className="w-full flex-wrap h-auto gap-0.5 p-1" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
+            <TabsTrigger value="dna" className="flex-1 text-xs stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">🧬 DNA</TabsTrigger>
+            <TabsTrigger value="bias" className="flex-1 text-xs stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">🛡️ Bias</TabsTrigger>
+            <TabsTrigger value="ai" className="flex-1 text-xs stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">🧠 AI</TabsTrigger>
+            <TabsTrigger value="charts" className="flex-1 text-xs stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">📊 Charts</TabsTrigger>
+            <TabsTrigger value="performance" className="flex-1 text-xs stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">🏆 Perf</TabsTrigger>
+            <TabsTrigger value="psychology" className="flex-1 text-xs stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">🧘 Psych</TabsTrigger>
+            <TabsTrigger value="rules" className="flex-1 text-xs stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">📖 Rules</TabsTrigger>
+            <TabsTrigger value="weekly" className="flex-1 text-xs stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">📅 Week</TabsTrigger>
+            <TabsTrigger value="monthly" className="flex-1 text-xs stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">📈 Month</TabsTrigger>
           </TabsList>
 
           {/* DNA TAB */}
@@ -224,55 +219,55 @@ const Insights = () => {
           <TabsContent value="performance" className="mt-3 flex flex-col gap-3">
             {/* Best Strategy */}
             <motion.div variants={fadeUp}>
-              <GlassCard className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-verdict-buy/10">
+              <div className="flex items-center gap-3" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderLeft: "3px solid hsl(var(--verdict-buy))", borderRadius: 2, padding: 14 }}>
+                <div className="flex h-10 w-10 items-center justify-center" style={{ border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
                   <Target className="h-5 w-5 text-verdict-buy" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Best Strategy</p>
+                  <p className="stoa-kicker">Best Strategy</p>
                   {analysis.bestStrategy ? (
                     <>
                       <p className="text-sm font-bold text-verdict-buy">{analysis.bestStrategy.decision}</p>
-                      <p className="text-[10px] text-muted-foreground">{analysis.bestStrategy.rate}% win rate across {analysis.bestStrategy.total} trades</p>
+                      <p className="stoa-kicker">{analysis.bestStrategy.rate}% win rate across {analysis.bestStrategy.total} trades</p>
                     </>
                   ) : (
                     <p className="text-sm text-muted-foreground">Log more trades to see</p>
                   )}
                 </div>
-              </GlassCard>
+              </div>
             </motion.div>
 
             {/* Confidence Calibration */}
             <motion.div variants={fadeUp}>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Confidence Calibration</h3>
-              <GlassCard className="flex flex-col gap-2">
+              <div className="mb-2"><span className="stoa-kicker">CALIBRATION · Μέτρον</span></div>
+              <div className="flex flex-col gap-2" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2, padding: 14 }}>
                 {analysis.calibration.map(c => (
                   <div key={c.level} className="flex items-center gap-3">
-                    <span className="text-xs font-bold font-mono w-6 text-primary">⚡{c.level}</span>
+                    <span className="stoa-mono font-bold w-6 text-[color:var(--stoa-accent)]" style={{ fontSize: 12 }}>⚡{c.level}</span>
                     <div className="flex-1">
                       <Progress value={c.rate} className="h-2" />
                     </div>
-                    <span className="text-[10px] text-muted-foreground font-mono w-16 text-right">
+                    <span className="stoa-mono w-16 text-right" style={{ fontSize: 11, color: "var(--stoa-muted)" }}>
                       {c.count > 0 ? `${c.rate}% (${c.count})` : "—"}
                     </span>
                   </div>
                 ))}
-                <p className="text-[10px] text-muted-foreground/60 mt-1">
+                <p style={{ fontFamily: "Georgia, serif", fontStyle: "italic", fontSize: 12, color: "var(--stoa-muted)", marginTop: 6 }}>
                   Are high-confidence trades actually winning more? Calibrate your gut.
                 </p>
-              </GlassCard>
+              </div>
             </motion.div>
 
             {/* Asset Breakdown */}
             {analysis.assetStats.length > 0 && (
               <motion.div variants={fadeUp}>
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Win Rate by Asset</h3>
+                <div className="mb-2"><span className="stoa-kicker">BY ASSET · Ὕλη</span></div>
                 <div className="grid grid-cols-3 gap-2">
                   {analysis.assetStats.map(a => (
-                    <GlassCard key={a.type} className="text-center py-3">
-                      <p className="text-lg font-bold font-mono">{a.rate}%</p>
-                      <p className="text-[10px] text-muted-foreground capitalize">{a.type} ({a.total})</p>
-                    </GlassCard>
+                    <div key={a.type} className="text-center" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2, padding: "14px 8px" }}>
+                      <p className="stoa-mono font-bold text-[color:var(--stoa-ink)]" style={{ fontSize: 18 }}>{a.rate}%</p>
+                      <p className="stoa-kicker capitalize" style={{ color: "var(--stoa-muted)" }}>{a.type} ({a.total})</p>
+                    </div>
                   ))}
                 </div>
               </motion.div>
@@ -281,16 +276,16 @@ const Insights = () => {
             {/* Strategy Breakdown */}
             {analysis.strategyStats.length > 0 && (
               <motion.div variants={fadeUp}>
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Win Rate by Decision</h3>
+                <div className="mb-2"><span className="stoa-kicker">BY DECISION · Κρίσις</span></div>
                 <div className="flex flex-col gap-2">
                   {analysis.strategyStats.map(s => (
-                    <GlassCard key={s.decision} className="flex items-center justify-between">
+                    <div key={s.decision} className="flex items-center justify-between" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2, padding: 12 }}>
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs font-bold ${s.decision === "BUY" ? "text-verdict-buy" : s.decision === "WAIT" ? "text-verdict-wait" : "text-verdict-avoid"}`}>{s.decision}</span>
-                        <span className="text-[10px] text-muted-foreground">{s.total} trades</span>
+                        <span className={`stoa-display font-bold ${s.decision === "BUY" ? "text-verdict-buy" : s.decision === "WAIT" ? "text-verdict-wait" : "text-verdict-avoid"}`} style={{ fontSize: 13 }}>{s.decision}</span>
+                        <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>{s.total} trades</span>
                       </div>
-                      <span className="text-sm font-bold font-mono">{s.rate}%</span>
-                    </GlassCard>
+                      <span className="stoa-mono font-bold text-[color:var(--stoa-ink)]" style={{ fontSize: 15 }}>{s.rate}%</span>
+                    </div>
                   ))}
                 </div>
               </motion.div>
