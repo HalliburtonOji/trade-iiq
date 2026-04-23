@@ -1,216 +1,236 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import StoaShell from "@/components/stoa/StoaShell";
 import PedimentCap from "@/components/stoa/PedimentCap";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { lessonsData } from "@/data/lessonsData";
-import { drillsData } from "@/data/drillsData";
-import { useLearningProgress } from "@/hooks/use-learning-progress";
-import { usePracticeProgress } from "@/hooks/use-practice-progress";
-import { useCoachingEngine, type TradeRow, type ReviewRow, type ChartAnalysisRow, type TradingRuleRow } from "@/hooks/use-coaching-engine";
-import { useRecommendationEngine } from "@/hooks/use-recommendation-engine";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import LearnHeader from "@/components/learn/LearnHeader";
-import ForYouTab from "@/components/learn/ForYouTab";
-import LessonsTab from "@/components/learn/LessonsTab";
-import PracticeTab from "@/components/learn/PracticeTab";
-import ReviewTab from "@/components/learn/ReviewTab";
-import BadgesTab from "@/components/learn/BadgesTab";
-import LessonDetail from "@/components/learn/LessonDetail";
-import DrillDetail from "@/components/learn/DrillDetail";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
+
+type LearnModule = {
+  id: string;
+  track: string;
+  level: number;
+  slug: string;
+  title_en: string;
+  title_gr: string;
+  summary: string | null;
+  ordinal: number;
+  learn_minutes: number | null;
+  xp_reward: number | null;
+};
+
+type ProgressRow = {
+  module_id: string;
+  mode: string;
+  status: string;
+  score: number | null;
+};
+
+type Recommendation = {
+  id: string;
+  module_id: string;
+  reason: string;
+  learn_modules: LearnModule | null;
+};
+
+const TRACKS = [
+  { key: "markets", en: "Markets", gr: "Ἀγών",    desc: "Mechanics of price and venue." },
+  { key: "chart",   en: "Chart",   gr: "Γραμμή",  desc: "Reading the tape." },
+  { key: "risk",    en: "Risk",    gr: "Πρόνοια", desc: "The math that lets you survive." },
+  { key: "mind",    en: "Mind",    gr: "Νοῦς",    desc: "The operator above the trade." },
+  { key: "craft",   en: "Craft",   gr: "Τέχνη",   desc: "Strategy, playbook, repetition." },
+];
 
 const Learn = () => {
   const { user } = useAuth();
-  const { completedLessons, totalXp, streak, quizAttempts, loading, refetch, learningDates } = useLearningProgress();
-  const { completedDrills, records: practiceRecords, saveDrillResult } = usePracticeProgress();
-  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
-  const [selectedDrillId, setSelectedDrillId] = useState<string | null>(null);
-  const { toast } = useToast();
-
-  // Coaching data
-  const [trades, setTrades] = useState<TradeRow[]>([]);
-  const [reviews, setReviews] = useState<ReviewRow[]>([]);
-  const [chartAnalyses, setChartAnalyses] = useState<ChartAnalysisRow[]>([]);
-  const [tradingRules, setTradingRules] = useState<TradingRuleRow[]>([]);
+  const navigate = useNavigate();
+  const [modules, setModules] = useState<LearnModule[]>([]);
+  const [progress, setProgress] = useState<Record<string, ProgressRow[]>>({});
+  const [rec, setRec] = useState<Recommendation | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
-    Promise.all([
-      supabase.from("trade_decisions").select("id,symbol,asset_type,decision,outcome,confidence,invalidation_point,thesis_why,notes,time_horizon").eq("user_id", user.id).order("date", { ascending: false }).limit(100),
-      supabase.from("decision_reviews").select("trade_decision_id,verdict_correct,timing_correct,followed_plan,emotion,mistake_type,execution_quality").eq("user_id", user.id).limit(100),
-      supabase.from("chart_analyses").select("id,symbol,analysis_json").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30),
-      supabase.from("trading_rules").select("rule_text,category,is_active").eq("user_id", user.id).eq("is_active", true),
-    ]).then(([t, r, c, ru]) => {
-      if (t.data) setTrades(t.data as TradeRow[]);
-      if (r.data) setReviews(r.data as ReviewRow[]);
-      if (c.data) setChartAnalyses(c.data as ChartAnalysisRow[]);
-      if (ru.data) setTradingRules(ru.data as TradingRuleRow[]);
-    });
-  }, [user]);
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const { data: mods } = await supabase
+        .from("learn_modules")
+        .select("id,track,level,slug,title_en,title_gr,summary,ordinal,learn_minutes,xp_reward")
+        .eq("is_published", true)
+        .eq("level", 1)
+        .order("track", { ascending: true })
+        .order("ordinal", { ascending: true });
+      if (!cancelled && mods) setModules(mods as LearnModule[]);
 
-  const recSignals = useRecommendationEngine(completedLessons, totalXp, streak, quizAttempts);
-  const learningDatesMap = useMemo(() => learningDates || new Map<string, string>(), [learningDates]);
+      if (user) {
+        const { data: prog } = await supabase
+          .from("learn_progress")
+          .select("module_id,mode,status,score")
+          .eq("user_id", user.id);
+        if (!cancelled && prog) {
+          const grouped: Record<string, ProgressRow[]> = {};
+          (prog as ProgressRow[]).forEach((p) => {
+            if (!grouped[p.module_id]) grouped[p.module_id] = [];
+            grouped[p.module_id].push(p);
+          });
+          setProgress(grouped);
+        }
 
-  const coaching = useCoachingEngine(
-    trades, reviews, chartAnalyses, tradingRules,
-    completedLessons, quizAttempts, practiceRecords, learningDatesMap,
-    recSignals.weakCategories
-  );
+        const { data: recs } = await supabase
+          .from("learn_recommendations")
+          .select("id,module_id,reason,learn_modules(*)")
+          .eq("user_id", user.id)
+          .is("dismissed_at", null)
+          .order("generated_at", { ascending: false })
+          .limit(1);
+        if (!cancelled && recs && recs.length > 0) setRec(recs[0] as unknown as Recommendation);
+      }
 
-  const selectedLesson = selectedLessonId ? lessonsData.find(l => l.id === selectedLessonId) : null;
-  const selectedDrill = selectedDrillId ? drillsData.find(d => d.id === selectedDrillId) : null;
+      if (!cancelled) setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id]);
 
-  const handleSelectLesson = useCallback((id: string) => {
-    setSelectedLessonId(id);
-    setSelectedDrillId(null);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
-
-  const handleSelectDrill = useCallback((drillId: string) => {
-    setSelectedDrillId(drillId);
-    setSelectedLessonId(null);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
-
-  const handleDrillComplete = useCallback(async (passed: boolean) => {
-    if (!selectedDrill) return;
-    const alreadyDone = completedDrills.includes(selectedDrill.id);
-    const xp = passed && !alreadyDone ? selectedDrill.xp_reward : 0;
-    await saveDrillResult(selectedDrill.id, selectedDrill.practice_type, selectedDrill.category, passed, xp, passed ? [] : selectedDrill.concept_tags);
-    if (passed && !alreadyDone) {
-      toast({ title: `⚡ +${selectedDrill.xp_reward} XP`, description: `"${selectedDrill.title}" completed!` });
-    }
-  }, [selectedDrill, completedDrills, saveDrillResult, toast]);
+  const modStatus = (id: string): "mastered" | "started" | "new" => {
+    const rows = progress[id];
+    if (!rows) return "new";
+    if (rows.some((r) => r.mode === "quiz" && r.status === "completed")) return "mastered";
+    if (rows.some((r) => r.status === "completed" || r.status === "in_progress")) return "started";
+    return "new";
+  };
 
   const stoaCrumb = (
     <span>
-      <span className="stoa-greek">Κῶδιξ</span> · Learn
+      <span className="stoa-greek">Κῶδιξ</span> · The Codex
     </span>
   );
 
-  if (selectedDrill) {
-    return (
-      <StoaShell palette="delphi" crumb={stoaCrumb}>
-        <DrillDetail
-          drill={selectedDrill}
-          alreadyCompleted={completedDrills.includes(selectedDrill.id)}
-          onComplete={handleDrillComplete}
-          onBack={() => setSelectedDrillId(null)}
-          onSelectLesson={handleSelectLesson}
-        />
-      </StoaShell>
-    );
-  }
-
-  if (selectedLesson) {
-    return (
-      <StoaShell palette="delphi" crumb={stoaCrumb}>
-        <LessonDetail
-          lesson={selectedLesson}
-          completed={completedLessons.includes(selectedLesson.id)}
-          onBack={() => setSelectedLessonId(null)}
-          onLessonComplete={refetch}
-          onSelectLesson={handleSelectLesson}
-          onSelectDrill={handleSelectDrill}
-        />
-      </StoaShell>
-    );
-  }
-
-  if (loading) {
-    return (
-      <StoaShell palette="delphi" crumb={stoaCrumb}>
-        <div className="flex flex-col gap-4 px-4 pt-6">
-          <Skeleton className="h-8 w-32" />
-          <Skeleton className="h-20 w-full rounded-xl" />
-          <Skeleton className="h-10 w-full rounded-lg" />
-          <Skeleton className="h-32 w-full rounded-xl" />
-          <Skeleton className="h-32 w-full rounded-xl" />
-        </div>
-      </StoaShell>
-    );
-  }
-
   return (
     <StoaShell palette="delphi" crumb={stoaCrumb}>
-      <div className="flex flex-col gap-2 mb-2 min-w-0 max-w-full overflow-hidden">
+      <div className="flex flex-col gap-2 mb-6 min-w-0 max-w-full">
         <PedimentCap variant="rule" />
         <span className="stoa-kicker">GROW · THE CODEX</span>
         <div className="flex items-baseline gap-3">
-          <h1 className="stoa-display text-3xl font-semibold">Learn</h1>
-          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Κῶδιξ</span>
+          <h1 className="stoa-display text-3xl font-semibold" style={{ color: "var(--stoa-ink)" }}>
+            THE CODEX · ΚΩΔΙΞ
+          </h1>
         </div>
-        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>read · drill · review</p>
+        <p style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", color: "var(--stoa-muted)" }}>
+          Your path of study — five tracks, three levels, one disciplined trader.
+        </p>
       </div>
-      <div className="flex flex-col gap-4 px-4 pt-6 pb-24">
-        <LearnHeader totalXp={totalXp} streak={streak} completedCount={completedLessons.length} />
 
-        <Tabs defaultValue="foryou">
-          <TabsList className="w-full h-10" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
-            <TabsTrigger value="foryou" className="flex-1 text-[11px] stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">✨ For You</TabsTrigger>
-            <TabsTrigger value="lessons" className="flex-1 text-[11px] stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">Lessons</TabsTrigger>
-            <TabsTrigger value="practice" className="flex-1 text-[11px] stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">Practice</TabsTrigger>
-            <TabsTrigger value="review" className="flex-1 text-[11px] stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">Review</TabsTrigger>
-            <TabsTrigger value="badges" className="flex-1 text-[11px] stoa-kicker rounded-none data-[state=active]:text-[color:var(--stoa-ink)] data-[state=active]:border-b-[2px] data-[state=active]:border-[color:var(--stoa-accent)] data-[state=active]:bg-transparent">Badges</TabsTrigger>
-          </TabsList>
+      {rec && rec.learn_modules && (
+        <div
+          onClick={() => navigate(`/learn/${rec.learn_modules!.slug}`)}
+          style={{
+            background: "var(--stoa-ink)",
+            color: "var(--stoa-shine)",
+            borderLeft: "3px solid var(--stoa-accent)",
+            borderRadius: 2,
+            padding: 20,
+            marginBottom: 24,
+            cursor: "pointer",
+          }}
+        >
+          <div className="stoa-kicker" style={{ color: "var(--stoa-accent)", marginBottom: 6 }}>
+            ORACLE · ΧΡΗΣΜΟΣ
+          </div>
+          <div className="stoa-display text-xl font-semibold" style={{ color: "var(--stoa-shine)" }}>
+            {rec.learn_modules.title_en}
+          </div>
+          <div style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", marginTop: 6, opacity: 0.85 }}>
+            {rec.reason}
+          </div>
+        </div>
+      )}
 
-          <TabsContent value="foryou">
-            <ForYouTab
-              completedLessons={completedLessons}
-              totalXp={totalXp}
-              streak={streak}
-              quizAttempts={quizAttempts}
-              onSelectLesson={handleSelectLesson}
-              onSelectDrill={handleSelectDrill}
-              coachingCards={coaching.cards}
-              weeklyCoachingSummary={coaching.weeklyCoachingSummary}
-              studyPlan={coaching.studyPlan}
-            />
-          </TabsContent>
+      {loading && (
+        <div className="stoa-kicker" style={{ color: "var(--stoa-muted)", padding: "20px 0" }}>
+          LOADING · ΧΡΟΝΟΣ…
+        </div>
+      )}
 
-          <TabsContent value="lessons">
-            <LessonsTab
-              completedLessons={completedLessons}
-              onSelectLesson={handleSelectLesson}
-              quizAttempts={quizAttempts}
-              totalXp={totalXp}
-              streak={streak}
-            />
-          </TabsContent>
+      {!loading && TRACKS.map((t) => {
+        const trackMods = modules.filter((m) => m.track === t.key);
+        return (
+          <section key={t.key} style={{ marginBottom: 32 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "baseline",
+                gap: 12,
+                borderBottom: "1px solid var(--stoa-rule)",
+                paddingBottom: 8,
+                marginBottom: 12,
+              }}
+            >
+              <span className="stoa-display text-xl font-semibold" style={{ color: "var(--stoa-ink)" }}>
+                {t.en}
+              </span>
+              <span className="stoa-greek" style={{ color: "var(--stoa-accent)", fontSize: 16 }}>
+                {t.gr}
+              </span>
+              <span style={{ flex: 1 }} />
+              <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>
+                {t.desc}
+              </span>
+            </div>
 
-          <TabsContent value="practice">
-            <PracticeTab
-              completedLessons={completedLessons}
-              quizAttempts={quizAttempts}
-              totalXp={totalXp}
-              streak={streak}
-              onSelectLesson={handleSelectLesson}
-            />
-          </TabsContent>
-
-          <TabsContent value="review">
-            <ReviewTab
-              completedLessons={completedLessons}
-              quizAttempts={quizAttempts}
-              practiceRecords={practiceRecords}
-              learningDates={learningDatesMap}
-              onSelectLesson={handleSelectLesson}
-              totalXp={totalXp}
-              streak={streak}
-            />
-          </TabsContent>
-
-          <TabsContent value="badges">
-            <BadgesTab
-              completedLessons={completedLessons}
-              conceptMastery={coaching.conceptMastery}
-              categoryMastery={coaching.categoryMastery}
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
+            {trackMods.length === 0 ? (
+              <div style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", color: "var(--stoa-muted)" }}>
+                Coming soon.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {trackMods.map((m) => {
+                  const st = modStatus(m.id);
+                  const badge = st === "mastered" ? "✓ Mastered" : st === "started" ? "· In progress" : "New";
+                  return (
+                    <div
+                      key={m.id}
+                      onClick={() => navigate(`/learn/${m.slug}`)}
+                      onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--stoa-accent)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--stoa-rule)")}
+                      style={{
+                        background: "var(--stoa-shine)",
+                        border: "1px solid var(--stoa-rule)",
+                        borderRadius: 2,
+                        padding: 14,
+                        cursor: "pointer",
+                        transition: "border-color 0.15s ease",
+                      }}
+                    >
+                      <div
+                        className="stoa-kicker"
+                        style={{
+                          color: st === "mastered" ? "var(--stoa-accent)" : "var(--stoa-muted)",
+                          marginBottom: 6,
+                        }}
+                      >
+                        {badge}
+                      </div>
+                      <div className="stoa-display font-semibold" style={{ color: "var(--stoa-ink)", fontSize: 15 }}>
+                        {m.title_en}
+                      </div>
+                      <div className="stoa-greek" style={{ color: "var(--stoa-accent)", fontSize: 13, marginTop: 2 }}>
+                        {m.title_gr}
+                      </div>
+                      {m.summary && (
+                        <div style={{ fontFamily: "Georgia, serif", fontSize: 13, color: "var(--stoa-muted)", marginTop: 8 }}>
+                          {m.summary}
+                        </div>
+                      )}
+                      <div className="stoa-kicker" style={{ color: "var(--stoa-muted)", marginTop: 10, fontSize: 11 }}>
+                        {m.learn_minutes ?? 8}M · +{m.xp_reward ?? 50}XP
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        );
+      })}
     </StoaShell>
   );
 };
