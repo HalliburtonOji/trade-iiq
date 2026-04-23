@@ -1,9 +1,7 @@
 import { motion } from "framer-motion";
-import { Sparkles, Plus, RefreshCw } from "lucide-react";
-import { useState } from "react";
+import { Plus } from "lucide-react";
 import StoaShell from "@/components/stoa/StoaShell";
 import PedimentCap from "@/components/stoa/PedimentCap";
-import GlassCard from "@/components/GlassCard";
 import VerdictBadge from "@/components/VerdictBadge";
 import { Button } from "@/components/ui/button";
 
@@ -24,11 +22,7 @@ const todaysPicks: Pick[] = [
   { symbol: "EUR/USD", type: "forex", price: "1.0842", verdict: "WAIT", insights: ["ECB-Fed policy divergence narrowing but unclear direction", "Range-bound between 1.08–1.09 until next CPI release", "Wait for macro catalyst before entering new positions"] },
 ];
 
-const typeColors: Record<string, string> = {
-  stock: "text-primary",
-  crypto: "text-accent",
-  forex: "text-verdict-wait",
-};
+const cream = { background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2 } as const;
 
 const DailyPicks = () => {
   const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
@@ -44,29 +38,27 @@ const DailyPicks = () => {
     >
       <div className="flex flex-col gap-2 mb-2 min-w-0 max-w-full overflow-hidden">
         <PedimentCap variant="rule" />
-        <span className="stoa-kicker">ACROPOLIS · THE OMENS</span>
+        <span className="stoa-kicker">ACROPOLIS · THE OMENS · Οἰωνοί</span>
         <div className="flex items-baseline gap-3">
           <h1 className="stoa-display text-3xl font-semibold">Daily Picks</h1>
           <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Οἰωνοί</span>
         </div>
-        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>six signs for today</p>
+        <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>six signs for today · {today}</p>
       </div>
       <div className="flex flex-col gap-4 px-4 pt-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
-              Daily Picks
-            </h1>
-            <p className="text-xs text-muted-foreground mt-0.5">{today} · Cached for today</p>
-          </div>
-        </div>
-
-        <GlassCard className="bg-primary/5 border-primary/20">
-          <p className="text-xs text-foreground/80">
+        <div
+          style={{
+            background: "var(--stoa-shine)",
+            border: "1px solid var(--stoa-rule)",
+            borderLeft: "3px solid var(--stoa-accent)",
+            borderRadius: 2,
+            padding: 14,
+          }}
+        >
+          <p className="text-xs" style={{ fontFamily: "Georgia, serif", color: "var(--stoa-ink)" }}>
             6 AI-curated trading opportunities across stocks, crypto, and forex. Updated daily based on technical, macro, and sentiment analysis.
           </p>
-        </GlassCard>
+        </div>
 
         {todaysPicks.map((pick, i) => (
           <motion.div
@@ -75,28 +67,31 @@ const DailyPicks = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08, duration: 0.4, ease: [0.2, 0.8, 0.2, 1] }}
           >
-            <GlassCard hoverable>
+            <div
+              style={{ ...cream, padding: 14 }}
+              className="cursor-pointer transition-colors hover:border-[color:var(--stoa-accent)]"
+            >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold font-mono">{pick.symbol}</span>
-                  <span className={`text-[10px] capitalize font-medium ${typeColors[pick.type]}`}>{pick.type}</span>
+                  <span className="stoa-mono font-bold" style={{ fontSize: 14, color: "var(--stoa-ink)" }}>{pick.symbol}</span>
+                  <span className="stoa-kicker capitalize">{pick.type}</span>
                 </div>
                 <VerdictBadge verdict={pick.verdict} size="sm" />
               </div>
-              <p className="text-lg font-bold font-mono mb-2">{pick.price}</p>
+              <p className="stoa-mono font-bold mb-2" style={{ fontSize: 18, color: "var(--stoa-ink)" }}>{pick.price}</p>
               <ul className="space-y-1">
                 {pick.insights.map((insight, j) => (
-                  <li key={j} className="text-xs text-muted-foreground flex items-start gap-2">
-                    <span className="text-primary mt-0.5">•</span> {insight}
+                  <li key={j} className="flex items-start gap-2" style={{ fontFamily: "Georgia, serif", fontSize: 13, color: "var(--stoa-ink)" }}>
+                    <span style={{ color: "var(--stoa-accent)", marginTop: 2 }}>•</span> {insight}
                   </li>
                 ))}
               </ul>
               <div className="mt-3">
-                <Button variant="outline" size="sm" className="text-[10px] h-7 gap-1">
+                <Button variant="outline" size="sm" className="text-[10px] h-7 gap-1 stoa-kicker" style={{ borderRadius: 2, border: "1px solid var(--stoa-rule)" }}>
                   <Plus className="h-3 w-3" /> Add to Watchlist
                 </Button>
               </div>
-            </GlassCard>
+            </div>
           </motion.div>
         ))}
       </div>
