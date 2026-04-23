@@ -304,17 +304,17 @@ const DemoTrading = () => {
 
           return (
             <motion.div key={pos.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <GlassCard className={`border ${unrealizedPnl >= 0 ? "border-verdict-buy/30 shadow-verdict-buy/5" : nearSL ? "border-verdict-wait/30 shadow-verdict-wait/5" : "border-verdict-avoid/30 shadow-verdict-avoid/5"}`}>
+              <div style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderLeft: `3px solid ${unrealizedPnl >= 0 ? "hsl(var(--verdict-buy))" : nearSL ? "hsl(var(--verdict-wait))" : "hsl(var(--verdict-avoid))"}`, borderRadius: 2, padding: 14 }}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-sm font-bold font-mono">{pos.symbol}</span>
-                    <span className={`ml-2 text-[10px] px-2 py-0.5 rounded-full font-medium ${pos.direction === "long" ? "bg-verdict-buy/10 text-verdict-buy" : "bg-verdict-avoid/10 text-verdict-avoid"}`}>
+                    <span className="stoa-mono font-bold" style={{ fontSize: 14, color: "var(--stoa-ink)" }}>{pos.symbol}</span>
+                    <span className={`ml-2 text-[10px] px-2 py-0.5 font-medium ${pos.direction === "long" ? "bg-verdict-buy/10 text-verdict-buy" : "bg-verdict-avoid/10 text-verdict-avoid"}`} style={{ borderRadius: 2 }}>
                       {pos.direction.toUpperCase()}
                     </span>
-                    <span className="text-xs text-muted-foreground ml-2">@ ${pos.entry_price.toFixed(2)}</span>
+                    <span className="stoa-kicker ml-2" style={{ color: "var(--stoa-muted)" }}>@ ${pos.entry_price.toFixed(2)}</span>
                   </div>
                   <div className="text-right">
-                    <p className={`text-sm font-bold font-mono ${unrealizedPnl >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`}>
+                    <p className={`stoa-mono font-bold ${unrealizedPnl >= 0 ? "text-verdict-buy" : "text-verdict-avoid"}`} style={{ fontSize: 14 }}>
                       {unrealizedPnl >= 0 ? "+" : ""}${unrealizedPnl.toFixed(2)}
                     </p>
                     <Button size="sm" variant="outline" className="text-[10px] h-6 mt-1" onClick={() => closePosition(pos)}>
@@ -322,12 +322,12 @@ const DemoTrading = () => {
                     </Button>
                   </div>
                 </div>
-                <div className="flex gap-4 mt-2 text-[10px] text-muted-foreground">
-                  {pos.stop_loss && <span className={nearSL ? "text-verdict-wait font-bold" : ""}>SL: ${pos.stop_loss}</span>}
-                  {pos.take_profit && <span className={nearTP ? "text-verdict-buy font-bold" : ""}>TP: ${pos.take_profit}</span>}
-                  <span>Qty: {pos.quantity}</span>
+                <div className="flex gap-4 mt-2 text-[10px]">
+                  {pos.stop_loss && <span className={`stoa-kicker ${nearSL ? "text-verdict-wait font-bold" : ""}`} style={!nearSL ? { color: "var(--stoa-muted)" } : undefined}>SL: ${pos.stop_loss}</span>}
+                  {pos.take_profit && <span className={`stoa-kicker ${nearTP ? "text-verdict-buy font-bold" : ""}`} style={!nearTP ? { color: "var(--stoa-muted)" } : undefined}>TP: ${pos.take_profit}</span>}
+                  <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Qty: {pos.quantity}</span>
                 </div>
-              </GlassCard>
+              </div>
             </motion.div>
           );
         })}
