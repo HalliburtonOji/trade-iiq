@@ -333,41 +333,45 @@ const DemoTrading = () => {
         })}
 
         {/* Order Form */}
-        <GlassCard id="demo-order-form">
+        <div id="demo-order-form" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2, padding: 14 }}>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Place Order</p>
+            <p className="stoa-kicker">PLACE ORDER · Πρᾶξις</p>
             <div className="flex items-center gap-2">
               {level >= 2 && (
                 <div className="flex gap-1">
                   {(["market", "limit"] as const).map((t) => (
                     <button key={t} onClick={() => setOrderType(t)}
-                      className={`text-[10px] px-2 py-0.5 rounded-full capitalize ${orderType === t ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
+                      className="text-[10px] px-2 py-0.5 capitalize"
+                      style={{ background: orderType === t ? "var(--stoa-accent)" : "var(--stoa-shine)", color: orderType === t ? "var(--stoa-shine)" : "var(--stoa-muted)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
                       {t}
                     </button>
                   ))}
                 </div>
               )}
-              {currentPrice > 0 && <span className="text-sm font-bold font-mono">${currentPrice.toFixed(2)}</span>}
+              {currentPrice > 0 && <span className="stoa-mono font-bold" style={{ fontSize: 14, color: "var(--stoa-ink)" }}>${currentPrice.toFixed(2)}</span>}
             </div>
           </div>
 
           {/* BUY/SELL */}
           <div className="flex gap-2 mb-3" id="demo-buy-sell">
-            <Button onClick={() => setDirection("long")} className={`flex-1 gap-1.5 ${direction === "long" ? "bg-verdict-buy hover:bg-verdict-buy/90 text-white" : "bg-secondary text-muted-foreground"}`}>
+            <Button onClick={() => setDirection("long")} className={`flex-1 gap-1.5 ${direction === "long" ? "bg-verdict-buy hover:bg-verdict-buy/90 text-white" : ""}`}
+              style={direction === "long" ? undefined : { background: "var(--stoa-shine)", color: "var(--stoa-muted)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
               <TrendingUp className="h-4 w-4" /> BUY
             </Button>
             <Button onClick={() => setDirection("short")} disabled={level < 3}
-              className={`flex-1 gap-1.5 ${direction === "short" ? "bg-verdict-avoid hover:bg-verdict-avoid/90 text-white" : "bg-secondary text-muted-foreground"}`}>
+              className={`flex-1 gap-1.5 ${direction === "short" ? "bg-verdict-avoid hover:bg-verdict-avoid/90 text-white" : ""}`}
+              style={direction === "short" ? undefined : { background: "var(--stoa-shine)", color: "var(--stoa-muted)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
               <TrendingDown className="h-4 w-4" /> SELL {level < 3 && "🔒"}
             </Button>
           </div>
 
           {/* Quick size buttons */}
           <div className="flex gap-1.5 mb-3">
-            <span className="text-[10px] text-muted-foreground self-center">Quick:</span>
+            <span className="stoa-kicker self-center" style={{ color: "var(--stoa-muted)" }}>Quick:</span>
             {[1, 2, 5, 10].map((pct) => (
               <button key={pct} onClick={() => quickSize(pct)}
-                className="text-[10px] px-2 py-0.5 rounded-full bg-secondary/50 text-muted-foreground hover:bg-primary/20 hover:text-primary transition-colors">
+                className="text-[10px] px-2 py-0.5 stoa-mono transition-colors"
+                style={{ background: "var(--stoa-shine)", color: "var(--stoa-muted)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
                 {pct}%
               </button>
             ))}
@@ -376,34 +380,34 @@ const DemoTrading = () => {
           {/* Inputs */}
           <div className="grid grid-cols-3 gap-2 mb-3">
             <div>
-              <label className="text-[10px] text-muted-foreground mb-1 block">Units</label>
-              <Input type="number" value={units} onChange={(e) => setUnits(e.target.value)} placeholder="0" className="bg-secondary/50" id="demo-units" />
+              <label className="stoa-kicker mb-1 block" style={{ color: "var(--stoa-muted)" }}>Units</label>
+              <Input type="number" value={units} onChange={(e) => setUnits(e.target.value)} placeholder="0" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }} id="demo-units" />
             </div>
             <div id="demo-stoploss">
-              <label className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
+              <label className="stoa-kicker mb-1 flex items-center gap-1" style={{ color: "var(--stoa-muted)" }}>
                 <ShieldAlert className="h-3 w-3" /> Stop Loss *
               </label>
-              <Input type="number" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} placeholder="$" className="bg-secondary/50" />
+              <Input type="number" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} placeholder="$" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }} />
             </div>
             <div id="demo-takeprofit">
-              <label className="text-[10px] text-muted-foreground mb-1 flex items-center gap-1">
+              <label className="stoa-kicker mb-1 flex items-center gap-1" style={{ color: "var(--stoa-muted)" }}>
                 <Target className="h-3 w-3" /> Take Profit
               </label>
-              <Input type="number" value={takeProfit} onChange={(e) => setTakeProfit(e.target.value)} placeholder="$" className="bg-secondary/50" />
+              <Input type="number" value={takeProfit} onChange={(e) => setTakeProfit(e.target.value)} placeholder="$" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }} />
             </div>
           </div>
 
           {/* Risk + R:R */}
           <div className="flex items-center justify-between mb-2 text-xs" id="demo-risk">
-            <span className="text-muted-foreground">
-              Risk: <span className={`font-mono font-bold ${riskPercent > 5 ? "text-verdict-avoid" : riskPercent > 2 ? "text-verdict-wait" : "text-verdict-buy"}`}>{riskPercent.toFixed(1)}%</span>
+            <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>
+              Risk: <span className={`stoa-mono font-bold ${riskPercent > 5 ? "text-verdict-avoid" : riskPercent > 2 ? "text-verdict-wait" : "text-verdict-buy"}`}>{riskPercent.toFixed(1)}%</span>
             </span>
             {rrRatio > 0 && (
-              <span className="text-muted-foreground flex items-center gap-1">
-                <Percent className="h-3 w-3" /> R:R <span className={`font-mono font-bold ${rrRatio >= 2 ? "text-verdict-buy" : rrRatio >= 1 ? "text-verdict-wait" : "text-verdict-avoid"}`}>{rrRatio.toFixed(1)}</span>
+              <span className="stoa-kicker flex items-center gap-1" style={{ color: "var(--stoa-muted)" }}>
+                <Percent className="h-3 w-3" /> R:R <span className={`stoa-mono font-bold ${rrRatio >= 2 ? "text-verdict-buy" : rrRatio >= 1 ? "text-verdict-wait" : "text-verdict-avoid"}`}>{rrRatio.toFixed(1)}</span>
               </span>
             )}
-            {cost > 0 && <span className="text-muted-foreground font-mono text-[10px]">Cost: ${cost.toFixed(2)}</span>}
+            {cost > 0 && <span className="stoa-kicker stoa-mono text-[10px]" style={{ color: "var(--stoa-muted)" }}>Cost: ${cost.toFixed(2)}</span>}
           </div>
 
           {riskPercent > 5 && (
@@ -415,10 +419,10 @@ const DemoTrading = () => {
           {/* Thesis builder */}
           <ThesisBuilder thesis={thesis} onChange={setThesis} direction={direction} />
 
-          <Button onClick={attemptPlaceOrder} disabled={placing || !units || !stopLoss} className="w-full mt-3" id="demo-place-order">
+          <Button onClick={attemptPlaceOrder} disabled={placing || !units || !stopLoss} className="w-full mt-3 stoa-display" style={{ background: "var(--stoa-accent)", color: "var(--stoa-shine)", border: "none", borderRadius: 2 }} id="demo-place-order">
             {placing ? "Placing..." : `Place ${direction === "long" ? "Buy" : "Sell"} Order`}
           </Button>
-        </GlassCard>
+        </div>
 
         {/* Missions */}
         <TradingMissions stats={missionStats} completedIds={completedMissions} />
