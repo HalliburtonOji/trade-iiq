@@ -455,6 +455,151 @@ export type Database = {
         }
         Relationships: []
       }
+      learn_modules: {
+        Row: {
+          content_md: string | null
+          created_at: string | null
+          drill_json: Json | null
+          id: string
+          is_published: boolean | null
+          learn_minutes: number | null
+          level: number
+          ordinal: number
+          prereqs: string[] | null
+          quiz_json: Json | null
+          scenario_json: Json | null
+          slug: string
+          summary: string | null
+          title_en: string
+          title_gr: string
+          track: string
+          updated_at: string | null
+          xp_reward: number | null
+        }
+        Insert: {
+          content_md?: string | null
+          created_at?: string | null
+          drill_json?: Json | null
+          id?: string
+          is_published?: boolean | null
+          learn_minutes?: number | null
+          level: number
+          ordinal?: number
+          prereqs?: string[] | null
+          quiz_json?: Json | null
+          scenario_json?: Json | null
+          slug: string
+          summary?: string | null
+          title_en: string
+          title_gr: string
+          track: string
+          updated_at?: string | null
+          xp_reward?: number | null
+        }
+        Update: {
+          content_md?: string | null
+          created_at?: string | null
+          drill_json?: Json | null
+          id?: string
+          is_published?: boolean | null
+          learn_minutes?: number | null
+          level?: number
+          ordinal?: number
+          prereqs?: string[] | null
+          quiz_json?: Json | null
+          scenario_json?: Json | null
+          slug?: string
+          summary?: string | null
+          title_en?: string
+          title_gr?: string
+          track?: string
+          updated_at?: string | null
+          xp_reward?: number | null
+        }
+        Relationships: []
+      }
+      learn_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          mode: string
+          module_id: string
+          playbook_rule_created: boolean | null
+          score: number | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          mode: string
+          module_id: string
+          playbook_rule_created?: boolean | null
+          score?: number | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          mode?: string
+          module_id?: string
+          playbook_rule_created?: boolean | null
+          score?: number | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learn_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "learn_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learn_recommendations: {
+        Row: {
+          dismissed_at: string | null
+          generated_at: string | null
+          id: string
+          module_id: string
+          reason: string
+          reason_detail: Json | null
+          user_id: string
+        }
+        Insert: {
+          dismissed_at?: string | null
+          generated_at?: string | null
+          id?: string
+          module_id: string
+          reason: string
+          reason_detail?: Json | null
+          user_id: string
+        }
+        Update: {
+          dismissed_at?: string | null
+          generated_at?: string | null
+          id?: string
+          module_id?: string
+          reason?: string
+          reason_detail?: Json | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learn_recommendations_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "learn_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_progress: {
         Row: {
           category: string
