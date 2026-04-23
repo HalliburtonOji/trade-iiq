@@ -296,42 +296,42 @@ const Insights = () => {
           <TabsContent value="psychology" className="mt-3 flex flex-col gap-3">
             {/* Worst Habit */}
             <motion.div variants={fadeUp}>
-              <GlassCard className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-verdict-avoid/10">
+              <div className="flex items-center gap-3" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderLeft: "3px solid hsl(var(--verdict-avoid))", borderRadius: 2, padding: 14 }}>
+                <div className="flex h-10 w-10 items-center justify-center" style={{ border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
                   <AlertTriangle className="h-5 w-5 text-verdict-avoid" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Worst Habit</p>
+                  <p className="stoa-kicker">Worst Habit</p>
                   {analysis.worstHabit ? (
                     <>
                       <p className="text-sm font-bold text-verdict-avoid">{mistakeLabels[analysis.worstHabit[0]] || analysis.worstHabit[0]}</p>
-                      <p className="text-[10px] text-muted-foreground">Occurred {analysis.worstHabit[1]} times in your reviews</p>
+                      <p className="stoa-kicker">Occurred {analysis.worstHabit[1]} times in your reviews</p>
                     </>
                   ) : (
                     <p className="text-sm text-muted-foreground">Complete post-mortems to track habits</p>
                   )}
                 </div>
-              </GlassCard>
+              </div>
             </motion.div>
 
             {/* Plan Adherence */}
             <motion.div variants={fadeUp}>
-              <GlassCard>
+              <div style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2, padding: 14 }}>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-semibold">Plan Adherence</p>
-                  <span className="text-sm font-bold font-mono text-primary">{analysis.planAdherence}%</span>
+                  <p className="stoa-kicker">PLAN ADHERENCE · Εὐταξία</p>
+                  <span className="stoa-mono font-bold text-[color:var(--stoa-accent)]" style={{ fontSize: 15 }}>{analysis.planAdherence}%</span>
                 </div>
                 <Progress value={analysis.planAdherence} className="h-2" />
-                <p className="text-[10px] text-muted-foreground mt-1.5">
+                <p style={{ fontFamily: "Georgia, serif", fontStyle: "italic", fontSize: 12, color: "var(--stoa-muted)", marginTop: 8 }}>
                   {analysis.planTotal > 0 ? `Based on ${analysis.planTotal} reviewed trades` : "Review completed trades to track this"}
                 </p>
-              </GlassCard>
+              </div>
             </motion.div>
 
             {/* Emotion Breakdown */}
             {Object.keys(analysis.emotionCounts).length > 0 && (
               <motion.div variants={fadeUp}>
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Emotions at Entry</h3>
+                <div className="mb-2"><span className="stoa-kicker">EMOTIONS · Πάθη</span></div>
                 <div className="flex flex-col gap-2">
                   {Object.entries(analysis.emotionCounts)
                     .sort((a, b) => b[1] - a[1])
@@ -339,16 +339,16 @@ const Insights = () => {
                       const total = Object.values(analysis.emotionCounts).reduce((a, b) => a + b, 0);
                       const pct = Math.round((count / total) * 100);
                       return (
-                        <GlassCard key={emotion} className="flex items-center gap-3">
+                        <div key={emotion} className="flex items-center gap-3" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2, padding: 12 }}>
                           <span className="text-sm capitalize">{emotion === "fomo" ? "😰" : emotion === "calm" ? "😌" : emotion === "confident" ? "💪" : emotion === "stressed" ? "😤" : "🔥"}</span>
                           <div className="flex-1">
                             <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs font-medium capitalize">{emotion}</span>
-                              <span className="text-[10px] text-muted-foreground font-mono">{pct}%</span>
+                              <span className="stoa-display capitalize" style={{ fontSize: 12, color: "var(--stoa-ink)" }}>{emotion}</span>
+                              <span className="stoa-mono" style={{ fontSize: 11, color: "var(--stoa-muted)" }}>{pct}%</span>
                             </div>
                             <Progress value={pct} className="h-1.5" />
                           </div>
-                        </GlassCard>
+                        </div>
                       );
                     })}
                 </div>
@@ -356,11 +356,11 @@ const Insights = () => {
             )}
 
             {reviews.length === 0 && (
-              <GlassCard className="text-center py-8">
-                <Brain className="h-8 w-8 text-muted-foreground/20 mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">No post-mortems yet</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">Complete trade reviews to unlock psychology insights</p>
-              </GlassCard>
+              <div className="text-center" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2, padding: 24 }}>
+                <Brain className="h-8 w-8 mx-auto mb-2" style={{ color: "var(--stoa-rule)" }} />
+                <p style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", color: "var(--stoa-muted)" }}>No post-mortems yet · κενόν</p>
+                <p className="stoa-kicker" style={{ marginTop: 6, color: "var(--stoa-muted)" }}>Complete trade reviews to unlock psychology insights</p>
+              </div>
             )}
           </TabsContent>
 
