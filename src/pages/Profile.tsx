@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import StoaShell from "@/components/stoa/StoaShell";
 import PedimentCap from "@/components/stoa/PedimentCap";
-import GlassCard from "@/components/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -87,7 +86,7 @@ const Profile = () => {
 
   const stoaCrumb = (
     <span>
-      <span className="stoa-greek">Ἔργον</span> · Profile
+      <span className="stoa-greek">Πρόσωπον</span> · Profile
     </span>
   );
 
@@ -103,80 +102,98 @@ const Profile = () => {
 
   const initials = (profile.display_name || user?.email || "U").slice(0, 2).toUpperCase();
 
+  const cream = { background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2 } as const;
+
   return (
     <StoaShell palette="delphi" crumb={stoaCrumb}>
       <div className="flex flex-col gap-2 mb-4 min-w-0 max-w-full overflow-hidden">
         <PedimentCap variant="rule" />
-        <span className="stoa-kicker">GROW · THE WORK</span>
+        <span className="stoa-kicker">GROW · THE PERSONA</span>
         <div className="flex items-baseline gap-3">
           <h1 className="stoa-display text-3xl font-semibold">Profile</h1>
-          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Ἔργον</span>
+          <span className="stoa-greek text-lg" style={{ color: "var(--stoa-muted)" }}>Πρόσωπον</span>
         </div>
         <p className="text-sm" style={{ color: "var(--stoa-muted)" }}>thy record and thy rites</p>
       </div>
       <div className="space-y-6 pb-8">
         {/* Header */}
-        <GlassCard className="flex items-center gap-4 p-5">
-          <Avatar className="h-16 w-16 border-2 border-primary/30">
-            <AvatarFallback className="bg-primary/10 text-primary text-lg font-bold">{initials}</AvatarFallback>
+        <div
+          className="flex items-center gap-4"
+          style={{
+            background: "var(--stoa-shine)",
+            border: "1px solid var(--stoa-rule)",
+            borderLeft: "3px solid var(--stoa-accent)",
+            borderRadius: 2,
+            padding: 18,
+          }}
+        >
+          <Avatar className="h-16 w-16" style={{ border: "2px solid var(--stoa-accent)" }}>
+            <AvatarFallback
+              className="stoa-display font-bold"
+              style={{ background: "var(--stoa-shine)", color: "var(--stoa-accent)", fontSize: 18 }}
+            >
+              {initials}
+            </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-bold truncate">{profile.display_name || "Trader"}</h1>
-            <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            <h1 className="stoa-display font-bold truncate" style={{ fontSize: 18, color: "var(--stoa-ink)" }}>
+              {profile.display_name || "Trader"}
+            </h1>
+            <p className="stoa-mono truncate" style={{ fontSize: 11, color: "var(--stoa-muted)" }}>{user?.email}</p>
             <div className="flex items-center gap-2 mt-1.5">
               <Badge variant="secondary" className="text-[10px]">{profile.level}</Badge>
               <Badge variant="outline" className="text-[10px] capitalize">{profile.experience_level || "Beginner"}</Badge>
               <Badge variant="outline" className="text-[10px] capitalize">{profile.trading_personality}</Badge>
             </div>
           </div>
-        </GlassCard>
+        </div>
 
         {/* Progress Stats */}
         <div>
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Progress</h2>
+          <div className="mb-2"><span className="stoa-kicker">PROGRESS · Ἄσκησις</span></div>
           <div className="grid grid-cols-2 gap-3">
-            <GlassCard className="p-4 text-center">
+            <div className="text-center" style={{ ...cream, padding: 14 }}>
               <Trophy className="h-5 w-5 mx-auto text-yellow-500 mb-1" />
-              <p className="text-xl font-bold">{profile.xp_total.toLocaleString()}</p>
-              <p className="text-[10px] text-muted-foreground">Total XP</p>
-            </GlassCard>
-            <GlassCard className="p-4 text-center">
+              <p className="stoa-mono font-bold text-[color:var(--stoa-ink)]" style={{ fontSize: 22 }}>{profile.xp_total.toLocaleString()}</p>
+              <p className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Total XP</p>
+            </div>
+            <div className="text-center" style={{ ...cream, padding: 14 }}>
               <Flame className="h-5 w-5 mx-auto text-orange-500 mb-1" />
-              <p className="text-xl font-bold">{profile.streak_count}</p>
-              <p className="text-[10px] text-muted-foreground">Day Streak</p>
-            </GlassCard>
-            <GlassCard className="p-4 text-center">
+              <p className="stoa-mono font-bold text-[color:var(--stoa-ink)]" style={{ fontSize: 22 }}>{profile.streak_count}</p>
+              <p className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Day Streak</p>
+            </div>
+            <div className="text-center" style={{ ...cream, padding: 14 }}>
               <BookOpen className="h-5 w-5 mx-auto text-blue-500 mb-1" />
-              <p className="text-xl font-bold">{stats.lessonsCompleted}</p>
-              <p className="text-[10px] text-muted-foreground">Lessons Done</p>
-            </GlassCard>
-            <GlassCard className="p-4 text-center">
+              <p className="stoa-mono font-bold text-[color:var(--stoa-ink)]" style={{ fontSize: 22 }}>{stats.lessonsCompleted}</p>
+              <p className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Lessons Done</p>
+            </div>
+            <div className="text-center" style={{ ...cream, padding: 14 }}>
               <Target className="h-5 w-5 mx-auto text-green-500 mb-1" />
-              <p className="text-xl font-bold">{stats.drillsCompleted}</p>
-              <p className="text-[10px] text-muted-foreground">Drills Done</p>
-            </GlassCard>
+              <p className="stoa-mono font-bold text-[color:var(--stoa-ink)]" style={{ fontSize: 22 }}>{stats.drillsCompleted}</p>
+              <p className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Drills Done</p>
+            </div>
           </div>
         </div>
 
         {/* Trading Stats */}
         <div>
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Trading</h2>
+          <div className="mb-2"><span className="stoa-kicker">TRADING · Ἐμπορία</span></div>
           <div className="grid grid-cols-3 gap-3">
-            <GlassCard className="p-4 text-center">
+            <div className="text-center" style={{ ...cream, padding: 14 }}>
               <Wallet className="h-5 w-5 mx-auto text-primary mb-1" />
-              <p className="text-lg font-bold">${profile.paper_balance.toLocaleString()}</p>
-              <p className="text-[10px] text-muted-foreground">Paper Balance</p>
-            </GlassCard>
-            <GlassCard className="p-4 text-center">
+              <p className="stoa-mono font-bold text-[color:var(--stoa-ink)]" style={{ fontSize: 18 }}>${profile.paper_balance.toLocaleString()}</p>
+              <p className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Paper Balance</p>
+            </div>
+            <div className="text-center" style={{ ...cream, padding: 14 }}>
               <BarChart3 className="h-5 w-5 mx-auto text-primary mb-1" />
-              <p className="text-lg font-bold">{stats.totalTrades}</p>
-              <p className="text-[10px] text-muted-foreground">Total Trades</p>
-            </GlassCard>
-            <GlassCard className="p-4 text-center">
+              <p className="stoa-mono font-bold text-[color:var(--stoa-ink)]" style={{ fontSize: 18 }}>{stats.totalTrades}</p>
+              <p className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Total Trades</p>
+            </div>
+            <div className="text-center" style={{ ...cream, padding: 14 }}>
               <Target className="h-5 w-5 mx-auto text-emerald-500 mb-1" />
-              <p className="text-lg font-bold">{stats.winRate}%</p>
-              <p className="text-[10px] text-muted-foreground">Win Rate</p>
-            </GlassCard>
+              <p className="stoa-mono font-bold text-[color:var(--stoa-ink)]" style={{ fontSize: 18 }}>{stats.winRate}%</p>
+              <p className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Win Rate</p>
+            </div>
           </div>
         </div>
 
@@ -184,36 +201,42 @@ const Profile = () => {
         {stats.watchlistItems.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Watchlist ({stats.watchlistCount})</h2>
+              <span className="stoa-kicker">WATCHLIST · Φυλακή</span>
               <Button variant="ghost" size="sm" className="text-xs h-7" onClick={() => navigate("/analysis")}>
-                Manage <ChevronRight className="h-3 w-3 ml-1" />
+                Manage · χειρισμός <ChevronRight className="h-3 w-3 ml-1" />
               </Button>
             </div>
-            <GlassCard className="p-3">
+            <div style={{ ...cream, padding: 12 }}>
               <div className="flex flex-wrap gap-2">
                 {stats.watchlistItems.map(w => (
-                  <Badge key={w.symbol} variant="secondary" className="text-xs cursor-pointer hover:bg-primary/10" onClick={() => navigate(`/analysis?symbol=${w.symbol}`)}>
+                  <Badge
+                    key={w.symbol}
+                    variant="secondary"
+                    className="stoa-mono font-bold text-xs cursor-pointer"
+                    style={{ background: "transparent", border: "1px solid var(--stoa-rule)", color: "var(--stoa-ink)" }}
+                    onClick={() => navigate(`/analysis?symbol=${w.symbol}`)}
+                  >
                     {w.symbol}
                   </Badge>
                 ))}
               </div>
-            </GlassCard>
+            </div>
           </div>
         )}
 
         {/* Preferences */}
         <div>
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Preferences</h2>
-          <GlassCard className="divide-y divide-border/30">
+          <div className="mb-2"><span className="stoa-kicker">PREFERENCES · Ἤθη</span></div>
+          <div style={cream}>
             {profile.preferred_broker && (
-              <div className="flex items-center justify-between px-4 py-3">
-                <span className="text-sm text-muted-foreground">Broker</span>
-                <span className="text-sm font-medium capitalize">{profile.preferred_broker}</span>
+              <div className="flex items-center justify-between px-4 py-3 border-t border-[color:var(--stoa-rule)] first:border-t-0">
+                <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Broker</span>
+                <span className="stoa-display capitalize" style={{ fontSize: 13, color: "var(--stoa-ink)" }}>{profile.preferred_broker}</span>
               </div>
             )}
             {profile.preferred_assets && profile.preferred_assets.length > 0 && (
-              <div className="flex items-center justify-between px-4 py-3">
-                <span className="text-sm text-muted-foreground">Assets</span>
+              <div className="flex items-center justify-between px-4 py-3 border-t border-[color:var(--stoa-rule)] first:border-t-0">
+                <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Assets</span>
                 <div className="flex gap-1">
                   {profile.preferred_assets.map(a => (
                     <Badge key={a} variant="outline" className="text-[10px] capitalize">{a}</Badge>
@@ -222,8 +245,8 @@ const Profile = () => {
               </div>
             )}
             {profile.trading_goals && profile.trading_goals.length > 0 && (
-              <div className="flex items-center justify-between px-4 py-3">
-                <span className="text-sm text-muted-foreground">Goals</span>
+              <div className="flex items-center justify-between px-4 py-3 border-t border-[color:var(--stoa-rule)] first:border-t-0">
+                <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>Goals</span>
                 <div className="flex gap-1 flex-wrap justify-end">
                   {profile.trading_goals.map(g => (
                     <Badge key={g} variant="outline" className="text-[10px] capitalize">{g}</Badge>
@@ -231,7 +254,7 @@ const Profile = () => {
                 </div>
               </div>
             )}
-          </GlassCard>
+          </div>
         </div>
 
         {/* Actions */}
