@@ -53,6 +53,9 @@ export default function LearnModule() {
   const [answers, setAnswers] = useState<number[]>([]);
   const [score, setScore] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showRuleModal, setShowRuleModal] = useState(false);
+  const [ruleTitle, setRuleTitle] = useState("");
+  const [ruleBody, setRuleBody] = useState("");
 
   useEffect(() => {
     if (!slug) return;
@@ -104,9 +107,31 @@ export default function LearnModule() {
       );
     }
     if (passed) {
-      // TODO(P7): show playbook rule modal on pass
       toast({ title: "Quiz passed", description: `+${mod.xp_reward ?? 50} XP` });
+      setRuleTitle(`Rule from ${mod.title_en}`);
+      setRuleBody(`Based on "${mod.title_en}" (${mod.title_gr}): ${mod.summary || ""}\n\nWhen this situation arises, I will: `);
+      setShowRuleModal(true);
     }
+  };
+
+  const saveRule = async () => {
+    if (!user || !mod) return;
+    const { error } = await supabase.from("playbooks").insert({
+      user_id: user.id,
+      name: ruleTitle,
+      notes: ruleBody,
+      strategy_type: "codex",
+      checklist: [],
+      conditions: { source_module_id: mod.id },
+    });
+    if (!error) {
+      await supabase.from("learn_progress").update({ playbook_rule_created: true })
+        .eq("user_id", user.id).eq("module_id", mod.id).eq("mode", "quiz");
+      toast({ title: "Rule added", description: "Saved to your Playbook." });
+    } else {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+    setShowRuleModal(false);
   };
 
   const stoaCrumb = (
@@ -165,7 +190,7 @@ export default function LearnModule() {
             >
               ← Back to Codex
             </button>
-            <div style={{ display: "flex", gap: 12 }}>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
               <button
                 style={creamCta}
                 className="stoa-kicker"
@@ -173,6 +198,15 @@ export default function LearnModule() {
               >
                 Drill (Γύμνασμα)
               </button>
+              {mod.scenario_json && (
+                <button
+                  style={creamCta}
+                  className="stoa-kicker"
+                  onClick={() => navigate(`/learn/${slug}/scenario`)}
+                >
+                  Scenario (Ἀγών)
+                </button>
+              )}
               <button
                 style={goldCta}
                 className="stoa-display font-semibold"
