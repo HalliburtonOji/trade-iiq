@@ -116,6 +116,33 @@ export type Database = {
         }
         Relationships: []
       }
+      candle_cache: {
+        Row: {
+          cached_at: string | null
+          candles: Json
+          end_date: string
+          id: string
+          start_date: string
+          symbol: string
+        }
+        Insert: {
+          cached_at?: string | null
+          candles: Json
+          end_date: string
+          id?: string
+          start_date: string
+          symbol: string
+        }
+        Update: {
+          cached_at?: string | null
+          candles?: Json
+          end_date?: string
+          id?: string
+          start_date?: string
+          symbol?: string
+        }
+        Relationships: []
+      }
       chart_analyses: {
         Row: {
           analysis_json: Json | null
@@ -1013,6 +1040,30 @@ export type Database = {
           total_questions?: number
           user_id?: string
           weak_tags?: string[] | null
+        }
+        Relationships: []
+      }
+      quote_cache: {
+        Row: {
+          cached_at: string | null
+          change_pct: number | null
+          payload: Json
+          price: number | null
+          symbol: string
+        }
+        Insert: {
+          cached_at?: string | null
+          change_pct?: number | null
+          payload: Json
+          price?: number | null
+          symbol: string
+        }
+        Update: {
+          cached_at?: string | null
+          change_pct?: number | null
+          payload?: Json
+          price?: number | null
+          symbol?: string
         }
         Relationships: []
       }
