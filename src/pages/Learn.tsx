@@ -213,6 +213,60 @@ const Learn = () => {
         </p>
       </div>
 
+      {isAdmin && !loading && modules.length === 0 && (
+        <div
+          style={{
+            background: "var(--stoa-shine)",
+            border: "1px solid var(--stoa-rule)",
+            borderRadius: 2,
+            padding: 16,
+            marginBottom: 24,
+          }}
+        >
+          <div className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>
+            ADMIN · ΣΠΟΡΟΣ
+          </div>
+          <h3
+            className="stoa-display font-semibold"
+            style={{ color: "var(--stoa-ink)", marginTop: 4, fontSize: 18 }}
+          >
+            Seed the Codex
+          </h3>
+          <p
+            style={{
+              fontFamily: "Georgia, serif",
+              fontSize: 14,
+              fontStyle: "italic",
+              color: "var(--stoa-muted)",
+              marginTop: 6,
+            }}
+          >
+            Your Codex is empty. Click to generate the 5 Initiate modules via OpenAI. One-time action; safe to re-run (idempotent upsert by slug).
+          </p>
+          <button
+            onClick={handleSeed}
+            disabled={seeding}
+            style={{
+              marginTop: 14,
+              background: "var(--stoa-accent)",
+              color: "var(--stoa-ink)",
+              border: "none",
+              borderRadius: 2,
+              padding: "10px 18px",
+              fontFamily: "inherit",
+              fontWeight: 600,
+              fontSize: 13,
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+              cursor: seeding ? "not-allowed" : "pointer",
+              opacity: seeding ? 0.6 : 1,
+            }}
+          >
+            {seeding ? "Seeding…" : "Seed 5 Initiate Modules →"}
+          </button>
+        </div>
+      )}
+
       {rec && rec.learn_modules && (
         <div
           onClick={() => navigate(`/learn/${rec.learn_modules!.slug}`)}
