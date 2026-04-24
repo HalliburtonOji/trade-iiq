@@ -41,6 +41,21 @@ const Profile = () => {
   const [stats, setStats] = useState<Stats>({ lessonsCompleted: 0, drillsCompleted: 0, totalTrades: 0, winRate: 0, watchlistCount: 0, watchlistItems: [] });
   const [loading, setLoading] = useState(true);
   const [resetting, setResetting] = useState(false);
+  const [health, setHealth] = useState<any>(null);
+  const [checking, setChecking] = useState(false);
+
+  const runHealthCheck = async () => {
+    setChecking(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("api-health-check");
+      if (error) throw error;
+      setHealth(data);
+    } catch (e: any) {
+      toast({ title: "Health check failed", description: e.message, variant: "destructive" });
+    } finally {
+      setChecking(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -302,6 +317,72 @@ const Profile = () => {
             >
               Regenerate recommendations (dev)
             </Button>
+
+            {/* API Health Check */}
+            <div
+              style={{
+                background: "var(--stoa-shine)",
+                border: "1px solid var(--stoa-rule)",
+                borderRadius: 2,
+                padding: 16,
+                margin: "16px 0",
+              }}
+            >
+              <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>
+                ADMIN · ΔΟΚΙΜΗ
+              </span>
+              <h3 className="stoa-display" style={{ marginTop: 4, color: "var(--stoa-ink)", fontSize: 18 }}>
+                API Health Check
+              </h3>
+              <p style={{ marginTop: 6, fontFamily: "Georgia, serif", fontStyle: "italic", color: "var(--stoa-muted)", fontSize: 13 }}>
+                Pings every external API. Green = key set + reachable.
+              </p>
+              <Button
+                size="sm"
+                className="stoa-display"
+                style={{
+                  marginTop: 14,
+                  background: "var(--stoa-accent)",
+                  color: "var(--stoa-ink)",
+                  border: "1px solid var(--stoa-rule)",
+                  borderRadius: 2,
+                }}
+                disabled={checking}
+                onClick={runHealthCheck}
+              >
+                {checking ? "Checking…" : "Run health check →"}
+              </Button>
+
+              {health && (
+                <>
+                  <div style={{ marginTop: 16, display: "grid", gap: 8 }}>
+                    {(["anthropic", "openai", "finnhub", "alpha_vantage", "lovable"] as const).map((k) => {
+                      const entry = health[k] as { status: string; detail: string } | undefined;
+                      if (!entry) return null;
+                      const color =
+                        entry.status === "ok"
+                          ? "var(--stoa-accent)"
+                          : entry.status === "missing"
+                          ? "var(--stoa-muted)"
+                          : "hsl(var(--verdict-avoid))";
+                      return (
+                        <div key={k} style={{ borderTop: "1px solid var(--stoa-rule)", paddingTop: 8 }}>
+                          <div className="stoa-kicker" style={{ color, textTransform: "uppercase" }}>
+                            {k.replace("_", " ")} · {entry.status}
+                          </div>
+                          <div style={{ fontFamily: "Georgia, serif", fontSize: 13, color: "var(--stoa-ink)", marginTop: 2 }}>
+                            {entry.detail}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="stoa-mono" style={{ marginTop: 8, fontSize: 11, color: "var(--stoa-muted)" }}>
+                    Checked: {health.checked_at}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>
