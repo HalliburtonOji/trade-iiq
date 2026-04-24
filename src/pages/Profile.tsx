@@ -337,6 +337,22 @@ const Profile = () => {
             >
               Regenerate recommendations (dev)
             </Button>
+            <button
+              onClick={regenerateInitiates}
+              disabled={regenerating}
+              className="stoa-kicker ml-2"
+              style={{
+                background: "var(--stoa-shine)",
+                color: "var(--stoa-ink)",
+                border: "1px solid var(--stoa-rule)",
+                borderRadius: 2,
+                padding: "10px 20px",
+                cursor: regenerating ? "not-allowed" : "pointer",
+                marginRight: 12,
+              }}
+            >
+              {regenerating ? "Regenerating…" : "Regenerate 5 Initiates (dev)"}
+            </button>
 
             {/* API Health Check */}
             <div
