@@ -41,6 +41,21 @@ const Profile = () => {
   const [stats, setStats] = useState<Stats>({ lessonsCompleted: 0, drillsCompleted: 0, totalTrades: 0, winRate: 0, watchlistCount: 0, watchlistItems: [] });
   const [loading, setLoading] = useState(true);
   const [resetting, setResetting] = useState(false);
+  const [health, setHealth] = useState<any>(null);
+  const [checking, setChecking] = useState(false);
+
+  const runHealthCheck = async () => {
+    setChecking(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("api-health-check");
+      if (error) throw error;
+      setHealth(data);
+    } catch (e: any) {
+      toast({ title: "Health check failed", description: e.message, variant: "destructive" });
+    } finally {
+      setChecking(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
