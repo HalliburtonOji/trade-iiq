@@ -8,9 +8,30 @@ export async function seedCodexInitiates() {
     { track: "mind",    level: 1, slug: "mind-01-bias-basics",      title_en: "The Four Biases",         title_gr: "Τέσσερες Πλάνες",    summary: "Confirmation, recency, loss-aversion, overconfidence.",            ordinal: 1, learn_minutes: 7 },
     { track: "craft",   level: 1, slug: "craft-01-playbook-intro",  title_en: "What is a Playbook?",     title_gr: "Τί ἔστι Τακτικόν;",  summary: "Why every serious trader writes one and how to start.",            ordinal: 1, learn_minutes: 7, xp_reward: 60 },
   ];
-  const { data, error } = await supabase.functions.invoke("generate-codex-module", {
-    body: { specs, auto_publish: true },
+
+  // Invoke ONE spec per request in parallel so each call stays well under the 150s edge timeout.
+  const settled = await Promise.allSettled(
+    specs.map((spec) =>
+      supabase.functions.invoke("generate-codex-module", {
+        body: { specs: [spec], auto_publish: true },
+      }),
+    ),
+  );
+
+  const results = settled.map((r, i) => {
+    const slug = specs[i].slug;
+    if (r.status === "fulfilled") {
+      const { data, error } = r.value;
+      return { slug, ok: !error, data, error: error?.message };
+    }
+    return { slug, ok: false, error: r.reason?.message ?? String(r.reason) };
   });
-  console.log("seedCodexInitiates:", { data, error });
-  return { data, error };
+
+  const failed = results.filter((r) => !r.ok);
+  console.log("seedCodexInitiates results:", results);
+
+  if (failed.length === specs.length) {
+    return { data: null, error: { message: `All ${specs.length} modules failed: ${failed[0].error}` } };
+  }
+  return { data: { results }, error: failed.length ? { message: `${failed.length}/${specs.length} failed` } : null };
 }
