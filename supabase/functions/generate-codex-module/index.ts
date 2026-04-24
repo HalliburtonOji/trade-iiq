@@ -1,5 +1,5 @@
 // Codex v2 — generate-codex-module
-// Expands compact specs into fully-populated learn_modules rows via AI.
+// Expands compact specs into fully-populated learn_modules rows via Anthropic Claude.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
@@ -56,9 +56,17 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { specs, auto_publish } = (await req.json()) as { specs: Spec[]; auto_publish?: boolean };
-    if (!Array.isArray(specs) || specs.length === 0) {
-      return new Response(JSON.stringify({ error: "specs[] required" }), {
+    const body = await req.json();
+    // Support both batch ({ specs: [...] }) and single-spec ({ track, level, slug, ... }) calls.
+    const specs: Spec[] = Array.isArray(body?.specs)
+      ? body.specs
+      : body?.track && body?.slug
+        ? [body as Spec]
+        : [];
+    const auto_publish: boolean = body?.auto_publish !== false; // default true
+
+    if (specs.length === 0) {
+      return new Response(JSON.stringify({ error: "specs[] or single spec required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -68,59 +76,65 @@ Deno.serve(async (req) => {
     const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
 
-    // Prefer OPENAI_API_KEY, fall back to LOVABLE_API_KEY (Lovable AI gateway, OpenAI-compatible).
-    const openaiKey = Deno.env.get("OPENAI_API_KEY");
-    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-    const useLovable = !openaiKey && !!lovableKey;
-    if (!openaiKey && !lovableKey) {
-      return new Response(JSON.stringify({ error: "No AI key (OPENAI_API_KEY or LOVABLE_API_KEY)" }), {
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!ANTHROPIC_API_KEY) {
+      return new Response(JSON.stringify({ error: "ANTHROPIC_API_KEY not set" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const endpoint = useLovable
-      ? "https://ai.gateway.lovable.dev/v1/chat/completions"
-      : "https://api.openai.com/v1/chat/completions";
-    const authKey = useLovable ? lovableKey! : openaiKey!;
-    const model = useLovable ? "openai/gpt-5-mini" : "gpt-4o-mini";
-
     const results: Array<{ slug: string; ok: boolean; id?: string; error?: string }> = [];
 
     for (const spec of specs) {
       try {
-        const aiResp = await fetch(endpoint, {
+        const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${authKey}`,
+            "x-api-key": ANTHROPIC_API_KEY,
+            "anthropic-version": "2023-06-01",
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model,
-            temperature: 0.6,
-            response_format: { type: "json_object" },
-            messages: [
-              { role: "system", content: SYSTEM_PROMPT },
-              { role: "user", content: userPrompt(spec) },
-            ],
+            model: "claude-sonnet-4-6",
+            max_tokens: 3000,
+            system:
+              SYSTEM_PROMPT +
+              "\n\nIMPORTANT: Return ONLY valid JSON matching the schema. No markdown code fences, no prose before or after.",
+            messages: [{ role: "user", content: userPrompt(spec) }],
           }),
         });
 
-        if (!aiResp.ok) {
-          const t = await aiResp.text();
-          console.error("AI error", spec.slug, aiResp.status, t);
-          results.push({ slug: spec.slug, ok: false, error: `AI ${aiResp.status}` });
+        if (!anthropicRes.ok) {
+          const errText = await anthropicRes.text();
+          console.error("Anthropic error:", spec.slug, anthropicRes.status, errText);
+          results.push({
+            slug: spec.slug,
+            ok: false,
+            error: `Anthropic ${anthropicRes.status}: ${errText.slice(0, 300)}`,
+          });
           continue;
         }
 
-        const aiJson = await aiResp.json();
-        const raw = aiJson?.choices?.[0]?.message?.content ?? "{}";
-        let parsed: any;
+        const anthropicData = await anthropicRes.json();
+        let rawText: string = anthropicData.content?.[0]?.text || "";
+
+        // Strip markdown code fences if Claude wrapped the JSON.
+        rawText = rawText.trim();
+        if (rawText.startsWith("```")) {
+          rawText = rawText.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "").trim();
+        }
+
+        let moduleData: any;
         try {
-          parsed = JSON.parse(raw);
-        } catch (e) {
-          console.error("parse error", spec.slug, raw.slice(0, 200));
-          results.push({ slug: spec.slug, ok: false, error: "AI returned non-JSON" });
+          moduleData = JSON.parse(rawText);
+        } catch (_e) {
+          console.error("JSON parse failed for", spec.slug, "Raw:", rawText.slice(0, 500));
+          results.push({
+            slug: spec.slug,
+            ok: false,
+            error: `Claude returned invalid JSON: ${rawText.slice(0, 200)}`,
+          });
           continue;
         }
 
@@ -134,11 +148,11 @@ Deno.serve(async (req) => {
           ordinal: spec.ordinal ?? 0,
           learn_minutes: spec.learn_minutes ?? 8,
           xp_reward: spec.xp_reward ?? 50,
-          content_md: parsed.content_md ?? null,
-          drill_json: parsed.drill_json ?? null,
-          quiz_json: parsed.quiz_json ?? null,
-          scenario_json: parsed.scenario_json ?? null,
-          is_published: !!auto_publish,
+          content_md: moduleData.content_md ?? null,
+          drill_json: moduleData.drill_json ?? null,
+          quiz_json: moduleData.quiz_json ?? null,
+          scenario_json: moduleData.scenario_json ?? null,
+          is_published: auto_publish,
         };
 
         const { data, error } = await supabase
