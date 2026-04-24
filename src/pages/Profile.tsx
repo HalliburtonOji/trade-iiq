@@ -43,6 +43,26 @@ const Profile = () => {
   const [resetting, setResetting] = useState(false);
   const [health, setHealth] = useState<any>(null);
   const [checking, setChecking] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+
+  const regenerateInitiates = async () => {
+    setRegenerating(true);
+    const specs = [
+      { track: "markets", level: 1, slug: "markets-01-order-types", title_en: "Order Types", title_gr: "Παραγγελίαι" },
+      { track: "chart",   level: 1, slug: "chart-01-candles",       title_en: "Reading Candles", title_gr: "Κηροί" },
+      { track: "risk",    level: 1, slug: "risk-01-position-sizing",title_en: "Position Sizing", title_gr: "Μέτρον" },
+      { track: "mind",    level: 1, slug: "mind-01-loss-aversion",  title_en: "Loss Aversion", title_gr: "Φόβος" },
+      { track: "craft",   level: 1, slug: "craft-01-playbook",      title_en: "Building a Playbook", title_gr: "Τακτική" },
+    ];
+    toast({ title: "Regenerating 5 Initiate modules…", description: "Takes ~60-90s." });
+    for (const spec of specs) {
+      const { error } = await supabase.functions.invoke("generate-codex-module", { body: spec });
+      if (error) toast({ title: `Failed: ${spec.slug}`, description: error.message, variant: "destructive" });
+      else toast({ title: `Regenerated: ${spec.title_en}` });
+    }
+    toast({ title: "All 5 modules regenerated" });
+    setRegenerating(false);
+  };
 
   const runHealthCheck = async () => {
     setChecking(true);
