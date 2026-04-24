@@ -38,7 +38,7 @@ async function checkAnthropic(): Promise<CheckResult> {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-6",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 10,
       messages: [{ role: "user", content: "ping" }],
     }),
@@ -48,23 +48,7 @@ async function checkAnthropic(): Promise<CheckResult> {
     return { status: "error", detail: `HTTP ${r.status}: ${t.slice(0, 200)}` };
   }
   await r.text();
-  return { status: "ok", detail: "Sonnet 4.6 reachable" };
-}
-
-async function checkOpenAI(): Promise<CheckResult> {
-  const key = Deno.env.get("OPENAI_API_KEY");
-  if (!key) return { status: "missing", detail: "OPENAI_API_KEY not set" };
-  const r = await fetch("https://api.openai.com/v1/embeddings", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "text-embedding-3-small", input: "ping" }),
-  });
-  if (!r.ok) {
-    const t = await r.text();
-    return { status: "error", detail: `HTTP ${r.status}: ${t.slice(0, 200)}` };
-  }
-  await r.text();
-  return { status: "ok", detail: "Embeddings reachable" };
+  return { status: "ok", detail: "Claude Haiku reachable" };
 }
 
 async function checkFinnhub(): Promise<CheckResult> {
@@ -77,18 +61,6 @@ async function checkFinnhub(): Promise<CheckResult> {
   return { status: "ok", detail: `AAPL=$${j.c}` };
 }
 
-async function checkAlphaVantage(): Promise<CheckResult> {
-  const key = Deno.env.get("ALPHA_VANTAGE_API_KEY");
-  if (!key) return { status: "missing", detail: "ALPHA_VANTAGE_API_KEY not set (optional fallback)" };
-  const r = await fetch(
-    `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=AAPL&apikey=${key}`,
-  );
-  const j = await r.json();
-  if (j.Note || j.Information) return { status: "error", detail: j.Note || j.Information };
-  if (!j["Global Quote"]) return { status: "error", detail: "No quote" };
-  return { status: "ok", detail: "AAPL fetched" };
-}
-
 async function checkLovable(): Promise<CheckResult> {
   const key = Deno.env.get("LOVABLE_API_KEY");
   if (!key) return { status: "missing", detail: "LOVABLE_API_KEY not set" };
@@ -98,20 +70,16 @@ async function checkLovable(): Promise<CheckResult> {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const [anthropic, openai, finnhub, alpha_vantage, lovable] = await Promise.all([
+  const [anthropic, finnhub, lovable] = await Promise.all([
     safeRun(checkAnthropic),
-    safeRun(checkOpenAI),
     safeRun(checkFinnhub),
-    safeRun(checkAlphaVantage),
     safeRun(checkLovable),
   ]);
 
   return new Response(
     JSON.stringify({
       anthropic,
-      openai,
       finnhub,
-      alpha_vantage,
       lovable,
       checked_at: new Date().toISOString(),
     }),
