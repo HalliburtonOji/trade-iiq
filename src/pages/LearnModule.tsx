@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import StoaShell from "@/components/stoa/StoaShell";
 import { useToast } from "@/hooks/use-toast";
+import StoaMarkdown from "@/components/stoa/StoaMarkdown";
 
 type QuizQ = { prompt: string; options: string[]; correct: number; explanation: string };
 type QuizJson = { pass_score?: number; questions: QuizQ[] };
@@ -171,17 +172,7 @@ export default function LearnModule() {
             {mod.title_gr}
           </div>
           <div style={{ height: 1, background: "var(--stoa-rule)", margin: "20px 0" }} />
-          <div
-            style={{
-              fontFamily: "Georgia, serif",
-              fontSize: 16,
-              lineHeight: 1.7,
-              color: "var(--stoa-ink)",
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            {mod.content_md}
-          </div>
+          <StoaMarkdown source={mod.content_md} />
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 32, gap: 12, flexWrap: "wrap" }}>
             <button
               className="stoa-kicker"

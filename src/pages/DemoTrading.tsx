@@ -22,6 +22,7 @@ import TradingMissions from "@/components/demo/TradingMissions";
 import PerformanceStats from "@/components/demo/PerformanceStats";
 import TradeJournal from "@/components/demo/TradeJournal";
 import PositionAlerts from "@/components/demo/PositionAlerts";
+import { normalizeSymbol } from "@/lib/tv-symbol";
 
 type AssetTab = "stock" | "crypto" | "forex";
 const exchangePrefix: Record<AssetTab, string> = { stock: "", crypto: "BINANCE:", forex: "FX:" };
@@ -122,14 +123,16 @@ const DemoTrading = () => {
   const loadChart = useCallback((sym: string) => {
     if (!chartRef.current) return;
     chartRef.current.innerHTML = "";
-    const full = assetTab === "stock" ? sym : `${exchangePrefix[assetTab]}${sym}`;
+    const base = assetTab === "stock" ? sym : `${exchangePrefix[assetTab]}${sym}`;
+    const full = normalizeSymbol(base);
     const script = document.createElement("script");
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
     script.type = "text/javascript";
     script.async = true;
     script.innerHTML = JSON.stringify({
-      autosize: true, symbol: full, interval: "15", timezone: "Etc/UTC", theme: "dark",
-      style: "1", locale: "en", backgroundColor: "rgba(8, 12, 24, 1)", gridColor: "rgba(255, 255, 255, 0.04)",
+      autosize: true, symbol: full, interval: "15", timezone: "Etc/UTC", theme: "light",
+      style: "1", locale: "en", toolbar_bg: "#F4EAD5",
+      backgroundColor: "#F4EAD5", gridColor: "rgba(26,20,12,0.08)",
       allow_symbol_change: false, calendar: false, support_host: "https://www.tradingview.com",
       hide_volume: false, studies: ["RSI@tv-basicstudies"],
     });

@@ -4,6 +4,7 @@ import StoaShell from "@/components/stoa/StoaShell";
 import PedimentCap from "@/components/stoa/PedimentCap";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { normalizeSymbol } from "@/lib/tv-symbol";
 
 type AssetTab = "stock" | "crypto" | "forex";
 
@@ -37,7 +38,8 @@ const Charts = () => {
     if (!containerRef.current) return;
     containerRef.current.innerHTML = "";
 
-    const fullSymbol = assetTab === "stock" ? sym : `${exchangePrefix[assetTab]}${sym}`;
+    const baseSymbol = assetTab === "stock" ? sym : `${exchangePrefix[assetTab]}${sym}`;
+    const fullSymbol = normalizeSymbol(baseSymbol);
 
     const script = document.createElement("script");
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
@@ -48,11 +50,12 @@ const Charts = () => {
       symbol: fullSymbol,
       interval: "D",
       timezone: "Etc/UTC",
-      theme: "dark",
+      theme: "light",
       style: "1",
       locale: "en",
-      backgroundColor: "rgba(8, 12, 24, 1)",
-      gridColor: "rgba(255, 255, 255, 0.04)",
+      toolbar_bg: "#F4EAD5",
+      backgroundColor: "#F4EAD5",
+      gridColor: "rgba(26,20,12,0.08)",
       allow_symbol_change: true,
       calendar: false,
       support_host: "https://www.tradingview.com",
@@ -75,7 +78,7 @@ const Charts = () => {
   }, [symbol]);
 
   const handleSearch = () => {
-    const s = inputVal.trim().toUpperCase();
+    const s = normalizeSymbol(inputVal.trim().toUpperCase());
     if (s) {
       setSymbol(s);
       setInputVal("");
