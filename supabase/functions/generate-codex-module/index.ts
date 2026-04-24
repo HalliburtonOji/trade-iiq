@@ -39,13 +39,14 @@ Summary: ${spec.summary ?? ""}
 
 Return STRICT JSON of shape:
 {
-  "content_md":   "<6-10 minute lesson. 2-3 section headings using '## '. Include exactly one numeric worked example. End with a paragraph starting with 'Next' that hints at what to drill or apply. No fluff, no emojis, no marketing.>",
-  "drill_json":   { "questions": [ { "prompt":"...", "options":["A","B","C","D"], "correct":0, "explanation":"..." } ] },   // exactly 6 questions
-  "quiz_json":    { "pass_score": 70, "questions": [ { "prompt":"...", "options":["A","B","C","D"], "correct":0, "explanation":"..." } ] },   // exactly 10 questions
+  "content_md":   "<900-1400 word lesson. Structure: opening paragraph → 3-5 sections with '## ' headings → closing paragraph. Each section MUST include at least one callout block using GFM blockquote alert syntax: '> [!TAKEAWAY]\\n> one-sentence insight.' OR '> [!EXAMPLE]\\n> concrete scenario with real numbers.' OR '> [!REMEMBER]\\n> a rule phrased memorably.' OR '> [!WARNING]\\n> a common mistake as a short directive.' At least 3 callouts total per lesson. Use **bold** for key terms. Tone: classical, precise, instructive — Stoic mentor. Include exactly one numeric worked example. End with a paragraph starting with 'Next' that hints at what to drill or apply. No fluff, no emojis, no marketing.>",
+  "drill_json":   { "questions": [ { "prompt":"...", "options":["A","B","C","D"], "correct":0, "explanation":"..." } ] },
+  "quiz_json":    { "pass_score": 70, "questions": [ { "prompt":"...", "options":["A","B","C","D"], "correct":0, "explanation":"..." } ] },
   "scenario_json":{ "symbol":"SPY", "timeframe":"1D", "start_date":"2023-09-15", "end_date":"2023-10-20", "ask":"<one-sentence decision ask>", "ideal_entry_day":5, "ideal_stop_pct":2, "ideal_target_pct":6 }
 }
 
 Rules:
+- drill_json has exactly 6 questions; quiz_json has exactly 10 questions.
 - "correct" is the 0-based index of the right option in "options".
 - Each question's "explanation" is one sentence and teaches the concept, not just states the answer.
 - Pick a real, plausible symbol/date range for scenario_json relevant to the lesson topic.
