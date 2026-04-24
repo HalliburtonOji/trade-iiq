@@ -1,4 +1,4 @@
-// Compute a per-user trading "signature": stats + bias/risk/craft vectors + 1536-dim embedding.
+// Compute a per-user trading "signature": stats + bias/risk/craft vectors + 11-dim normalized embedding.
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -108,28 +108,26 @@ Deno.serve(async (req) => {
       total_trades: total,
     };
 
-    // Compact text for embedding
-    const summaryText = `Trader signature: ${total} closed trades, win rate ${(win_rate*100).toFixed(1)}%, avg return ${(avg_r*100).toFixed(2)}%, tilt ${tilt_score.toFixed(2)}. Biases confirmation=${bias_vec[0].toFixed(2)} recency=${bias_vec[1].toFixed(2)} loss-aversion=${bias_vec[2].toFixed(2)} overconfidence=${bias_vec[3].toFixed(2)}. Risk: stop=${(avgStop*100).toFixed(1)}% target=${(avgTarget*100).toFixed(1)}% maxDD=${(maxDd*100).toFixed(1)}%. Craft: diversity=${craft_vec[0].toFixed(2)} adherence=${craft_vec[1].toFixed(2)} consistency=${craft_vec[2].toFixed(2)}.`;
-
-    let embedding: number[] | null = null;
-    const openaiKey = Deno.env.get("OPENAI_API_KEY");
-    if (openaiKey) {
-      try {
-        const r = await fetch("https://api.openai.com/v1/embeddings", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${openaiKey}` },
-          body: JSON.stringify({ model: "text-embedding-3-small", input: summaryText }),
-        });
-        const d = await r.json();
-        embedding = d?.data?.[0]?.embedding ?? null;
-      } catch (_) { embedding = null; }
-    }
+    // Build 11-dim normalized feature vector (replaces OpenAI embedding)
+    const raw = [
+      Number(signature.win_rate) || 0,
+      Number(signature.avg_r) || 0,
+      Number(signature.tilt_score) || 0,
+      ...(signature.bias_vec || [0, 0, 0, 0]).map((x: any) => Number(x) || 0),
+      ...((signature.risk_vec || [0, 0]).slice(0, 2)).map((x: any) => Number(x) || 0),
+      ...((signature.craft_vec || [0, 0]).slice(0, 2)).map((x: any) => Number(x) || 0),
+    ]; // exactly 11
+    const norm = Math.sqrt(raw.reduce((s, v) => s + v * v, 0)) || 1;
+    const embedding = raw.map((v) => v / norm);
 
     await supabase.from("trading_signatures").upsert({
-      user_id, signature, embedding, computed_at: new Date().toISOString(),
+      user_id,
+      signature,
+      embedding: embedding as any,
+      computed_at: new Date().toISOString(),
     }, { onConflict: "user_id" });
 
-    return new Response(JSON.stringify({ signature }), {
+    return new Response(JSON.stringify({ signature, embedding }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {

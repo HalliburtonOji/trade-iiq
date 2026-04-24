@@ -10,7 +10,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { user_id } = await req.json();
+    const body = await req.json();
+    const { user_id, force } = body || {};
     if (!user_id) {
       return new Response(JSON.stringify({ error: "missing_user_id" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -21,6 +22,24 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+
+    // 24h rate limit: return the most recent non-dismissed recommendation if it's fresh
+    const { data: recent } = await supabase
+      .from("learn_recommendations")
+      .select("module_id, reason, generated_at")
+      .eq("user_id", user_id)
+      .is("dismissed_at", null)
+      .order("generated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!force && recent?.generated_at && Date.now() - new Date(recent.generated_at).getTime() < 24 * 60 * 60 * 1000) {
+      return new Response(JSON.stringify({
+        module_id: recent.module_id,
+        reason: recent.reason,
+        from_cache: true,
+      }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     // Ensure latest signature; if missing, invoke compute fn
     let { data: sigRow } = await supabase.from("trading_signatures")

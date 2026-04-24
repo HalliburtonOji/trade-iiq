@@ -310,7 +310,7 @@ const Profile = () => {
               style={{ background: "var(--stoa-shine)", color: "var(--stoa-ink)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}
               onClick={async () => {
                 toast({ title: "Regenerating...", description: "Computing signature + recommendation." });
-                const { error } = await supabase.functions.invoke("generate-codex-recommendation", { body: { user_id: user!.id } });
+                const { error } = await supabase.functions.invoke("generate-codex-recommendation", { body: { user_id: user!.id, force: true } });
                 if (error) toast({ title: "Failed", description: String(error.message ?? error), variant: "destructive" });
                 else toast({ title: "Recommendation regenerated" });
               }}
@@ -356,7 +356,7 @@ const Profile = () => {
               {health && (
                 <>
                   <div style={{ marginTop: 16, display: "grid", gap: 8 }}>
-                    {(["anthropic", "openai", "finnhub", "alpha_vantage", "lovable"] as const).map((k) => {
+                    {(["anthropic", "finnhub", "lovable"] as const).map((k) => {
                       const entry = health[k] as { status: string; detail: string } | undefined;
                       if (!entry) return null;
                       const color =
