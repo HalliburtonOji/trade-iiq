@@ -51,7 +51,48 @@ const Learn = () => {
   const [loading, setLoading] = useState(true);
   const [masteredL1, setMasteredL1] = useState(0);
   const [tradeCount, setTradeCount] = useState(0);
+  const [seeding, setSeeding] = useState(false);
   const seedRanRef = useRef(false);
+  const isAdmin = user?.email === "halliburtonoji@gmail.com";
+
+  const handleSeed = async () => {
+    setSeeding(true);
+    try {
+      console.log("[seed] starting");
+      toast("Seeding Codex…", {
+        description: "Calling generate-codex-module for 5 Initiate modules. This takes ~30–60s.",
+      });
+      const result = await seedCodexInitiates();
+      console.log("[seed] result:", result);
+      if ((result as any)?.error) throw (result as any).error;
+      toast("Seed complete", { description: "Reloading modules…" });
+      const { data: mods, error } = await supabase
+        .from("learn_modules")
+        .select("id,track,level,slug,title_en,title_gr,summary,ordinal,learn_minutes,xp_reward")
+        .eq("is_published", true)
+        .lte("level", 2)
+        .order("track", { ascending: true })
+        .order("level", { ascending: true })
+        .order("ordinal", { ascending: true });
+      if (error) throw error;
+      console.log("[seed] modules after:", mods);
+      setModules((mods || []) as LearnModule[]);
+      if (!mods || mods.length === 0) {
+        toast.error("Seed finished but no modules found", {
+          description: "Check the generate-codex-module function logs in Supabase.",
+        });
+      }
+    } catch (e: any) {
+      console.error("[seed] failed:", e);
+      toast.error("Seed failed", {
+        description:
+          e?.message || (typeof e === "string" ? e : JSON.stringify(e)) ||
+          "Unknown error — check browser console and Supabase function logs.",
+      });
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -171,6 +212,60 @@ const Learn = () => {
           Your path of study — five tracks, three levels, one disciplined trader.
         </p>
       </div>
+
+      {isAdmin && !loading && modules.length === 0 && (
+        <div
+          style={{
+            background: "var(--stoa-shine)",
+            border: "1px solid var(--stoa-rule)",
+            borderRadius: 2,
+            padding: 16,
+            marginBottom: 24,
+          }}
+        >
+          <div className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>
+            ADMIN · ΣΠΟΡΟΣ
+          </div>
+          <h3
+            className="stoa-display font-semibold"
+            style={{ color: "var(--stoa-ink)", marginTop: 4, fontSize: 18 }}
+          >
+            Seed the Codex
+          </h3>
+          <p
+            style={{
+              fontFamily: "Georgia, serif",
+              fontSize: 14,
+              fontStyle: "italic",
+              color: "var(--stoa-muted)",
+              marginTop: 6,
+            }}
+          >
+            Your Codex is empty. Click to generate the 5 Initiate modules via OpenAI. One-time action; safe to re-run (idempotent upsert by slug).
+          </p>
+          <button
+            onClick={handleSeed}
+            disabled={seeding}
+            style={{
+              marginTop: 14,
+              background: "var(--stoa-accent)",
+              color: "var(--stoa-ink)",
+              border: "none",
+              borderRadius: 2,
+              padding: "10px 18px",
+              fontFamily: "inherit",
+              fontWeight: 600,
+              fontSize: 13,
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+              cursor: seeding ? "not-allowed" : "pointer",
+              opacity: seeding ? 0.6 : 1,
+            }}
+          >
+            {seeding ? "Seeding…" : "Seed 5 Initiate Modules →"}
+          </button>
+        </div>
+      )}
 
       {rec && rec.learn_modules && (
         <div
