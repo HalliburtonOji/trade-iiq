@@ -460,6 +460,58 @@ const Profile = () => {
               </button>
             </div>
 
+            {/* Generate Codex Catalog (Level 1, all 20 modules) */}
+            <div
+              style={{
+                background: "var(--stoa-shine)",
+                border: "1px solid var(--stoa-rule)",
+                borderRadius: 2,
+                padding: 16,
+                margin: "16px 0",
+              }}
+            >
+              <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>
+                CATALOG · ΚΑΤΑΛΟΓΟΣ
+              </span>
+              <h3 className="stoa-display" style={{ marginTop: 4, color: "var(--stoa-ink)", fontSize: 18 }}>
+                Generate Codex Catalog (Level 1)
+              </h3>
+              <p style={{ marginTop: 6, fontFamily: "Georgia, serif", fontStyle: "italic", color: "var(--stoa-muted)", fontSize: 13 }}>
+                Bulk-generates all 20 Level-1 modules across the 5 tracks via the Lovable AI Gateway.
+                Skips slugs that already have content. Sequential, ~3-5 minutes.
+              </p>
+              <button
+                onClick={async () => {
+                  toast({ title: "Generating catalog…", description: "This may take 3-5 minutes." });
+                  const { data, error } = await supabase.functions.invoke("bulk-generate-codex", { body: {} });
+                  if (error) {
+                    toast({ title: "Catalog generation failed", description: error.message, variant: "destructive" });
+                    return;
+                  }
+                  const generated = data?.generated?.length ?? 0;
+                  const skipped = data?.skipped?.length ?? 0;
+                  const failed = data?.failed?.length ?? 0;
+                  toast({
+                    title: `Catalog: ${generated} new, ${skipped} skipped, ${failed} failed`,
+                    description: failed > 0 ? `First fail: ${data?.failed?.[0]?.slug} — ${data?.failed?.[0]?.error}` : "Done.",
+                    variant: failed > 0 ? "destructive" : "default",
+                  });
+                }}
+                style={{
+                  background: "var(--stoa-accent)",
+                  color: "var(--stoa-ink)",
+                  border: "none",
+                  borderRadius: 2,
+                  padding: "10px 16px",
+                  marginTop: 12,
+                  cursor: "pointer",
+                }}
+                className="stoa-display"
+              >
+                GENERATE CATALOG
+              </button>
+            </div>
+
             {/* API Health Check */}
             <div
               style={{
