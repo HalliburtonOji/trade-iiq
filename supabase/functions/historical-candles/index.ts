@@ -1,4 +1,4 @@
-// Historical daily candles via Stooq (free, keyless) with Finnhub fallback + 24h DB cache.
+// Historical daily candles via Yahoo Finance v8 (keyless) with 24h DB cache.
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -8,46 +8,21 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 type Candle = { time: string; open: number; high: number; low: number; close: number; volume: number };
 
-function toStooqSymbol(raw: string): string {
-  const s = raw.trim().toLowerCase();
-  if (!s) return s;
-  // Already namespaced (e.g. "spy.us") — pass through
-  if (s.includes(".")) return s;
-  // Crypto pairs (btcusd, ethusdt, btcusdc) — Stooq uses lowercase pair like btcusd
-  if (/^[a-z]{2,6}(usd|usdt|usdc|btc|eth)$/.test(s)) {
-    // Stooq supports btcusd / ethusd etc. Strip trailing t/c if usdt/usdc → fall back to usd
-    return s.replace(/usdt$|usdc$/, "usd");
+function toYahooSymbol(input: string): string {
+  const raw = (input || "").trim();
+  if (!raw) return raw;
+  // Already Yahoo-shaped: index, crypto-dash, or forex =X
+  if (raw.startsWith("^") || raw.includes("-USD") || raw.endsWith("=X")) return raw.toUpperCase();
+  const upper = raw.toUpperCase();
+  // Crypto: e.g. BTCUSD, ETHUSDT, ETHUSDC, SOLUSD → BTC-USD
+  const cryptoMatch = upper.match(/^([A-Z]{2,6})(USDT|USDC|USD)$/);
+  if (cryptoMatch) {
+    return `${cryptoMatch[1]}-USD`;
   }
-  // Forex 6-letter (eurusd) — Stooq accepts as-is
-  if (/^[a-z]{6}$/.test(s)) return s;
-  // Default: treat as US equity
-  return `${s}.us`;
-}
-
-function stripDashes(d: string): string {
-  return d.replace(/-/g, "");
-}
-
-function parseStooqCsv(csv: string): Candle[] {
-  const lines = csv.trim().split(/\r?\n/);
-  if (lines.length < 2) return [];
-  const header = lines[0].toLowerCase();
-  if (!header.startsWith("date")) return [];
-  const out: Candle[] = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split(",");
-    if (cols.length < 5) continue;
-    const [date, o, h, l, c, v] = cols;
-    const open = Number(o), high = Number(h), low = Number(l), close = Number(c);
-    if (![open, high, low, close].every(Number.isFinite)) continue;
-    const volume = Number(v) || 0;
-    out.push({
-      time: date, date,
-      open, high, low, close, volume,
-      o: open, h: high, l: low, c: close, v: volume,
-    } as any);
-  }
-  return out;
+  // Forex: 6 letters all alpha, e.g. EURUSD → EURUSD=X
+  if (/^[A-Z]{6}$/.test(upper)) return `${upper}=X`;
+  // Default: equity / ETF
+  return upper;
 }
 
 Deno.serve(async (req) => {
@@ -79,7 +54,7 @@ Deno.serve(async (req) => {
         .maybeSingle();
       if (cached?.candles && Array.isArray(cached.candles) && cached.candles.length > 0) {
         console.log(`[candles] cache HIT ${symbol} ${start_date}→${end_date} src=${cached.source} rows=${cached.candles.length}`);
-        return new Response(JSON.stringify({ symbol, candles: cached.candles, from_cache: true, source: cached.source }), {
+        return new Response(JSON.stringify({ symbol, candles: cached.candles, from_cache: true, source: cached.source ?? "yahoo" }), {
           status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -87,72 +62,68 @@ Deno.serve(async (req) => {
     }
     console.log(`[candles] cache MISS ${symbol} ${start_date}→${end_date} force=${!!force}`);
 
-    const tried: string[] = [];
+    // PRIMARY: Yahoo Finance v8 (keyless)
+    const yhSymbol = toYahooSymbol(symbol);
+    const period1 = Math.floor(new Date(start_date).getTime() / 1000);
+    const period2 = Math.floor(new Date(end_date).getTime() / 1000) + 86400; // inclusive of end day
+    const yhUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yhSymbol)}?period1=${period1}&period2=${period2}&interval=1d`;
 
-    // PRIMARY: Stooq
-    tried.push("stooq");
-    const stooqSym = toStooqSymbol(symbol);
-    const stooqUrl = `https://stooq.com/q/d/l/?s=${encodeURIComponent(stooqSym)}&d1=${stripDashes(start_date)}&d2=${stripDashes(end_date)}&i=d`;
-    let stooqCandles: Candle[] = [];
+    let candles: Candle[] = [];
+    let yhStatus = 0;
     try {
-      const r = await fetch(stooqUrl);
-      const text = await r.text();
-      console.log(`[candles] stooq ${stooqSym} status=${r.status} bytes=${text.length}`);
-      stooqCandles = parseStooqCsv(text);
-      console.log(`[candles] stooq parsed rows=${stooqCandles.length}`);
+      const r = await fetch(yhUrl, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+          "Accept": "application/json",
+        },
+      });
+      yhStatus = r.status;
+      const j = await r.json();
+      const result = j?.chart?.result?.[0];
+      if (result) {
+        const ts: number[] = result.timestamp ?? [];
+        const q = result.indicators?.quote?.[0] ?? {};
+        candles = ts.map((t: number, i: number) => {
+          const date = new Date(t * 1000).toISOString().slice(0, 10);
+          const open = q.open?.[i];
+          const high = q.high?.[i];
+          const low = q.low?.[i];
+          const close = q.close?.[i];
+          const volume = q.volume?.[i] ?? 0;
+          return {
+            time: date, date,
+            open, high, low, close, volume,
+            o: open, h: high, l: low, c: close, v: volume,
+          } as any;
+        }).filter((c: any) =>
+          c.open != null && c.high != null && c.low != null && c.close != null
+        );
+      } else if (j?.chart?.error) {
+        console.error(`[candles] yahoo error payload`, j.chart.error);
+      }
+      console.log(`[candles] yahoo`, { yhSymbol, status: yhStatus, rows: candles.length });
     } catch (e) {
-      console.error(`[candles] stooq fetch error`, e);
+      console.error(`[candles] yahoo fetch error`, e);
     }
 
-    if (stooqCandles.length > 5) {
+    if (candles.length >= 2) {
       await supa.from("candle_cache").upsert({
         symbol, start_date, end_date,
-        candles: stooqCandles,
-        source: "stooq",
+        candles,
+        source: "yahoo",
         cached_at: new Date().toISOString(),
       }, { onConflict: "symbol,start_date,end_date" });
-      return new Response(JSON.stringify({ symbol, candles: stooqCandles, from_cache: false, source: "stooq" }), {
+      return new Response(JSON.stringify({ symbol, candles, from_cache: false, source: "yahoo" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // FALLBACK: Finnhub
-    const key = Deno.env.get("FINNHUB_API_KEY");
-    if (key) {
-      tried.push("finnhub");
-      try {
-        const s = Math.floor(new Date(start_date).getTime() / 1000);
-        const e = Math.floor(new Date(end_date).getTime() / 1000);
-        const url = `https://finnhub.io/api/v1/stock/candle?symbol=${encodeURIComponent(symbol)}&resolution=D&from=${s}&to=${e}&token=${key}`;
-        const r = await fetch(url);
-        const d = await r.json();
-        console.log(`[candles] finnhub ${symbol} status=${r.status} s=${d.s}`);
-        if (d.s === "ok" && Array.isArray(d.t) && d.t.length > 0) {
-          const candles: any[] = d.t.map((ts: number, i: number) => {
-            const date = new Date(ts * 1000).toISOString().slice(0, 10);
-            const open = d.o[i], high = d.h[i], low = d.l[i], close = d.c[i], volume = d.v[i] || 0;
-            return { time: date, date, open, high, low, close, volume, o: open, h: high, l: low, c: close, v: volume };
-          });
-          await supa.from("candle_cache").upsert({
-            symbol, start_date, end_date,
-            candles, source: "finnhub",
-            cached_at: new Date().toISOString(),
-          }, { onConflict: "symbol,start_date,end_date" });
-          return new Response(JSON.stringify({ symbol, candles, from_cache: false, source: "finnhub" }), {
-            status: 200,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-      } catch (e) {
-        console.error(`[candles] finnhub error`, e);
-      }
-    }
-
-    console.log(`[candles] FAIL ${symbol} tried=${tried.join(",")}`);
+    console.log(`[candles] FAIL ${symbol} (yahoo rows=${candles.length} status=${yhStatus})`);
     return new Response(JSON.stringify({
       error: "no_data",
-      tried,
+      tried: ["yahoo"],
       symbol,
       candles: [],
       range: [start_date, end_date],
