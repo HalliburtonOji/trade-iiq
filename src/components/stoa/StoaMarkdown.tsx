@@ -111,6 +111,18 @@ export default function StoaMarkdown({
           </a>
         ),
         blockquote: ({ children }) => {
+          // Diagram embed: > [!DIAGRAM:d1]
+          const fullText = extractFirstText(children as ReactNode);
+          const dm = fullText.match(DIAGRAM_RE);
+          if (dm) {
+            const spec = diagrams.find((d) => d.id === dm[1]);
+            if (spec) return <StoaDiagram spec={spec} />;
+            return (
+              <div className="stoa-kicker" style={{ color: "var(--stoa-muted)", fontStyle: "italic", margin: "12px 0" }}>
+                [diagram {dm[1]} missing]
+              </div>
+            );
+          }
           const { kind, rest } = detectAlert(children as ReactNode);
           if (kind) {
             const meta = ALERT_META[kind];
