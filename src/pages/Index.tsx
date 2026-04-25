@@ -23,6 +23,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useDailyMissionsState } from "@/hooks/useDailyMissionsState";
 
 import StatCard from "@/components/StatCard";
 import TickerMarquee from "@/components/TickerMarquee";
@@ -76,6 +77,7 @@ const Index = () => {
   const [lessonsCompleted, setLessonsCompleted] = useState(0);
   const [totalXp, setTotalXp] = useState(0);
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
+  const dm = useDailyMissionsState();
 
   const { quotes: idxQuotes } = useQuotes(["SPY", "QQQ"], "stock", 5 * 60 * 1000);
   const [btcDom, setBtcDom] = useState({ value: "—", change: "—", up: true });
@@ -347,7 +349,13 @@ const Index = () => {
 
         {/* Daily Missions */}
         <motion.div variants={fadeUp}>
-          <DailyMissions />
+          <DailyMissions
+            analysed={dm.analysed}
+            logged={dm.logged}
+            lessoned={dm.lessoned}
+            watchlisted={dm.watchlisted}
+            reviewed={dm.reviewed}
+          />
         </motion.div>
 
         {/* Economic Calendar */}
