@@ -1,8 +1,10 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ReactNode } from "react";
+import { StoaDiagram, type DiagramSpec } from "./StoaDiagram";
 
 const ALERT_RE = /^\s*\[!(TAKEAWAY|EXAMPLE|REMEMBER|WARNING)\]\s*/i;
+const DIAGRAM_RE = /\[!DIAGRAM:([a-zA-Z0-9_-]+)\]/;
 type AlertKind = "takeaway" | "example" | "remember" | "warning";
 
 const ALERT_META: Record<AlertKind, { label: string; greek: string; accent: string }> = {
@@ -48,7 +50,13 @@ function detectAlert(children: ReactNode): { kind: AlertKind | null; rest: React
   return { kind: m[1].toLowerCase() as AlertKind, rest: stripAlertPrefix(children) };
 }
 
-export default function StoaMarkdown({ source }: { source: string | null | undefined }) {
+export default function StoaMarkdown({
+  source,
+  diagrams = [],
+}: {
+  source: string | null | undefined;
+  diagrams?: DiagramSpec[];
+}) {
   if (!source) return null;
   return (
     <ReactMarkdown
