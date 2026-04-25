@@ -176,6 +176,7 @@ Deno.serve(async (req) => {
           drill_json: moduleData.drill_json ?? null,
           quiz_json: moduleData.quiz_json ?? null,
           scenario_json: moduleData.scenario_json ?? null,
+          diagrams: Array.isArray(moduleData.diagrams) ? moduleData.diagrams : [],
           is_published: auto_publish,
         };
 
