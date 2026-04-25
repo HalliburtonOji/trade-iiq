@@ -1,8 +1,10 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ReactNode } from "react";
+import { StoaDiagram, type DiagramSpec } from "./StoaDiagram";
 
 const ALERT_RE = /^\s*\[!(TAKEAWAY|EXAMPLE|REMEMBER|WARNING)\]\s*/i;
+const DIAGRAM_RE = /\[!DIAGRAM:([a-zA-Z0-9_-]+)\]/;
 type AlertKind = "takeaway" | "example" | "remember" | "warning";
 
 const ALERT_META: Record<AlertKind, { label: string; greek: string; accent: string }> = {
@@ -48,7 +50,13 @@ function detectAlert(children: ReactNode): { kind: AlertKind | null; rest: React
   return { kind: m[1].toLowerCase() as AlertKind, rest: stripAlertPrefix(children) };
 }
 
-export default function StoaMarkdown({ source }: { source: string | null | undefined }) {
+export default function StoaMarkdown({
+  source,
+  diagrams = [],
+}: {
+  source: string | null | undefined;
+  diagrams?: DiagramSpec[];
+}) {
   if (!source) return null;
   return (
     <ReactMarkdown
@@ -103,6 +111,18 @@ export default function StoaMarkdown({ source }: { source: string | null | undef
           </a>
         ),
         blockquote: ({ children }) => {
+          // Diagram embed: > [!DIAGRAM:d1]
+          const fullText = extractFirstText(children as ReactNode);
+          const dm = fullText.match(DIAGRAM_RE);
+          if (dm) {
+            const spec = diagrams.find((d) => d.id === dm[1]);
+            if (spec) return <StoaDiagram spec={spec} />;
+            return (
+              <div className="stoa-kicker" style={{ color: "var(--stoa-muted)", fontStyle: "italic", margin: "12px 0" }}>
+                [diagram {dm[1]} missing]
+              </div>
+            );
+          }
           const { kind, rest } = detectAlert(children as ReactNode);
           if (kind) {
             const meta = ALERT_META[kind];

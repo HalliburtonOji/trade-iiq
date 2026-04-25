@@ -30,6 +30,19 @@ export default function LearnScenario() {
   const [phase, setPhase] = useState<"setup" | "replay" | "result">("setup");
   const [outcome, setOutcome] = useState<{ exitPrice: number; pnlPct: number; verdict: string; idealPnl: number; delta: number } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refetching, setRefetching] = useState(false);
+
+  const fetchCandles = async (opts?: { force?: boolean }) => {
+    if (!mod) return;
+    const sc = (mod as any)?.scenario_json;
+    if (!sc?.symbol || !sc?.start_date || !sc?.end_date) return;
+    if (opts?.force) setRefetching(true);
+    const { data: cd } = await supabase.functions.invoke("historical-candles", {
+      body: { symbol: sc.symbol, start_date: sc.start_date, end_date: sc.end_date, force: !!opts?.force },
+    });
+    setCandles(((cd as any)?.candles || []) as Candle[]);
+    setRefetching(false);
+  };
 
   useEffect(() => {
     if (!slug) return;
@@ -44,7 +57,7 @@ export default function LearnScenario() {
         const { data: cd } = await supabase.functions.invoke("historical-candles", {
           body: { symbol: sc.symbol, start_date: sc.start_date, end_date: sc.end_date },
         });
-        if (!cancelled) setCandles((cd as any)?.candles || []);
+        if (!cancelled) setCandles(((cd as any)?.candles || []) as Candle[]);
       }
       if (!cancelled) setLoading(false);
     })();
@@ -135,10 +148,38 @@ export default function LearnScenario() {
                 style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", padding: "6px 10px", color: "var(--stoa-ink)", borderRadius: 2, width: 100 }} />
             </label>
           </div>
-          {candles.length === 0 && (
-            <p style={{ fontFamily: "Georgia, serif", fontStyle: "italic", color: "var(--stoa-muted)", marginTop: 16 }}>
-              Candle data unavailable — scenario will not run.
-            </p>
+          {candles.length === 0 && !loading && (
+            <div style={{
+              background: "var(--stoa-shine)",
+              border: "1px solid var(--stoa-rule)",
+              borderLeft: "3px solid hsl(var(--verdict-avoid))",
+              borderRadius: 2,
+              padding: 16,
+              marginTop: 16,
+            }}>
+              <div className="stoa-kicker" style={{ color: "hsl(var(--verdict-avoid))" }}>
+                DATA UNAVAILABLE · ΕΛΛΕΙΨΙΣ
+              </div>
+              <p style={{ fontFamily: "Georgia, serif", color: "var(--stoa-ink)", marginTop: 6, fontSize: 14 }}>
+                Historical candles for <strong>{sc.symbol}</strong> between {sc.start_date} and {sc.end_date} could not be fetched. The free data source may not cover this range.
+              </p>
+              <button
+                onClick={() => fetchCandles({ force: true })}
+                disabled={refetching}
+                className="stoa-display font-semibold"
+                style={{
+                  background: "var(--stoa-accent)",
+                  color: "var(--stoa-ink)",
+                  border: "none",
+                  borderRadius: 2,
+                  padding: "10px 20px",
+                  marginTop: 12,
+                  cursor: refetching ? "not-allowed" : "pointer",
+                }}
+              >
+                {refetching ? "Retrying…" : "RETRY →"}
+              </button>
+            </div>
           )}
           <div style={{ marginTop: 20 }}>
             <button style={goldCta} className="stoa-display font-semibold"

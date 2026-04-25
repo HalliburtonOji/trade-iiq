@@ -23,6 +23,7 @@ type LearnModuleRow = {
   quiz_json: QuizJson | null;
   learn_minutes: number | null;
   xp_reward: number | null;
+  diagrams: any[] | null;
 };
 
 const goldCta = {
@@ -172,7 +173,7 @@ export default function LearnModule() {
             {mod.title_gr}
           </div>
           <div style={{ height: 1, background: "var(--stoa-rule)", margin: "20px 0" }} />
-          <StoaMarkdown source={mod.content_md} />
+          <StoaMarkdown source={mod.content_md} diagrams={(mod.diagrams as any[]) || []} />
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 32, gap: 12, flexWrap: "wrap" }}>
             <button
               className="stoa-kicker"
