@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
           },
           body: JSON.stringify({
             model: "claude-sonnet-4-6",
-            max_tokens: 3000,
+            max_tokens: 4500,
             system:
               SYSTEM_PROMPT +
               "\n\nIMPORTANT: Return ONLY valid JSON matching the schema. No markdown code fences, no prose before or after.",
