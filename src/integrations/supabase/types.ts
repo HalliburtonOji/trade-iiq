@@ -122,6 +122,7 @@ export type Database = {
           candles: Json
           end_date: string
           id: string
+          source: string | null
           start_date: string
           symbol: string
         }
@@ -130,6 +131,7 @@ export type Database = {
           candles: Json
           end_date: string
           id?: string
+          source?: string | null
           start_date: string
           symbol: string
         }
@@ -138,6 +140,7 @@ export type Database = {
           candles?: Json
           end_date?: string
           id?: string
+          source?: string | null
           start_date?: string
           symbol?: string
         }
@@ -486,6 +489,7 @@ export type Database = {
         Row: {
           content_md: string | null
           created_at: string | null
+          diagrams: Json | null
           drill_json: Json | null
           id: string
           is_published: boolean | null
@@ -506,6 +510,7 @@ export type Database = {
         Insert: {
           content_md?: string | null
           created_at?: string | null
+          diagrams?: Json | null
           drill_json?: Json | null
           id?: string
           is_published?: boolean | null
@@ -526,6 +531,7 @@ export type Database = {
         Update: {
           content_md?: string | null
           created_at?: string | null
+          diagrams?: Json | null
           drill_json?: Json | null
           id?: string
           is_published?: boolean | null
