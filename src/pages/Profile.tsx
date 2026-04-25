@@ -354,6 +354,106 @@ const Profile = () => {
               {regenerating ? "Regenerating…" : "Regenerate 5 Initiates (dev)"}
             </button>
 
+            {/* Candle Cache Admin */}
+            <div
+              style={{
+                background: "var(--stoa-shine)",
+                border: "1px solid var(--stoa-rule)",
+                borderRadius: 2,
+                padding: 16,
+                margin: "16px 0",
+              }}
+            >
+              <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>
+                CANDLE CACHE · ΧΡΟΝΟΣ
+              </span>
+              <h3 className="stoa-display" style={{ marginTop: 4, color: "var(--stoa-ink)", fontSize: 18 }}>
+                Historical Candle Cache
+              </h3>
+              <p style={{ marginTop: 6, fontFamily: "Georgia, serif", fontStyle: "italic", color: "var(--stoa-muted)", fontSize: 13 }}>
+                Clears all cached candle data. Next scenario load will refetch from Stooq → Finnhub.
+              </p>
+              <button
+                onClick={async () => {
+                  const { error } = await supabase.from("candle_cache").delete().neq("symbol", "___none___");
+                  toast({
+                    title: error ? "Failed" : "Candle cache cleared",
+                    description: error?.message,
+                    variant: error ? "destructive" : "default",
+                  });
+                }}
+                style={{
+                  background: "var(--stoa-shine)",
+                  color: "var(--stoa-ink)",
+                  border: "1px solid var(--stoa-rule)",
+                  borderRadius: 2,
+                  padding: "10px 16px",
+                  marginTop: 12,
+                  cursor: "pointer",
+                }}
+                className="stoa-display"
+              >
+                Clear Candle Cache
+              </button>
+            </div>
+
+            {/* Visual Upgrade — regenerate with diagrams */}
+            <div
+              style={{
+                background: "var(--stoa-shine)",
+                border: "1px solid var(--stoa-rule)",
+                borderRadius: 2,
+                padding: 16,
+                margin: "16px 0",
+              }}
+            >
+              <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>
+                VISUAL UPGRADE · ΕΙΚΩΝ
+              </span>
+              <h3 className="stoa-display" style={{ marginTop: 4, color: "var(--stoa-ink)", fontSize: 18 }}>
+                Regenerate Initiates with Diagrams
+              </h3>
+              <p style={{ marginTop: 6, fontFamily: "Georgia, serif", fontStyle: "italic", color: "var(--stoa-muted)", fontSize: 13 }}>
+                Re-runs all 5 Initiate modules with inline SVG diagrams populated. Takes ~60-90s.
+              </p>
+              <button
+                onClick={async () => {
+                  const specs = [
+                    { track: "markets", level: 1, slug: "markets-01-order-types", title_en: "Order Types", title_gr: "Παραγγελίαι" },
+                    { track: "chart",   level: 1, slug: "chart-01-candles",       title_en: "Reading Candles", title_gr: "Κηροί" },
+                    { track: "risk",    level: 1, slug: "risk-01-position-sizing",title_en: "Position Sizing", title_gr: "Μέτρον" },
+                    { track: "mind",    level: 1, slug: "mind-01-loss-aversion",  title_en: "Loss Aversion", title_gr: "Φόβος" },
+                    { track: "craft",   level: 1, slug: "craft-01-playbook",      title_en: "Building a Playbook", title_gr: "Τακτική" },
+                  ];
+                  toast({ title: "Regenerating with diagrams…", description: "5 modules, ~90s." });
+                  for (const spec of specs) {
+                    const { error } = await supabase.functions.invoke("generate-codex-module", {
+                      body: { ...spec, auto_publish: true, force: true },
+                    });
+                    toast({
+                      title: `${spec.track}: ${error ? "fail" : "ok"}`,
+                      description: error?.message,
+                      variant: error ? "destructive" : "default",
+                    });
+                    await new Promise((r) => setTimeout(r, 1500));
+                  }
+                  toast({ title: "All 5 regenerated with diagrams" });
+                }}
+                style={{
+                  background: "var(--stoa-accent)",
+                  color: "var(--stoa-ink)",
+                  border: "none",
+                  borderRadius: 2,
+                  padding: "10px 16px",
+                  marginTop: 12,
+                  cursor: "pointer",
+                }}
+                className="stoa-display"
+              >
+                REGENERATE WITH DIAGRAMS
+              </button>
+            </div>
+
             {/* API Health Check */}
             <div
               style={{
