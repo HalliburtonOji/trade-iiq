@@ -969,6 +969,7 @@ export type Database = {
           preferred_assets: string[] | null
           preferred_broker: string | null
           streak_count: number
+          streak_last_active: string | null
           trading_goals: string[] | null
           trading_level: number
           trading_personality: string
@@ -988,6 +989,7 @@ export type Database = {
           preferred_assets?: string[] | null
           preferred_broker?: string | null
           streak_count?: number
+          streak_last_active?: string | null
           trading_goals?: string[] | null
           trading_level?: number
           trading_personality?: string
@@ -1007,6 +1009,7 @@ export type Database = {
           preferred_assets?: string[] | null
           preferred_broker?: string | null
           streak_count?: number
+          streak_last_active?: string | null
           trading_goals?: string[] | null
           trading_level?: number
           trading_personality?: string
@@ -1514,12 +1517,54 @@ export type Database = {
         }
         Relationships: []
       }
+      xp_ledger: {
+        Row: {
+          amount: number
+          awarded_at: string
+          id: string
+          ref_id: string
+          ref_table: string | null
+          source: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          awarded_at?: string
+          id?: string
+          ref_id: string
+          ref_table?: string | null
+          source: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          awarded_at?: string
+          id?: string
+          ref_id?: string
+          ref_table?: string | null
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      award_xp: {
+        Args: {
+          p_amount: number
+          p_ref_id: string
+          p_ref_table?: string
+          p_source: string
+        }
+        Returns: {
+          awarded: boolean
+          new_streak: number
+          new_xp: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
