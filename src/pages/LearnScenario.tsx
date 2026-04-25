@@ -30,6 +30,19 @@ export default function LearnScenario() {
   const [phase, setPhase] = useState<"setup" | "replay" | "result">("setup");
   const [outcome, setOutcome] = useState<{ exitPrice: number; pnlPct: number; verdict: string; idealPnl: number; delta: number } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refetching, setRefetching] = useState(false);
+
+  const fetchCandles = async (opts?: { force?: boolean }) => {
+    if (!mod) return;
+    const sc = (mod as any)?.scenario_json;
+    if (!sc?.symbol || !sc?.start_date || !sc?.end_date) return;
+    if (opts?.force) setRefetching(true);
+    const { data: cd } = await supabase.functions.invoke("historical-candles", {
+      body: { symbol: sc.symbol, start_date: sc.start_date, end_date: sc.end_date, force: !!opts?.force },
+    });
+    setCandles(((cd as any)?.candles || []) as Candle[]);
+    setRefetching(false);
+  };
 
   useEffect(() => {
     if (!slug) return;
@@ -44,7 +57,7 @@ export default function LearnScenario() {
         const { data: cd } = await supabase.functions.invoke("historical-candles", {
           body: { symbol: sc.symbol, start_date: sc.start_date, end_date: sc.end_date },
         });
-        if (!cancelled) setCandles((cd as any)?.candles || []);
+        if (!cancelled) setCandles(((cd as any)?.candles || []) as Candle[]);
       }
       if (!cancelled) setLoading(false);
     })();
