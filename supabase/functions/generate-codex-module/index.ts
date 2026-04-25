@@ -100,9 +100,9 @@ Deno.serve(async (req) => {
     const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
 
-    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!ANTHROPIC_API_KEY) {
-      return new Response(JSON.stringify({ error: "ANTHROPIC_API_KEY not set" }), {
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      return new Response(JSON.stringify({ error: "LOVABLE_API_KEY not set" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -112,36 +112,42 @@ Deno.serve(async (req) => {
 
     for (const spec of specs) {
       try {
-        const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
+        const gatewayRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: {
-            "x-api-key": ANTHROPIC_API_KEY,
-            "anthropic-version": "2023-06-01",
+            "Authorization": `Bearer ${LOVABLE_API_KEY}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "claude-sonnet-4-6",
-            max_tokens: 4500,
-            system:
-              SYSTEM_PROMPT +
-              "\n\nIMPORTANT: Return ONLY valid JSON matching the schema. No markdown code fences, no prose before or after.",
-            messages: [{ role: "user", content: userPrompt(spec) }],
+            model: "google/gemini-2.5-flash",
+            messages: [
+              {
+                role: "system",
+                content:
+                  SYSTEM_PROMPT +
+                  "\n\nCRITICAL: Output a single JSON object only. No markdown fences. No prose before or after. No code blocks. The first character of your response must be `{` and the last character must be `}`.",
+              },
+              { role: "user", content: userPrompt(spec) },
+            ],
+            response_format: { type: "json_object" },
+            max_tokens: 8000,
+            temperature: 0.7,
           }),
         });
 
-        if (!anthropicRes.ok) {
-          const errText = await anthropicRes.text();
-          console.error("Anthropic error:", spec.slug, anthropicRes.status, errText);
+        if (!gatewayRes.ok) {
+          const errText = await gatewayRes.text();
+          console.error("Lovable AI gateway error:", spec.slug, gatewayRes.status, errText);
           results.push({
             slug: spec.slug,
             ok: false,
-            error: `Anthropic ${anthropicRes.status}: ${errText.slice(0, 300)}`,
+            error: `Gateway ${gatewayRes.status}: ${errText.slice(0, 300)}`,
           });
           continue;
         }
 
-        const anthropicData = await anthropicRes.json();
-        let rawText: string = anthropicData.content?.[0]?.text || "";
+        const gatewayData = await gatewayRes.json();
+        let rawText: string = gatewayData.choices?.[0]?.message?.content || "";
 
         // Strip markdown code fences if Claude wrapped the JSON.
         rawText = rawText.trim();

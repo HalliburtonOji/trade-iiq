@@ -66,13 +66,28 @@ export function useDailyMissionsState(): DailyMissionsState {
           .gte("reviewed_date", since),
       ]);
 
-      setState({
+      const next: DailyMissionsState = {
         analysed: (analysed.count ?? 0) > 0,
         logged: (logged.count ?? 0) > 0,
         lessoned: (lessoned.count ?? 0) > 0,
         watchlisted: (watchlisted.count ?? 0) > 0,
         reviewed: (reviewed.count ?? 0) > 0,
-      });
+      };
+      setState(next);
+
+      // Award XP for any ticked mission today (idempotent via UNIQUE on ledger).
+      const today = new Date().toISOString().slice(0, 10);
+      const ticked = (Object.entries(next) as [keyof DailyMissionsState, boolean][])
+        .filter(([, v]) => v)
+        .map(([k]) => k);
+      for (const flag of ticked) {
+        await supabase.rpc("award_xp", {
+          p_amount: 10,
+          p_source: "daily_mission",
+          p_ref_id: `${flag}_${today}`,
+          p_ref_table: null as any,
+        });
+      }
     };
 
     load();
