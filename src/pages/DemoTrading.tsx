@@ -250,6 +250,13 @@ const DemoTrading = () => {
       setPositions(prev => prev.filter(p => p.id !== pos.id));
       setAllTrades(prev => prev.map(t => t.id === pos.id ? closed : t));
       setReviewTrade(closed);
+      // Award XP for closing a paper trade (idempotent per trade id)
+      await supabase.rpc("award_xp", {
+        p_amount: 10,
+        p_source: "paper_trade",
+        p_ref_id: pos.id,
+        p_ref_table: "paper_trades",
+      });
       toast.success(`Closed ${pos.symbol} — P&L: ${pnl >= 0 ? "+" : ""}$${pnl.toFixed(2)}`);
     }
   };
