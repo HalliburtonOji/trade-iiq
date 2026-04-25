@@ -39,11 +39,34 @@ Summary: ${spec.summary ?? ""}
 
 Return STRICT JSON of shape:
 {
-  "content_md":   "<900-1400 word lesson. Structure: opening paragraph → 3-5 sections with '## ' headings → closing paragraph. Each section MUST include at least one callout block using GFM blockquote alert syntax: '> [!TAKEAWAY]\\n> one-sentence insight.' OR '> [!EXAMPLE]\\n> concrete scenario with real numbers.' OR '> [!REMEMBER]\\n> a rule phrased memorably.' OR '> [!WARNING]\\n> a common mistake as a short directive.' At least 3 callouts total per lesson. Use **bold** for key terms. Tone: classical, precise, instructive — Stoic mentor. Include exactly one numeric worked example. End with a paragraph starting with 'Next' that hints at what to drill or apply. No fluff, no emojis, no marketing.>",
+  "content_md":   "<900-1400 word lesson. Structure: opening paragraph → 3-5 sections with '## ' headings → closing paragraph. Each section MUST include at least one callout block using GFM blockquote alert syntax: '> [!TAKEAWAY]\\n> one-sentence insight.' OR '> [!EXAMPLE]\\n> concrete scenario with real numbers.' OR '> [!REMEMBER]\\n> a rule phrased memorably.' OR '> [!WARNING]\\n> a common mistake as a short directive.' At least 3 callouts total per lesson. Use **bold** for key terms. Tone: classical, precise, instructive — Stoic mentor. Include exactly one numeric worked example. End with a paragraph starting with 'Next' that hints at what to drill or apply. No fluff, no emojis, no marketing. EMBED 1-3 DIAGRAMS by placing a blockquote line on its own (blank line above and below) of the form '> [!DIAGRAM:d1]' where the diagram should appear. Each id MUST match an entry in the diagrams array.>",
+  "diagrams": [
+    {
+      "id": "d1",
+      "type": "candle_anatomy" | "risk_reward" | "position_sizing" | "trend_channel" | "support_resistance" | "breakout_pattern",
+      "caption": "Short Georgia-italic caption.",
+      "data": { /* shape per type — see VISUAL DIAGRAMS guide */ }
+    }
+  ],
   "drill_json":   { "questions": [ { "prompt":"...", "options":["A","B","C","D"], "correct":0, "explanation":"..." } ] },
   "quiz_json":    { "pass_score": 70, "questions": [ { "prompt":"...", "options":["A","B","C","D"], "correct":0, "explanation":"..." } ] },
   "scenario_json":{ "symbol":"SPY", "timeframe":"1D", "start_date":"2023-09-15", "end_date":"2023-10-20", "ask":"<one-sentence decision ask>", "ideal_entry_day":5, "ideal_stop_pct":2, "ideal_target_pct":6 }
 }
+
+VISUAL DIAGRAMS guide (data shapes):
+- candle_anatomy: { "kind": "bullish" | "bearish" }
+- risk_reward: { "entry": number, "stop": number, "target": number }
+- position_sizing: { "account": number, "risk_pct": number, "entry": number, "stop": number }
+- trend_channel: { "direction": "up" | "down" }
+- support_resistance: { "levels": [{"price": number, "label": string, "type": "support"|"resistance"}] }
+- breakout_pattern: { "pattern": "compression" | "flag" | "triangle" }
+
+VISUAL DIAGRAMS rules:
+- Markets or Chart modules MUST include 1-2 diagrams.
+- Risk modules MUST include a position_sizing or risk_reward diagram.
+- Mind / Craft modules SHOULD include 1 if relevant.
+- Total diagrams per module: 1-3.
+- Choose data values that ILLUSTRATE the lesson's specific concept (e.g. risk lesson uses entry/stop/target matching prose example).
 
 Rules:
 - drill_json has exactly 6 questions; quiz_json has exactly 10 questions.
