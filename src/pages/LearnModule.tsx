@@ -107,6 +107,32 @@ export default function LearnModule() {
         },
         { onConflict: "user_id,module_id,mode" }
       );
+      if (passed) {
+        await supabase.rpc("award_xp", {
+          p_amount: 30,
+          p_source: "quiz",
+          p_ref_id: mod.id,
+          p_ref_table: "learn_modules",
+        });
+        // Also award lesson XP (lesson is considered completed once quiz passes)
+        await supabase.rpc("award_xp", {
+          p_amount: mod.xp_reward ?? 50,
+          p_source: "lesson",
+          p_ref_id: mod.id,
+          p_ref_table: "learn_modules",
+        });
+        await supabase.from("learn_progress").upsert(
+          {
+            user_id: user.id,
+            module_id: mod.id,
+            mode: "lesson",
+            status: "completed",
+            score: pct,
+            completed_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id,module_id,mode" }
+        );
+      }
     }
     if (passed) {
       toast({ title: "Quiz passed", description: `+${mod.xp_reward ?? 50} XP` });
