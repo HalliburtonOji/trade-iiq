@@ -106,7 +106,13 @@ const DemoTrading = () => {
       const [profileRes, tradesRes, lessonsRes] = await Promise.all([
         supabase.from("profiles").select("paper_balance, xp_total").eq("user_id", user.id).single(),
         supabase.from("paper_trades").select("*").eq("user_id", user.id).order("opened_at", { ascending: false }),
-        supabase.from("learning_progress").select("id").eq("user_id", user.id).eq("completed", true),
+        // Bridge: count Codex v2 completed lessons (replaces legacy learning_progress)
+        supabase
+          .from("learn_progress")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .eq("mode", "lesson")
+          .eq("status", "completed"),
       ]);
       if (profileRes.data) { setBalance(profileRes.data.paper_balance); setXp(profileRes.data.xp_total); }
       if (tradesRes.data) {
@@ -114,10 +120,30 @@ const DemoTrading = () => {
         setAllTrades(all);
         setPositions(all.filter(t => t.status === "open"));
       }
-      if (lessonsRes.data) setLessonsCompleted(lessonsRes.data.length);
+      setLessonsCompleted(lessonsRes.count ?? 0);
     };
     load();
   }, [user]);
+
+  // Award XP for trading missions whenever the completed set changes (idempotent server-side)
+  useEffect(() => {
+    if (!user || completedMissions.length === 0) return;
+    (async () => {
+      for (const mid of completedMissions) {
+        const m = tradingMissions.find((x) => x.id === mid);
+        if (!m) continue;
+        await supabase.rpc("award_xp", {
+          p_amount: m.xp,
+          p_source: "trading_mission",
+          p_ref_id: m.id,
+          p_ref_table: "trading_missions",
+        });
+      }
+      // refresh xp_total after batch
+      const { data: p } = await supabase.from("profiles").select("xp_total").eq("user_id", user.id).single();
+      if (p?.xp_total != null) setXp(p.xp_total);
+    })();
+  }, [completedMissions, user]);
 
   // Chart
   const loadChart = useCallback((sym: string) => {
