@@ -40,11 +40,12 @@ function parseStooqCsv(csv: string): Candle[] {
     const [date, o, h, l, c, v] = cols;
     const open = Number(o), high = Number(h), low = Number(l), close = Number(c);
     if (![open, high, low, close].every(Number.isFinite)) continue;
+    const volume = Number(v) || 0;
     out.push({
-      time: date,
-      open, high, low, close,
-      volume: Number(v) || 0,
-    });
+      time: date, date,
+      open, high, low, close, volume,
+      o: open, h: high, l: low, c: close, v: volume,
+    } as any);
   }
   return out;
 }
@@ -128,11 +129,11 @@ Deno.serve(async (req) => {
         const d = await r.json();
         console.log(`[candles] finnhub ${symbol} status=${r.status} s=${d.s}`);
         if (d.s === "ok" && Array.isArray(d.t) && d.t.length > 0) {
-          const candles: Candle[] = d.t.map((ts: number, i: number) => ({
-            time: new Date(ts * 1000).toISOString().slice(0, 10),
-            open: d.o[i], high: d.h[i], low: d.l[i], close: d.c[i],
-            volume: d.v[i] || 0,
-          }));
+          const candles: any[] = d.t.map((ts: number, i: number) => {
+            const date = new Date(ts * 1000).toISOString().slice(0, 10);
+            const open = d.o[i], high = d.h[i], low = d.l[i], close = d.c[i], volume = d.v[i] || 0;
+            return { time: date, date, open, high, low, close, volume, o: open, h: high, l: low, c: close, v: volume };
+          });
           await supa.from("candle_cache").upsert({
             symbol, start_date, end_date,
             candles, source: "finnhub",
