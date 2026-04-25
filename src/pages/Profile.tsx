@@ -82,7 +82,13 @@ const Profile = () => {
     const load = async () => {
       const [profileRes, lessonsRes, drillsRes, tradesRes, watchlistRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", user.id).single(),
-        supabase.from("learning_progress").select("id").eq("user_id", user.id).eq("completed", true),
+        // Bridge: Codex v2 lessons completed (replaces legacy learning_progress)
+        supabase
+          .from("learn_progress")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id)
+          .eq("mode", "lesson")
+          .eq("status", "completed"),
         supabase.from("practice_progress").select("id").eq("user_id", user.id).eq("completed", true),
         supabase.from("trade_decisions").select("outcome").eq("user_id", user.id),
         supabase.from("watchlist").select("symbol, type").eq("user_id", user.id).order("added_date", { ascending: false }).limit(10),
@@ -94,7 +100,7 @@ const Profile = () => {
       const wins = trades.filter(t => t.outcome === "WIN").length;
 
       setStats({
-        lessonsCompleted: lessonsRes.data?.length || 0,
+        lessonsCompleted: lessonsRes.count ?? 0,
         drillsCompleted: drillsRes.data?.length || 0,
         totalTrades: trades.length,
         winRate: trades.length > 0 ? Math.round((wins / trades.length) * 100) : 0,
