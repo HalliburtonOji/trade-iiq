@@ -33,13 +33,20 @@ Deno.serve(async (req) => {
 
     const supa = createClient(SUPABASE_URL, SERVICE_ROLE);
 
-    // Find slugs already populated (have content_md)
+    // A module is considered COMPLETE only when lesson + drill + quiz + scenario all exist.
+    // Modules missing any of those parts are regenerated so the bulk-gen actually fills the gaps.
     const { data: existing } = await supa
       .from("learn_modules")
-      .select("slug, content_md")
+      .select("slug, content_md, drill_json, quiz_json, scenario_json")
       .in("slug", LEVEL_1_SPEC.map((s) => s.slug));
+    const isComplete = (r: any) =>
+      r &&
+      typeof r.content_md === "string" && r.content_md.length > 100 &&
+      r.drill_json && Array.isArray(r.drill_json?.questions) && r.drill_json.questions.length > 0 &&
+      r.quiz_json && Array.isArray(r.quiz_json?.questions) && r.quiz_json.questions.length > 0 &&
+      r.scenario_json && typeof r.scenario_json === "object";
     const populatedSlugs = new Set(
-      (existing || []).filter((r: any) => r.content_md && r.content_md.length > 100).map((r: any) => r.slug)
+      (existing || []).filter(isComplete).map((r: any) => r.slug)
     );
 
     // Optional batch params from client to avoid 150s edge timeout.

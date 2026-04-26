@@ -1549,7 +1549,42 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard_30d: {
+        Row: {
+          active_days: number | null
+          display_name: string | null
+          level: string | null
+          streak_count: number | null
+          user_id: string | null
+          xp_total: number | null
+          xp_window: number | null
+        }
+        Relationships: []
+      }
+      leaderboard_7d: {
+        Row: {
+          active_days: number | null
+          display_name: string | null
+          level: string | null
+          streak_count: number | null
+          user_id: string | null
+          xp_total: number | null
+          xp_window: number | null
+        }
+        Relationships: []
+      }
+      leaderboard_alltime: {
+        Row: {
+          active_days: number | null
+          display_name: string | null
+          level: string | null
+          streak_count: number | null
+          user_id: string | null
+          xp_total: number | null
+          xp_window: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       award_xp: {
