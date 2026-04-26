@@ -482,19 +482,33 @@ const Profile = () => {
               </p>
               <button
                 onClick={async () => {
-                  toast({ title: "Generating catalog…", description: "This may take 3-5 minutes." });
-                  const { data, error } = await supabase.functions.invoke("bulk-generate-codex", { body: {} });
-                  if (error) {
-                    toast({ title: "Catalog generation failed", description: error.message, variant: "destructive" });
-                    return;
+                  toast({ title: "Generating catalog…", description: "Processing in batches, this may take 3-5 minutes." });
+                  let nextIndex: number | null = 0;
+                  const totals = { generated: 0, skipped: 0, failed: 0 };
+                  let firstFail: { slug: string; error: string } | null = null;
+                  let safetyGuard = 0;
+                  while (nextIndex !== null && safetyGuard < 30) {
+                    safetyGuard++;
+                    const { data, error } = await supabase.functions.invoke("bulk-generate-codex", {
+                      body: { start_index: nextIndex, batch_size: 3 },
+                    });
+                    if (error) {
+                      toast({ title: "Catalog generation failed", description: error.message, variant: "destructive" });
+                      return;
+                    }
+                    totals.generated += data?.generated?.length ?? 0;
+                    totals.skipped += data?.skipped?.length ?? 0;
+                    totals.failed += data?.failed?.length ?? 0;
+                    if (!firstFail && data?.failed?.[0]) firstFail = data.failed[0];
+                    nextIndex = data?.next_index ?? null;
+                    if (nextIndex !== null) {
+                      toast({ title: `Progress: ${nextIndex}/${data?.total ?? 20}`, description: `${totals.generated} new so far.` });
+                    }
                   }
-                  const generated = data?.generated?.length ?? 0;
-                  const skipped = data?.skipped?.length ?? 0;
-                  const failed = data?.failed?.length ?? 0;
                   toast({
-                    title: `Catalog: ${generated} new, ${skipped} skipped, ${failed} failed`,
-                    description: failed > 0 ? `First fail: ${data?.failed?.[0]?.slug} — ${data?.failed?.[0]?.error}` : "Done.",
-                    variant: failed > 0 ? "destructive" : "default",
+                    title: `Catalog: ${totals.generated} new, ${totals.skipped} skipped, ${totals.failed} failed`,
+                    description: firstFail ? `First fail: ${firstFail.slug} — ${firstFail.error}` : "Done.",
+                    variant: totals.failed > 0 ? "destructive" : "default",
                   });
                 }}
                 style={{

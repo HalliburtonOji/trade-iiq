@@ -42,11 +42,27 @@ Deno.serve(async (req) => {
       (existing || []).filter((r: any) => r.content_md && r.content_md.length > 100).map((r: any) => r.slug)
     );
 
+    // Optional batch params from client to avoid 150s edge timeout.
+    // Client should loop until done=true.
+    let batchSize = 3;
+    let startIndex = 0;
+    try {
+      const body = await req.json();
+      if (typeof body?.batch_size === "number") batchSize = Math.max(1, Math.min(5, body.batch_size));
+      if (typeof body?.start_index === "number") startIndex = Math.max(0, body.start_index);
+    } catch { /* no body */ }
+
     const generated: string[] = [];
     const skipped: string[] = [];
     const failed: Array<{ slug: string; error: string }> = [];
 
-    for (const spec of LEVEL_1_SPEC as ModuleSpec[]) {
+    let processed = 0;
+    let nextIndex = startIndex;
+
+    for (let i = startIndex; i < LEVEL_1_SPEC.length; i++) {
+      const spec = LEVEL_1_SPEC[i] as ModuleSpec;
+      nextIndex = i + 1;
+
       if (populatedSlugs.has(spec.slug)) {
         skipped.push(spec.slug);
         continue;
@@ -67,10 +83,19 @@ Deno.serve(async (req) => {
       } catch (e) {
         failed.push({ slug: spec.slug, error: String(e) });
       }
-      await new Promise((res) => setTimeout(res, 2000));
+      processed++;
+      if (processed >= batchSize) break;
     }
 
-    return new Response(JSON.stringify({ generated, skipped, failed }), {
+    const done = nextIndex >= LEVEL_1_SPEC.length;
+    return new Response(JSON.stringify({
+      generated,
+      skipped,
+      failed,
+      next_index: done ? null : nextIndex,
+      total: LEVEL_1_SPEC.length,
+      done,
+    }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
