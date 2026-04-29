@@ -128,6 +128,42 @@ const ThesisBuilder = ({ thesis, onChange, direction }: Props) => {
           className="h-8 text-xs bg-background/50"
         />
       </div>
+
+      {/* Save current thesis as a reusable Playbook */}
+      <button
+        type="button"
+        disabled={!user || !thesis.reason}
+        onClick={async () => {
+          if (!user) return;
+          const reasonLabel = REASONS.find((r) => r.value === thesis.reason)?.label ?? thesis.reason;
+          const name = `${reasonLabel} (${direction})`;
+          const { data, error } = await supabase
+            .from("playbooks")
+            .insert({
+              user_id: user.id,
+              name,
+              strategy_type: thesis.reason,
+              checklist: [],
+              conditions: { direction, confidence: thesis.confidence },
+              invalidation_rules: thesis.invalidation
+                ? `Exit if price reaches ${thesis.invalidation}`
+                : "",
+              notes: "Saved from a paper trade thesis.",
+            })
+            .select("id,name,strategy_type")
+            .single();
+          if (error) {
+            toast.error("Could not save playbook", { description: error.message });
+            return;
+          }
+          if (data) setPlaybooks((prev) => [data as PlaybookOption, ...prev]);
+          toast.success("Saved to Playbook", { description: name });
+        }}
+        className="w-full flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground py-1.5 border border-dashed border-border/40 rounded-md disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+      >
+        <BookmarkPlus className="h-3 w-3" />
+        Save as playbook
+      </button>
     </div>
   );
 };
