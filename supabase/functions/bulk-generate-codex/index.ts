@@ -67,10 +67,14 @@ Deno.serve(async (req) => {
     // Client should loop until done=true.
     let batchSize = 3;
     let startIndex = 0;
+    let forceRegenerate: string[] = [];
     try {
       const body = await req.json();
       if (typeof body?.batch_size === "number") batchSize = Math.max(1, Math.min(5, body.batch_size));
       if (typeof body?.start_index === "number") startIndex = Math.max(0, body.start_index);
+      if (Array.isArray(body?.force_regenerate)) {
+        forceRegenerate = body.force_regenerate.filter((s: unknown): s is string => typeof s === "string");
+      }
     } catch { /* no body */ }
 
     const generated: string[] = [];
@@ -84,7 +88,8 @@ Deno.serve(async (req) => {
       const spec = LEVEL_1_SPEC[i] as ModuleSpec;
       nextIndex = i + 1;
 
-      if (populatedSlugs.has(spec.slug)) {
+      const isForced = forceRegenerate.includes(spec.slug);
+      if (!isForced && populatedSlugs.has(spec.slug)) {
         skipped.push(spec.slug);
         continue;
       }
