@@ -1,143 +1,80 @@
+# P17 — Τελείωσις (Completion): Finish the Codex Loop
 
+After P14–P16 the foundations are in place but production is in a half-built state. Three concrete gaps to close, in order of user impact.
 
-# Floating Nav Hub + Trader OS Features
+## Current state (verified live)
 
-## 1. Replace BottomNav with Floating Nav Hub
+- **Catalog**: 14 of 20 Level-1 modules exist. 3 have prose but no drill/quiz/scenario (`markets-01`, `markets-03`, `risk-02`). 5 are entirely missing (`chart-02-trend-channels`, all 4 `craft-*`).
+- **XP ledger**: 7 rows total. Sources firing: `drill`, `scenario`, `daily_mission`, `trading_mission`. **Zero rows from `lesson` or `quiz`** — meaning no user has passed a Codex quiz since P15 launch, so the leaderboard reflects almost nothing.
+- **Trader OS**: `playbooks` and `screenshot_vault` tables exist with RLS but **0 rows ever**. Pages exist at `/playbook` and `/screenshot-vault` but have no entry point from the Demo Trading flow where they would naturally be used.
+- **Surfacing**: `/learn` still leads with the legacy static `lessonsData.ts` cards. New Stoa Codex modules are reachable but not the front door.
 
-**Current state**: Two overlapping nav elements on mobile -- a bottom bar (Home, Analysis, Demo, Learn, More) and a floating chat bubble. Redundant.
+## Goals
 
-**Change**: Remove `BottomNav` entirely. Refactor `AIChatbot.tsx` into a unified floating hub with a hamburger icon (`Menu` / three-dash). When tapped, it opens a bottom sheet with two tabs:
-
-- **Navigate tab**: Grid of ALL routes (Home, Analysis, Demo Trading, Learn, Charts, Screener, Daily Picks, Tracker, Portfolio, Insights, Community, Profile) + Sign Out. Active route highlighted.
-- **AI Coach tab**: The existing streaming chatbot, unchanged.
-
-**Files**:
-- `src/components/AIChatbot.tsx` -- full rewrite into `FloatingHub.tsx` (or rename in place). Hamburger icon FAB, Sheet with tabs for Nav + Chat.
-- `src/components/BottomNav.tsx` -- delete
-- `src/components/PageShell.tsx` -- remove BottomNav import/render on mobile; remove `pb-20` since no bottom bar. Keep SideNav for desktop.
-- `src/App.tsx` -- update import if component is renamed
-
-**UX**: FAB sits bottom-right. On mobile, no bottom bar at all -- just the floating button. Desktop keeps SideNav + floating button (chat only, no nav grid needed on desktop since SideNav exists).
+1. Finish the catalog so the bulk-gen button completes cleanly to 20/20.
+2. Make sure the lesson→quiz→XP loop actually fires (diagnose the zero-row gap).
+3. Bring the Trader OS shells to life by hooking them into Demo Trading.
+4. Make the Codex the front door of `/learn`.
 
 ---
 
-## 2. Database Migration -- New Tables
+## Step 1 — Catalog completion
 
-Three new tables needed for the Trader OS features:
+**Diagnose why `craft-*` and `chart-02` are missing despite bulk-gen running.** The most likely cause is that `bulk-generate-codex` only inserts modules whose slugs already exist as rows in `learn_modules`; the 5 missing slugs were never seeded.
 
-**`playbooks`** -- stores repeatable setup templates
-- `id`, `user_id`, `name`, `strategy_type` (breakout/pullback/mean-reversion/custom), `checklist` (jsonb array), `conditions` (jsonb), `invalidation_rules` (text), `example_screenshots` (text[] -- storage URLs), `notes`, `created_at`, `updated_at`
-- RLS: user owns their playbooks (SELECT/INSERT/UPDATE/DELETE)
+Two-part fix in `supabase/functions/bulk-generate-codex/index.ts`:
+- Before generating, upsert a stub row for every spec in `LEVEL_1_SPEC` (track, level, slug, title_en, title_gr, ordinal, `is_published=false`).
+- Then proceed with the existing batched generation. Skip rule unchanged: skip when content_md > 100 AND drill_json AND quiz_json AND scenario_json.
 
-**`screenshot_vault`** -- pre/post trade chart screenshots with annotations
-- `id`, `user_id`, `trade_id` (nullable ref to paper_trades), `symbol`, `image_url`, `annotation` (text), `phase` (pre_trade/post_trade/general), `tags` (text[]), `created_at`
-- RLS: user owns their screenshots
+The 3 partials (`markets-01`, `markets-03`, `risk-02`) will be picked up automatically because they fail the skip check. The 5 missing slugs will now exist as stubs and get generated.
 
-**`accountability_streaks`** -- tracks review streaks and accountability
-- `id`, `user_id`, `current_streak`, `longest_streak`, `last_review_date`, `pending_reviews` (integer), `updated_at`
-- RLS: user owns their streak data
+Add a `force_regenerate?: string[]` body param so the admin button can target specific slugs if a generation goes sideways.
 
-No new tables needed for Review Workspace or Weekly Coaching -- those are computed views over existing `paper_trades`, `decision_reviews`, `trade_decisions`, and `trading_dna` tables, plus the existing `weekly-digest` edge function.
+## Step 2 — Diagnose the silent quiz/lesson XP gap
 
----
+The code in `LearnModule.tsx` (lines 285–297) does call `award_xp` with sources `quiz` and `lesson`, but ledger has zero such rows. Three things to check, in order:
 
-## 3. Playbook Builder
+1. **`award_xp` RPC permissions** — verify the function is `SECURITY DEFINER` and grants `EXECUTE` to `authenticated`. If it silently fails on `auth.uid()` resolution, the front-end never sees an error. Check via `supabase--read_query` against `pg_proc` and `information_schema.routine_privileges`.
+2. **Quiz passing threshold** — `pass_score` defaults to 70 and quizzes are 4–5 questions, so a single wrong answer can drop below 70. Verify with `quiz_attempts` table whether attempts are being logged at all, and at what scores.
+3. **Module ID match** — confirm `mod.id` is a real `learn_modules.id` UUID at the moment `award_xp` is called (not the slug).
 
-New page component at `/playbook` (or section within Demo Trading / Tracker).
+Wire a small dev-only `console.error` on the `await supabase.rpc("award_xp", …)` calls in `LearnModule.tsx`, `LearnDrill.tsx`, `LearnScenario.tsx` to surface RPC errors in the browser console for the next session. Remove after one successful end-to-end pass.
 
-**Features**:
-- Create/edit/delete playbooks
-- Each playbook has: name, strategy type selector, checklist items (add/remove/reorder), entry/exit conditions (text fields), invalidation rules, notes
-- Attach example screenshots from Screenshot Vault
-- When opening a new paper trade in Demo Trading, user can select a playbook to pre-fill thesis
+If the RPC turns out to be the issue, ship a migration that recreates `award_xp` with the correct definer/grant and inserts a `lesson_complete` taxonomy row.
 
-**Files**:
-- `src/pages/Playbook.tsx` (new) -- list view + create/edit form
-- `src/components/playbook/PlaybookCard.tsx` -- display card
-- `src/components/playbook/PlaybookForm.tsx` -- create/edit form with checklist builder
-- Add route in `App.tsx`, add to nav items
+## Step 3 — Hook Trader OS into Demo Trading
 
----
+The pages exist (`Playbook.tsx`, `ScreenshotVault.tsx`, `ReviewWorkspace.tsx`) but nothing in the Demo Trading flow points to them, so users never discover them.
 
-## 4. Screenshot Vault
+Three small wiring changes in `src/pages/DemoTrading.tsx` and `src/components/demo/ThesisBuilder.tsx`:
 
-**Features**:
-- Upload chart screenshots (pre-trade / post-trade) to existing `chart_screenshots` storage bucket
-- Add text annotations and tags
-- Link to a specific paper trade (optional)
-- Gallery view with filter by symbol, phase, tags
-- View screenshot with overlay annotation
+- **Thesis Builder**: when opening a new paper trade, show a "Load from Playbook" select sourced from `playbooks` where `user_id = auth.uid()`. Selecting one pre-fills the strategy, checklist, and invalidation fields.
+- **Trade Review**: after closing a trade, add an "Attach screenshot" button that opens `ScreenshotUpload` pre-bound to the just-closed `trade_id`.
+- **Empty-state CTAs**: on `/playbook` and `/screenshot-vault`, when the table is empty, show a single Stoa-styled card linking to "Create your first" — currently the empty state is a blank panel.
 
-**Files**:
-- `src/pages/ScreenshotVault.tsx` (new) or section within existing pages
-- `src/components/vault/ScreenshotUpload.tsx` -- upload + annotate form
-- `src/components/vault/ScreenshotGallery.tsx` -- filterable grid
-- Add route, add to nav
+No new tables. No new XP sources. Just wiring.
+
+## Step 4 — Codex as the front door of `/learn`
+
+In `src/pages/Learn.tsx`, restructure the tab order so the Stoa Codex (the new `learn_modules` content with diagrams, drills, quizzes, scenarios) is the first/default tab. The legacy `lessonsData.ts` content moves to a "Quick Lessons" tab kept for users who started before P14.
+
+Render the Codex tab as a 5-column grid of tracks (markets, chart, risk, mind, craft) with a folio strip showing Greek-numeral progress (Αʹ Βʹ Γʹ Δʹ) per track, sourced from `learn_progress` joined with `learn_modules`. Each card links to `/learn/module/:slug`.
+
+No new components needed beyond a `CodexTrackCard.tsx` — reuses the Stoa palette and `greek-numerals.ts` from P16.
 
 ---
 
-## 5. Review Workspace
+## Technical notes
 
-Computed dashboard pulling from existing tables -- no new backend tables needed.
+- Stub upsert in bulk-gen uses `onConflict: "slug"` since slug is unique.
+- `award_xp` RPC signature confirmed: `(p_amount, p_source, p_ref_id, p_ref_table)`.
+- Diagnostic logging is **strictly temporary** — remove in the same patch once one end-to-end pass is verified, no leftover console noise.
+- `craft-*` modules introduce the Trader OS concepts the user is about to encounter — natural pairing with Step 3's wiring.
+- No schema changes required if Step 2 turns out to be a quiz threshold or front-end issue rather than RPC permissions.
 
-**Features**:
-- Best/worst setup reports (aggregate `paper_trades` by `thesis_json.strategy`)
-- Mistake tags breakdown (from `decision_reviews.mistake_type`)
-- Win rate by: setup type, session time, asset type
-- Emotional pattern breakdown (from `paper_trades.emotion` + `decision_reviews.emotion`)
-- "Trades pending review" counter -- paper trades with no matching decision_review
+## Acceptance
 
-**Files**:
-- `src/pages/ReviewWorkspace.tsx` (new)
-- `src/components/review/SetupReport.tsx`
-- `src/components/review/MistakeBreakdown.tsx`
-- `src/components/review/EmotionalPatterns.tsx`
-- `src/components/review/PendingReviews.tsx`
-- Add route, add to nav
-
----
-
-## 6. Weekly Coaching Report
-
-Extend the existing `weekly-digest` edge function output. Add a new page/component to display it.
-
-**Features**:
-- "What improved this week" (compare current vs previous week stats)
-- "What's leaking money" (top mistake types, worst setups)
-- "One rule for next week" (AI-generated from digest data)
-- Lesson recommendations linked to actual mistakes
-- The existing edge function already generates `ai_focus` -- extend the prompt to produce structured coaching sections
-
-**Files**:
-- `src/components/review/WeeklyCoachingReport.tsx` (new) -- fetches from `weekly-digest` edge function, renders structured report
-- `supabase/functions/weekly-digest/index.ts` -- extend AI prompt to return structured coaching JSON (what_improved, money_leak, next_rule, recommended_lessons)
-- Surface in Review Workspace or as standalone tab
-
----
-
-## 7. Accountability Loop
-
-**Features**:
-- Review streak tracking (consecutive days with at least one trade review)
-- "X trades pending review" badge/notification
-- Mission system tied to real behavior: "Review 3 trades", "Write 1 post-mortem", "Update your playbook"
-- Streak display on Profile page and Review Workspace
-
-**Files**:
-- `src/components/review/AccountabilityWidget.tsx` -- streak display, pending count, missions
-- Integrate into Profile page and Review Workspace
-- Update `DailyMissions` data to include review-based missions
-
----
-
-## Build Order
-
-1. **Floating Nav Hub** -- refactor AIChatbot into nav+chat hub, delete BottomNav, update PageShell
-2. **Database migration** -- create `playbooks`, `screenshot_vault`, `accountability_streaks` tables with RLS
-3. **Playbook Builder** -- page + components
-4. **Screenshot Vault** -- page + upload + gallery
-5. **Review Workspace** -- computed dashboard from existing data
-6. **Weekly Coaching Report** -- extend edge function + display component
-7. **Accountability Loop** -- streak tracking + review missions
-8. **Wire into nav** -- add all new routes to floating hub nav grid and desktop SideNav
-
+1. Admin "Generate Catalog" button finishes with 20 generated, 0 failed; `select count(*) from learn_modules where is_published=true` returns 20.
+2. After one user passes one Codex quiz, `select count(*) from xp_ledger where source in ('lesson','quiz')` is ≥ 2.
+3. Creating a paper trade in Demo Trading shows a Playbook selector when at least one playbook exists.
+4. `/learn` opens with the Codex tab active by default; each track card shows a Greek-numeral progress strip.

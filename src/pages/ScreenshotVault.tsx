@@ -196,9 +196,19 @@ const ScreenshotVault = () => {
         {loading ? (
           <div className="flex justify-center py-12"><div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>
         ) : filtered.length === 0 ? (
-          <div style={{ ...cream, padding: 32 }} className="text-center">
-            <Image className="h-12 w-12 mx-auto mb-4" style={{ color: "var(--stoa-rule)" }} />
+          <div style={{ ...cream, padding: 32 }} className="text-center space-y-4">
+            <Image className="h-12 w-12 mx-auto" style={{ color: "var(--stoa-rule)" }} />
             <p style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", color: "var(--stoa-muted)" }}>No screenshots yet · κενόν</p>
+            {!showUpload && (
+              <Button
+                onClick={() => setShowUpload(true)}
+                size="sm"
+                className="gap-1.5 stoa-display"
+                style={{ background: "var(--stoa-accent)", color: "var(--stoa-ink)", border: "none", borderRadius: 2 }}
+              >
+                <Upload className="h-4 w-4" /> Upload your first chart
+              </Button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

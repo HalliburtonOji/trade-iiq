@@ -33,6 +33,20 @@ Deno.serve(async (req) => {
 
     const supa = createClient(SUPABASE_URL, SERVICE_ROLE);
 
+    // Pre-seed stub rows so missing slugs (e.g., craft-*) exist before generation.
+    // Without this, generate-codex-module's upsert is fine, but if it fails mid-flight
+    // we still want a discoverable stub for admins to retry against.
+    const stubs = LEVEL_1_SPEC.map((s) => ({
+      track: s.track,
+      level: s.level,
+      slug: s.slug,
+      title_en: s.title_en,
+      title_gr: s.title_gr,
+      ordinal: s.ordinal ?? 0,
+      is_published: false,
+    }));
+    await supa.from("learn_modules").upsert(stubs, { onConflict: "slug", ignoreDuplicates: true });
+
     // A module is considered COMPLETE only when lesson + drill + quiz + scenario all exist.
     // Modules missing any of those parts are regenerated so the bulk-gen actually fills the gaps.
     const { data: existing } = await supa
@@ -53,10 +67,14 @@ Deno.serve(async (req) => {
     // Client should loop until done=true.
     let batchSize = 3;
     let startIndex = 0;
+    let forceRegenerate: string[] = [];
     try {
       const body = await req.json();
       if (typeof body?.batch_size === "number") batchSize = Math.max(1, Math.min(5, body.batch_size));
       if (typeof body?.start_index === "number") startIndex = Math.max(0, body.start_index);
+      if (Array.isArray(body?.force_regenerate)) {
+        forceRegenerate = body.force_regenerate.filter((s: unknown): s is string => typeof s === "string");
+      }
     } catch { /* no body */ }
 
     const generated: string[] = [];
@@ -70,7 +88,8 @@ Deno.serve(async (req) => {
       const spec = LEVEL_1_SPEC[i] as ModuleSpec;
       nextIndex = i + 1;
 
-      if (populatedSlugs.has(spec.slug)) {
+      const isForced = forceRegenerate.includes(spec.slug);
+      if (!isForced && populatedSlugs.has(spec.slug)) {
         skipped.push(spec.slug);
         continue;
       }

@@ -88,12 +88,13 @@ export default function LearnDrill() {
       },
       { onConflict: "user_id,module_id,mode" }
     );
-    await supabase.rpc("award_xp", {
+    const xpRes = await supabase.rpc("award_xp", {
       p_amount: 25,
       p_source: "drill",
       p_ref_id: mod.id,
       p_ref_table: "learn_modules",
     });
+    if (xpRes.error) console.error("[award_xp drill]", xpRes.error);
     toast({ title: "Drill complete", description: `${pct}% accuracy · +25 XP` });
   };
 
