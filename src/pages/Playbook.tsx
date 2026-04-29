@@ -203,9 +203,17 @@ const Playbook = () => {
         {loading ? (
           <div className="flex justify-center py-12"><div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" /></div>
         ) : playbooks.length === 0 && !showForm ? (
-          <div style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2, padding: 14 }} className="text-center py-12">
-            <BookOpen className="h-12 w-12 mx-auto mb-4" style={{ color: "var(--stoa-rule)" }} />
+          <div style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2, padding: 14 }} className="text-center py-12 space-y-4">
+            <BookOpen className="h-12 w-12 mx-auto" style={{ color: "var(--stoa-rule)" }} />
             <p style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", color: "var(--stoa-muted)" }}>No playbooks yet · κενόν. Forge thy first canon.</p>
+            <Button
+              onClick={() => { resetForm(); setShowForm(true); }}
+              size="sm"
+              className="gap-1.5 stoa-display"
+              style={{ background: "var(--stoa-accent)", color: "var(--stoa-ink)", border: "none", borderRadius: 2 }}
+            >
+              <Plus className="h-4 w-4" /> Create your first playbook
+            </Button>
           </div>
         ) : (
           <div className="space-y-3">
