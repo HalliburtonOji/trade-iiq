@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Star, BookOpen } from "lucide-react";
+import { Star, BookOpen, BookmarkPlus } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export interface ThesisData {
   reason: string;
