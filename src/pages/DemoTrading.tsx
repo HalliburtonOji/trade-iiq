@@ -19,6 +19,7 @@ import TradeReview from "@/components/demo/TradeReview";
 import TradingLevel from "@/components/demo/TradingLevel";
 import ThesisBuilder, { type ThesisData } from "@/components/demo/ThesisBuilder";
 import TradingMissions from "@/components/demo/TradingMissions";
+import TraderOSStrip from "@/components/demo/TraderOSStrip";
 import PerformanceStats from "@/components/demo/PerformanceStats";
 import TradeJournal from "@/components/demo/TradeJournal";
 import PositionAlerts from "@/components/demo/PositionAlerts";
