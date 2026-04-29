@@ -89,12 +89,13 @@ export default function LearnScenario() {
         user_id: user.id, module_id: mod.id, mode: "scenario",
         status: "completed", score, completed_at: new Date().toISOString(),
       }, { onConflict: "user_id,module_id,mode" });
-      await supabase.rpc("award_xp", {
+      const xpRes = await supabase.rpc("award_xp", {
         p_amount: 50,
         p_source: "scenario",
         p_ref_id: mod.id,
         p_ref_table: "learn_modules",
       });
+      if (xpRes.error) console.error("[award_xp scenario]", xpRes.error);
       toast({ title: "Scenario complete", description: `${pnlPct.toFixed(2)}% PnL · +50 XP` });
     }
   };
