@@ -94,7 +94,9 @@ export default function LearnDrill() {
       p_ref_id: mod.id,
       p_ref_table: "learn_modules",
     });
-    if (xpRes.error) console.error("[award_xp drill]", xpRes.error);
+    if (xpRes.error) {
+      toast({ title: "XP error", description: xpRes.error.message, variant: "destructive" });
+    }
     toast({ title: "Drill complete", description: `${pct}% accuracy · +25 XP` });
   };
 

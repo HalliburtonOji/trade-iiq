@@ -282,21 +282,30 @@ export default function LearnModule() {
         { onConflict: "user_id,module_id,mode" }
       );
       if (passed) {
+        const quizAmount = 30;
+        const lessonAmount = mod.xp_reward ?? 50;
         const quizXp = await supabase.rpc("award_xp", {
-          p_amount: 30,
+          p_amount: quizAmount,
           p_source: "quiz",
           p_ref_id: mod.id,
           p_ref_table: "learn_modules",
         });
-        if (quizXp.error) console.error("[award_xp quiz]", quizXp.error);
+        if (quizXp.error) {
+          toast({ title: "XP error", description: quizXp.error.message, variant: "destructive" });
+        }
         // Lesson XP fires here when quiz passes — single source of truth.
         const lessonXp = await supabase.rpc("award_xp", {
-          p_amount: mod.xp_reward ?? 50,
+          p_amount: lessonAmount,
           p_source: "lesson",
           p_ref_id: mod.id,
           p_ref_table: "learn_modules",
         });
-        if (lessonXp.error) console.error("[award_xp lesson]", lessonXp.error);
+        if (lessonXp.error) {
+          toast({ title: "XP error", description: lessonXp.error.message, variant: "destructive" });
+        } else {
+          // Visible confirmation that the Codex loop fired.
+          toast({ title: `+${quizAmount + lessonAmount} XP — Κῶδιξ`, description: `${mod.title_en} inscribed.` });
+        }
         await supabase.from("learn_progress").upsert(
           {
             user_id: user.id,
@@ -311,7 +320,6 @@ export default function LearnModule() {
       }
     }
     if (passed) {
-      toast({ title: "Quiz passed", description: `+${mod.xp_reward ?? 50} XP` });
       setRuleTitle(`Rule from ${mod.title_en}`);
       setRuleBody(
         `Based on "${mod.title_en}" (${mod.title_gr}): ${mod.summary || ""}\n\nWhen this situation arises, I will: `

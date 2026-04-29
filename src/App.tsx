@@ -25,6 +25,7 @@ import Profile from "./pages/Profile";
 import Playbook from "./pages/Playbook";
 import ScreenshotVault from "./pages/ScreenshotVault";
 import ReviewWorkspace from "./pages/ReviewWorkspace";
+import Council from "./pages/Council";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -76,6 +77,7 @@ const AppContent = () => {
         <Route path="/playbook" element={<ProtectedRoute><Playbook /></ProtectedRoute>} />
         <Route path="/screenshots" element={<ProtectedRoute><ScreenshotVault /></ProtectedRoute>} />
         <Route path="/review" element={<ProtectedRoute><ReviewWorkspace /></ProtectedRoute>} />
+        <Route path="/council" element={<ProtectedRoute><Council /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {user && <FloatingHub />}

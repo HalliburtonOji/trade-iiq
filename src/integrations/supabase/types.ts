@@ -274,6 +274,42 @@ export type Database = {
         }
         Relationships: []
       }
+      council_reviews: {
+        Row: {
+          aggregates: Json
+          ai_summary: string
+          created_at: string
+          decree: string
+          id: string
+          updated_at: string
+          user_id: string
+          viewed_at: string | null
+          week_starting: string
+        }
+        Insert: {
+          aggregates?: Json
+          ai_summary?: string
+          created_at?: string
+          decree?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          viewed_at?: string | null
+          week_starting: string
+        }
+        Update: {
+          aggregates?: Json
+          ai_summary?: string
+          created_at?: string
+          decree?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          viewed_at?: string | null
+          week_starting?: string
+        }
+        Relationships: []
+      }
       daily_missions: {
         Row: {
           completed_count: number
