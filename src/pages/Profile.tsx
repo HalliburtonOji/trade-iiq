@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Trophy, Flame, BookOpen, Target, BarChart3, Wallet, Settings, LogOut, ChevronRight, RotateCcw } from "lucide-react";
+import { User, Trophy, Flame, BookOpen, Target, BarChart3, Wallet, Settings, LogOut, ChevronRight, RotateCcw, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import StoaShell from "@/components/stoa/StoaShell";
