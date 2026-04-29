@@ -524,6 +524,57 @@ const Profile = () => {
               >
                 GENERATE CATALOG
               </button>
+              <button
+                onClick={async () => {
+                  const FORCE_SLUGS = [
+                    "markets-01-order-types",
+                    "markets-03-session-times",
+                    "risk-02-risk-reward",
+                    "chart-02-trend-channels",
+                    "craft-01-what-is-playbook",
+                    "craft-02-trade-journal",
+                    "craft-03-review-rituals",
+                    "craft-04-pattern-of-one",
+                  ];
+                  toast({ title: "Force regenerating…", description: `${FORCE_SLUGS.length} modules. ~3 minutes.` });
+                  let nextIndex: number | null = 0;
+                  const totals = { generated: 0, failed: 0 };
+                  let firstFail: { slug: string; error: string } | null = null;
+                  let safety = 0;
+                  while (nextIndex !== null && safety < 30) {
+                    safety++;
+                    const { data, error } = await supabase.functions.invoke("bulk-generate-codex", {
+                      body: { start_index: nextIndex, batch_size: 2, force_regenerate: FORCE_SLUGS },
+                    });
+                    if (error) {
+                      toast({ title: "Force-regen failed", description: error.message, variant: "destructive" });
+                      return;
+                    }
+                    totals.generated += data?.generated?.length ?? 0;
+                    totals.failed += data?.failed?.length ?? 0;
+                    if (!firstFail && data?.failed?.[0]) firstFail = data.failed[0];
+                    nextIndex = data?.next_index ?? null;
+                  }
+                  toast({
+                    title: `Force-regen: ${totals.generated} regenerated, ${totals.failed} failed`,
+                    description: firstFail ? `First fail: ${firstFail.slug} — ${firstFail.error}` : "Done.",
+                    variant: totals.failed > 0 ? "destructive" : "default",
+                  });
+                }}
+                style={{
+                  background: "var(--stoa-shine)",
+                  color: "var(--stoa-ink)",
+                  border: "1px solid var(--stoa-rule)",
+                  borderRadius: 2,
+                  padding: "10px 16px",
+                  marginTop: 8,
+                  marginLeft: 8,
+                  cursor: "pointer",
+                }}
+                className="stoa-kicker"
+              >
+                FORCE REGEN INCOMPLETE
+              </button>
             </div>
 
             {/* API Health Check */}
