@@ -464,6 +464,9 @@ const DemoTrading = () => {
         {/* Missions */}
         <TradingMissions stats={missionStats} completedIds={completedMissions} />
 
+        {/* Trader OS surface */}
+        <TraderOSStrip />
+
         {/* Tabs: Open / Journal / Stats */}
         <Tabs defaultValue="open">
           <TabsList className="w-full" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-rule)", borderRadius: 2 }}>
