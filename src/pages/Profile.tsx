@@ -300,6 +300,14 @@ const Profile = () => {
 
         {/* Actions */}
         <div className="space-y-2">
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-3 text-sm"
+            onClick={() => navigate("/council")}
+          >
+            <Star className="h-4 w-4" />
+            The Council awaits — weekly review
+          </Button>
           <Button variant="outline" className="w-full justify-start gap-3 text-sm" onClick={resetBalance} disabled={resetting}>
             <RotateCcw className={`h-4 w-4 ${resetting ? "animate-spin" : ""}`} />
             {resetting ? "Resetting..." : "Reset Paper Balance"}
