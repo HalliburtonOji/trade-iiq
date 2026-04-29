@@ -282,19 +282,21 @@ export default function LearnModule() {
         { onConflict: "user_id,module_id,mode" }
       );
       if (passed) {
-        await supabase.rpc("award_xp", {
+        const quizXp = await supabase.rpc("award_xp", {
           p_amount: 30,
           p_source: "quiz",
           p_ref_id: mod.id,
           p_ref_table: "learn_modules",
         });
+        if (quizXp.error) console.error("[award_xp quiz]", quizXp.error);
         // Lesson XP fires here when quiz passes — single source of truth.
-        await supabase.rpc("award_xp", {
+        const lessonXp = await supabase.rpc("award_xp", {
           p_amount: mod.xp_reward ?? 50,
           p_source: "lesson",
           p_ref_id: mod.id,
           p_ref_table: "learn_modules",
         });
+        if (lessonXp.error) console.error("[award_xp lesson]", lessonXp.error);
         await supabase.from("learn_progress").upsert(
           {
             user_id: user.id,
