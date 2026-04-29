@@ -54,12 +54,12 @@ const TraderOSStrip = () => {
           <span className="text-base font-semibold">{counts.playbooks}</span>
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Playbooks</span>
         </Link>
-        <Link to="/screenshot-vault" className={tile}>
+        <Link to="/screenshots" className={tile}>
           <Camera className="h-3.5 w-3.5 text-muted-foreground" />
           <span className="text-base font-semibold">{counts.screenshots}</span>
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Screenshots</span>
         </Link>
-        <Link to="/review-workspace" className={tile}>
+        <Link to="/review" className={tile}>
           <ClipboardCheck className="h-3.5 w-3.5 text-muted-foreground" />
           <span className="text-base font-semibold">{counts.reviewsPending}</span>
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider">To review</span>
