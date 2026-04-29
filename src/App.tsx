@@ -77,6 +77,7 @@ const AppContent = () => {
         <Route path="/playbook" element={<ProtectedRoute><Playbook /></ProtectedRoute>} />
         <Route path="/screenshots" element={<ProtectedRoute><ScreenshotVault /></ProtectedRoute>} />
         <Route path="/review" element={<ProtectedRoute><ReviewWorkspace /></ProtectedRoute>} />
+        <Route path="/council" element={<ProtectedRoute><Council /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {user && <FloatingHub />}
