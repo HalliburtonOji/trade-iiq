@@ -320,7 +320,6 @@ export default function LearnModule() {
       }
     }
     if (passed) {
-      toast({ title: "Quiz passed", description: `+${mod.xp_reward ?? 50} XP` });
       setRuleTitle(`Rule from ${mod.title_en}`);
       setRuleBody(
         `Based on "${mod.title_en}" (${mod.title_gr}): ${mod.summary || ""}\n\nWhen this situation arises, I will: `
