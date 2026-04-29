@@ -305,7 +305,7 @@ const Profile = () => {
             className="w-full justify-start gap-3 text-sm"
             onClick={() => navigate("/council")}
           >
-            <Star className="h-4 w-4" />
+            <Sparkles className="h-4 w-4" />
             The Council awaits — weekly review
           </Button>
           <Button variant="outline" className="w-full justify-start gap-3 text-sm" onClick={resetBalance} disabled={resetting}>
