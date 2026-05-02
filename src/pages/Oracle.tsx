@@ -7,6 +7,23 @@ import { useAuth } from "@/contexts/AuthContext";
 import StoaShell from "@/components/stoa/StoaShell";
 import PedimentCap from "@/components/stoa/PedimentCap";
 
+function OracleHeader() {
+  return (
+    <header style={{ marginBottom: 8 }}>
+      <PedimentCap variant="rule" width={140} />
+      <span className="stoa-kicker" style={{ display: "block", marginTop: 12, color: "var(--stoa-accent)" }}>
+        ΜΑΝΤΕῖΟΝ · MANTEION · THE ORACLE
+      </span>
+      <h1 className="stoa-display" style={{ fontSize: 34, margin: "6px 0 6px", color: "var(--stoa-ink)", letterSpacing: "0.01em" }}>
+        A council of one
+      </h1>
+      <p style={{ color: "var(--stoa-muted)", fontFamily: "Georgia, serif", fontStyle: "italic", margin: 0, maxWidth: 620 }}>
+        It has read thy trades, thy reflections, thy rules. Speak — and it answers from what it knows of thee.
+      </p>
+    </header>
+  );
+}
+
 type Session = { id: string; title: string; pinned: boolean; last_message_at: string };
 type Msg = { id?: string; role: "user" | "assistant"; content: string };
 
