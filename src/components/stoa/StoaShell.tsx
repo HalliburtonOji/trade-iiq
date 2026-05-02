@@ -166,6 +166,7 @@ const StoaShell = React.forwardRef<HTMLDivElement, StoaShellProps>(function Stoa
 
   return (
     <div
+      ref={ref}
       className={`stoa-root ${paletteClass}`}
       style={{ minHeight: "100vh", display: "flex" }}
     >
