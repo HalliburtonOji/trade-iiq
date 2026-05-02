@@ -1000,6 +1000,7 @@ export type Database = {
           id: string
           last_active_date: string | null
           level: string
+          onboarded_at: string | null
           onboarding_complete: boolean | null
           paper_balance: number
           preferred_assets: string[] | null
@@ -1020,6 +1021,7 @@ export type Database = {
           id?: string
           last_active_date?: string | null
           level?: string
+          onboarded_at?: string | null
           onboarding_complete?: boolean | null
           paper_balance?: number
           preferred_assets?: string[] | null
@@ -1040,6 +1042,7 @@ export type Database = {
           id?: string
           last_active_date?: string | null
           level?: string
+          onboarded_at?: string | null
           onboarding_complete?: boolean | null
           paper_balance?: number
           preferred_assets?: string[] | null

@@ -37,6 +37,9 @@ import StoaShell from "@/components/stoa/StoaShell";
 import Altar from "@/components/stoa/Altar";
 import PedimentCap from "@/components/stoa/PedimentCap";
 import Meander from "@/components/stoa/Meander";
+import AtriumHero from "@/components/AtriumHero";
+import CouncilBanner from "@/components/CouncilBanner";
+import TraderOSStrip from "@/components/demo/TraderOSStrip";
 
 const getGreeting = () => {
   const h = new Date().getHours();
@@ -225,6 +228,21 @@ const Index = () => {
           <div style={{ width: "min(100%, 520px)", marginTop: 14 }}>
             <Meander height={16} opacity={0.55} />
           </div>
+        </motion.div>
+
+        {/* Sunday-evening Council banner (auto-hides outside that window) */}
+        <motion.div variants={fadeUp}>
+          <CouncilBanner />
+        </motion.div>
+
+        {/* Atrium hero — single state-aware next-action prompt */}
+        <motion.div variants={fadeUp}>
+          <AtriumHero />
+        </motion.div>
+
+        {/* Trader OS surface — discoverable beyond Demo Trading */}
+        <motion.div variants={fadeUp}>
+          <TraderOSStrip />
         </motion.div>
 
         {/* Temple — Entablature (hero edge reading) */}

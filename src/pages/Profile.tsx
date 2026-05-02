@@ -539,6 +539,8 @@ const Profile = () => {
                     "markets-03-session-times",
                     "risk-02-risk-reward",
                     "chart-02-trend-channels",
+                    "mind-03-recency-bias",
+                    "mind-04-tilt-recovery",
                     "craft-01-what-is-playbook",
                     "craft-02-trade-journal",
                     "craft-03-review-rituals",

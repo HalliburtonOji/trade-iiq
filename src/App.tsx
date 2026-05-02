@@ -1,9 +1,11 @@
+import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import FloatingHub from "@/components/FloatingHub";
 import Index from "./pages/Index";
 import Analysis from "./pages/Analysis";
@@ -26,6 +28,7 @@ import Playbook from "./pages/Playbook";
 import ScreenshotVault from "./pages/ScreenshotVault";
 import ReviewWorkspace from "./pages/ReviewWorkspace";
 import Council from "./pages/Council";
+import Initiation from "./pages/Initiation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +55,40 @@ const PublicOnly = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+/**
+ * On first login (profiles.onboarded_at is null), bounce to /initiation.
+ * Wraps only the root route so deep links still work.
+ */
+const InitiationGate = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+  const [state, setState] = useState<"checking" | "needs" | "ok">("checking");
+
+  useEffect(() => {
+    if (!user) { setState("ok"); return; }
+    let active = true;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("onboarded_at")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!active) return;
+      setState(data?.onboarded_at ? "ok" : "needs");
+    })();
+    return () => { active = false; };
+  }, [user]);
+
+  if (state === "checking") {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+  if (state === "needs") return <Navigate to="/initiation" replace />;
+  return <>{children}</>;
+};
+
 const AppContent = () => {
   const { user } = useAuth();
   return (
@@ -59,7 +96,8 @@ const AppContent = () => {
       <Routes>
         <Route path="/landing" element={<PublicOnly><Landing /></PublicOnly>} />
         <Route path="/auth" element={<PublicOnly><Auth /></PublicOnly>} />
-        <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+        <Route path="/" element={<ProtectedRoute><InitiationGate><Index /></InitiationGate></ProtectedRoute>} />
+        <Route path="/initiation" element={<ProtectedRoute><Initiation /></ProtectedRoute>} />
         <Route path="/analysis" element={<ProtectedRoute><Analysis /></ProtectedRoute>} />
         <Route path="/charts" element={<ProtectedRoute><Charts /></ProtectedRoute>} />
         <Route path="/tracker" element={<ProtectedRoute><Tracker /></ProtectedRoute>} />
