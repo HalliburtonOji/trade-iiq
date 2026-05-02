@@ -310,6 +310,45 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_briefs: {
+        Row: {
+          acknowledged_at: string | null
+          ai_summary: string
+          bias_explainer: string
+          bias_focus: string
+          brief_date: string
+          created_at: string
+          discipline_focus: string
+          id: string
+          symbols: Json
+          user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          ai_summary?: string
+          bias_explainer?: string
+          bias_focus?: string
+          brief_date: string
+          created_at?: string
+          discipline_focus?: string
+          id?: string
+          symbols?: Json
+          user_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          ai_summary?: string
+          bias_explainer?: string
+          bias_focus?: string
+          brief_date?: string
+          created_at?: string
+          discipline_focus?: string
+          id?: string
+          symbols?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_missions: {
         Row: {
           completed_count: number
@@ -449,6 +488,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      evening_reflections: {
+        Row: {
+          created_at: string
+          id: string
+          intent_tomorrow: string
+          lesson: string
+          reflection_date: string
+          rules_honoured: Json
+          trade_summary: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          intent_tomorrow?: string
+          lesson?: string
+          reflection_date: string
+          rules_honoured?: Json
+          trade_summary?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          intent_tomorrow?: string
+          lesson?: string
+          reflection_date?: string
+          rules_honoured?: Json
+          trade_summary?: Json
+          user_id?: string
+        }
+        Relationships: []
       }
       idea_likes: {
         Row: {
@@ -962,6 +1034,42 @@ export type Database = {
         }
         Relationships: []
       }
+      practice_streak: {
+        Row: {
+          created_at: string
+          current_streak: number
+          id: string
+          last_evening_date: string | null
+          last_full_date: string | null
+          last_morning_date: string | null
+          longest_streak: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_evening_date?: string | null
+          last_full_date?: string | null
+          last_morning_date?: string | null
+          longest_streak?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_evening_date?: string | null
+          last_full_date?: string | null
+          last_morning_date?: string | null
+          longest_streak?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       price_alerts: {
         Row: {
           created_at: string
@@ -1007,6 +1115,7 @@ export type Database = {
           preferred_broker: string | null
           streak_count: number
           streak_last_active: string | null
+          timezone: string | null
           trading_goals: string[] | null
           trading_level: number
           trading_personality: string
@@ -1028,6 +1137,7 @@ export type Database = {
           preferred_broker?: string | null
           streak_count?: number
           streak_last_active?: string | null
+          timezone?: string | null
           trading_goals?: string[] | null
           trading_level?: number
           trading_personality?: string
@@ -1049,6 +1159,7 @@ export type Database = {
           preferred_broker?: string | null
           streak_count?: number
           streak_last_active?: string | null
+          timezone?: string | null
           trading_goals?: string[] | null
           trading_level?: number
           trading_personality?: string
@@ -1637,6 +1748,14 @@ export type Database = {
           awarded: boolean
           new_streak: number
           new_xp: number
+        }[]
+      }
+      touch_practice_ritual: {
+        Args: { p_kind: string }
+        Returns: {
+          current_streak: number
+          full_day: boolean
+          longest_streak: number
         }[]
       }
     }
