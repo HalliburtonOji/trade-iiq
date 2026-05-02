@@ -350,4 +350,6 @@ const StoaShell = React.forwardRef<HTMLDivElement, StoaShellProps>(function Stoa
       </main>
     </div>
   );
-}
+});
+
+export default StoaShell;
