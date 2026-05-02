@@ -169,12 +169,18 @@ const Learn = () => {
 
         const { data: recs } = await supabase
           .from("learn_recommendations")
-          .select("id,module_id,reason,learn_modules(*)")
+          .select("id,module_id,reason,learn_modules:module_id(id,track,level,slug,title_en,title_gr,summary,ordinal,learn_minutes,xp_reward)")
           .eq("user_id", user.id)
           .is("dismissed_at", null)
           .order("generated_at", { ascending: false })
           .limit(1);
-        if (!cancelled && recs && recs.length > 0) setRec(recs[0] as unknown as Recommendation);
+        if (!cancelled && recs && recs.length > 0) {
+          const r: any = recs[0];
+          if (!r.learn_modules && mods) {
+            r.learn_modules = (mods as any[]).find((m) => m.id === r.module_id) || null;
+          }
+          setRec(r as Recommendation);
+        }
       }
 
       if (!cancelled) setLoading(false);
