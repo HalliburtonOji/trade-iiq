@@ -193,7 +193,7 @@ export default function Oracle() {
 
   return (
     <StoaShell palette="delphi">
-      <PedimentCap kicker="ΜΑΝΤΕῖΟΝ · MANTEION" title="The Oracle" subtitle="A council of one. It has read thy trades, thy reflections, thy rules." />
+      <OracleHeader />
 
       <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 24, marginTop: 22, minHeight: 560 }} className="oracle-grid">
         {/* Sessions sidebar */}
