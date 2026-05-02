@@ -121,6 +121,7 @@ const AppContent = () => {
         <Route path="/council" element={<ProtectedRoute><Council /></ProtectedRoute>} />
         <Route path="/morning" element={<ProtectedRoute><Morning /></ProtectedRoute>} />
         <Route path="/evening" element={<ProtectedRoute><Evening /></ProtectedRoute>} />
+        <Route path="/oracle" element={<ProtectedRoute><Oracle /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {user && <FloatingHub />}
