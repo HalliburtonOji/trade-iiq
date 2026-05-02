@@ -39,6 +39,7 @@ import PedimentCap from "@/components/stoa/PedimentCap";
 import Meander from "@/components/stoa/Meander";
 import AtriumHero from "@/components/AtriumHero";
 import CouncilBanner from "@/components/CouncilBanner";
+import StreakMosaic from "@/components/StreakMosaic";
 import TraderOSStrip from "@/components/demo/TraderOSStrip";
 
 const getGreeting = () => {
@@ -238,6 +239,11 @@ const Index = () => {
         {/* Atrium hero — single state-aware next-action prompt */}
         <motion.div variants={fadeUp}>
           <AtriumHero />
+        </motion.div>
+
+        {/* Practice mosaic — 30-day habit ledger */}
+        <motion.div variants={fadeUp}>
+          <StreakMosaic />
         </motion.div>
 
         {/* Trader OS surface — discoverable beyond Demo Trading */}
