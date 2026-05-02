@@ -26,6 +26,7 @@ import Playbook from "./pages/Playbook";
 import ScreenshotVault from "./pages/ScreenshotVault";
 import ReviewWorkspace from "./pages/ReviewWorkspace";
 import Council from "./pages/Council";
+import Initiation from "./pages/Initiation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
