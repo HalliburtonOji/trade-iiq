@@ -1,103 +1,104 @@
-# P18 — Λειτουργία (Operation)
+# P19 — Μύησις (Initiation)
 
-After P14–P17 the rails are in. Live audit (2026-04-29) shows the platform is still pre-loop: only one paper trade exists, zero playbooks, zero screenshots, zero quiz attempts. The next big build is the **operating ritual** — content fully filled in, lessons that bend back into Demo Trading, and a weekly Council review that closes the loop and gives users a reason to come back.
+After P14–P18 the rails are built — Codex content, XP ledger, Council, Trader OS, paper trades. Live audit (today) reveals the uncomfortable truth: **4 users, 0 quiz attempts, 0 closed paper trades, 0 playbooks, 0 screenshots, 0 council reviews.** The platform works. Nobody is using it.
 
-## Verified live state
+Diagnosis: there is no path from landing → first action. `OnboardingWizard` exists in the codebase but is never imported. The Index dashboard shows watchlists and stats but doesn't tell a brand-new user *what to do next*. The Codex catalog is still 13/20 published, 10/20 complete — the missing rows quietly break the "5 tracks × 4 modules" promise on `/learn`.
 
-- `learn_modules`: 14 rows. **6 incomplete:** `markets-01`, `markets-03`, `risk-02` (prose only), plus `chart-02-trend-channels` and all 4 `craft-*` are missing entirely. One stray duplicate (`mind-01-bias-basics`).
-- `xp_ledger`: 7 rows, sources `drill`, `scenario`, `daily_mission`, `trading_mission`. Still **zero `lesson` / `quiz` rows.**
-- `quiz_attempts`: 0 rows ever — no one has finished a Codex quiz.
-- `paper_trades`: 1 row. `playbooks`: 0. `screenshot_vault`: 0.
-- Diagnostic `console.error` from P17 still in three Learn pages.
+P19 fixes both at once: **finish the catalog, then build a first-session ritual that guarantees one closed trade, one completed lesson, and one Council preview within the first 15 minutes.**
 
 ## Goals
 
-1. Catalog hits 20/20 published-and-complete (no half-modules, no duplicate slugs).
-2. The lesson→quiz→XP path actually fires end-to-end and the diagnostics get pulled out.
-3. Trader OS becomes part of the trade flow, not three orphan pages.
-4. A weekly **Council** ritual replaces the dead-end profile page with a real "what did this week say about you" review.
+1. Catalog reaches 20/20 complete. No partials, no missing slugs, no half-rendered cards on `/learn`.
+2. Every new user is funnelled through a 4-step Initiation that ends with their first XP awarded.
+3. The Index dashboard ("Atrium") shifts from data-display to **next-action prompt** based on user state.
+4. The Council card on Sunday becomes a real notification, not just a route.
 
 ---
 
-## Step 1 — Finish the catalog (cleanup + force-regen)
+## Step 1 — Finish the catalog (final pass)
 
-### 1a. Remove duplicate slug
-Migration to delete `mind-01-bias-basics` (legacy, superseded by `mind-01-four-biases`) and any `learn_progress` rows pointing to it.
+### 1a. Ship the missing 7 modules
+Three partials need quiz/drill/scenario regenerated: `markets-01-order-types`, `markets-03-session-times`, `risk-02-risk-reward`. Four `craft-*` and `chart-02-trend-channels` and `mind-03-recency-bias`, `mind-04-tilt-recovery` need full generation. Extend `bulk-generate-codex` to accept `regenerate_partials: true` which targets any published row missing quiz/drill/scenario. Add an admin button on `/profile` ("Complete the Codex") that loops 3-at-a-time with progress feedback (current `force_regenerate` button does the work but gives no signal).
 
-### 1b. Force-regenerate the 6 incomplete modules
-The `bulk-generate-codex` skip rule is correct, but the 3 partials (`markets-01`, `markets-03`, `risk-02`) have prose long enough that generation will overwrite them. The 5 missing slugs (`chart-02`, `craft-01..04`) get stub-upserted by P17's pre-seed and then generated.
+### 1b. Pre-seed remaining stubs
+The P17 stub-upsert on `LEVEL_1_SPEC` should already cover the 5 missing slugs but live data shows they never landed. Verify the upsert runs on every invocation (not gated behind `force_regenerate`) and that `chart-02`, `mind-03`, `mind-04` stubs exist before generation begins.
 
-Add a one-shot admin button on `/profile` ("Force regenerate incomplete") that calls `bulk-generate-codex` with `force_regenerate: ["markets-01-order-types","markets-03-session-times","risk-02-risk-reward","chart-02-trend-channels","craft-01-what-is-playbook","craft-02-trade-journal","craft-03-review-rituals","craft-04-pattern-of-one"]` and loops batched calls (3 per call) until `done:true`.
+### 1c. Acceptance: `/learn` shows 5 tracks × 4 modules with no "coming soon" placeholders, and the SQL check from P18 acceptance returns 20.
 
-### 1c. Acceptance check in UI
-After bulk-gen finishes, `/learn` shows 5 tracks × 4 modules = 20 cards, each with a Greek-numeral progress strip, no "stub" placeholders.
+## Step 2 — The Initiation (Μύησις) — first-session ritual
 
-## Step 2 — Close the lesson→XP loop
+A 4-step guided flow shown once per user, dismissible but persistent until completed. Replaces the dead `OnboardingWizard`.
 
-### 2a. Diagnose & fix the silent failure
-Likely cause given zero `quiz_attempts`: the front-end never gets to the quiz because `LearnModule.tsx` only advances to the quiz step after the lesson is marked complete, and `LessonDetail`'s "complete" CTA may not be firing the right state path for Codex modules (vs. legacy lessons). Read `LearnModule.tsx`, `QuizFlow.tsx`, and the `award_xp` RPC definition once with the diagnostics on, fix whichever of these is broken:
-  - `award_xp` permissions / `auth.uid()` resolution
-  - quiz threshold (lower default `pass_score` to 60 for 4-question quizzes; round up)
-  - the "complete lesson" CTA wiring on the new Stoa lesson layout
+### 2a. Trigger
+On first login after signup (no `profiles.onboarded_at`), redirect to `/initiation` instead of `/`. Skippable via a small "Enter the Stoa unguided" link, but skipping flips `onboarded_at` so they don't get pestered.
 
-### 2b. Remove the diagnostic noise
-Once one round-trip works in dev, remove the `console.error` blocks added in P17 from `LearnModule.tsx`, `LearnDrill.tsx`, `LearnScenario.tsx`. Replace with a single `toast.error` on RPC failure so future regressions are visible without console noise.
+### 2b. The four steps
+Each is a full-screen `StoaShell` panel with `PedimentCap` heading in Greek + English. Progress bar uses Greek numerals (Α' → Δ').
 
-### 2c. Visible XP feedback
-On successful `award_xp` for `lesson` or `quiz`, show a small "+N XP — Codex" toast with the Greek-numeral source label. Confirms the loop to the user and to us in QA.
+  1. **Α' — The Oath** — pick experience (Novice / Apprentice / Initiate), pick primary asset (Stocks / Crypto / Forex), state one goal in your own words. Saves to `profiles` (already has the columns).
+  2. **Β' — The First Reading** — auto-launches `mind-01-four-biases` (the shortest, highest-impact lesson) inside the initiation flow. Reduced quiz threshold (50% to pass) just for the initiation lesson. On completion, awards 30 XP via `award_xp` with source `initiation` — proves the loop fires.
+  3. **Γ' — The First Trade** — guided paper trade. Pre-fills a thesis on AAPL (or BTC if user picked crypto) using a built-in playbook ("The Apprentice's Breakout"). User confirms size (locked at 1% risk), SL, TP. Trade opens; we mark it with `meta.initiation = true`. Closes immediately at current price + small simulated drift to demonstrate the close flow and the screenshot prompt.
+  4. **Δ' — The Council Preview** — synthetic Council card showing what one week of activity *would* look like, with a real "Adopt thy first decree" CTA that writes a starter Rulebook entry.
 
-## Step 3 — Trader OS lives inside Demo Trading
+### 2c. Database
+One migration: `alter table profiles add column onboarded_at timestamptz`. Seed one row in `playbooks` per user during step Γ' so the selector is non-empty forever after. No new tables.
 
-The Playbook and Screenshot Vault pages are correct but invisible. Three concrete wiring changes:
+### 2d. Acceptance
+- A fresh signup lands on `/initiation`, completes all four steps, ends on `/` with: `xp_ledger` row (source=`initiation`), one `paper_trades` row (status=`closed`, `meta->>'initiation'='true'`), one `playbooks` row, one `rulebook` row, `profiles.onboarded_at` set.
 
-### 3a. Playbook quick-create from Thesis Builder
-In `ThesisBuilder.tsx`, add a "Save as playbook" link below the form. When the user has filled reason + checklist, one click creates a `playbooks` row from the in-progress thesis. Future trades load it from the existing P17 selector. Closes the cold-start: a user makes their first playbook *during* their first paper trade, not on a separate page they'll never visit.
+## Step 3 — The Atrium (Index reborn as next-action prompt)
 
-### 3b. Auto-prompt screenshot on trade close
-In `DemoTrading.tsx`, when a trade is closed (TP/SL/manual), open the existing Trade Review sheet with an "Attach chart screenshot" file input pre-bound to that `trade_id`. Skippable. No new component — extend `TradeReview.tsx`.
+`Index.tsx` today is a stat dashboard for users who already have data. New users see a wall of dashes. Restructure into a state-aware single-prompt Atrium.
 
-### 3c. Trader OS strip on Demo Trading sidebar
-Compact 3-card strip: "Playbooks (n)", "Screenshots (n)", "Reviews pending (n)". Each links to the existing page. Makes the Trader OS surface area discoverable without rebuilding the nav.
+### 3a. The Hero Prompt
+Top of `/`. One card, one CTA, computed from user state in this priority order:
 
-## Step 4 — The Council (weekly review ritual)
+  1. Council ready → "The Council awaits. Hear thy verdict." → `/council`
+  2. Open paper trade with no thesis → "An untethered position. Anchor it." → `/demo-trading`
+  3. Closed paper trade with no review → "Review thy last trade." → `/review`
+  4. Codex module ≥50% with quiz unattempted → "Finish the lesson, take the test." → `/learn/:slug`
+  5. No closed trade in 7d → "The hand grows cold. Open a paper trade." → `/demo-trading`
+  6. Default: "Today's Codex reading awaits." → next incomplete module
 
-This is the new feature and the reason this whole patch matters. A weekly review page at `/council` (or `/profile?tab=council`) that gives the user one Sunday-evening artefact summarising the week.
+### 3b. Demote the existing widgets
+Watchlist, ticker marquee, daily missions, DQS, smart alerts move into a collapsible "The Forum" section below the hero. Existing components reused, no rewrites.
 
-### 4a. Data
-No new tables. Aggregate from existing rows for the last 7 days:
-  - paper_trades closed: count, win rate, best/worst trade, total pnl
-  - playbooks used: count by `strategy_type`
-  - xp_ledger: total + by source
-  - quiz_attempts: count, avg score, weakest tag
-  - rules violated: from existing rule-check edge function
+### 3c. Trader OS Strip
+Reuse `TraderOSStrip.tsx` from P18 on the dashboard sidebar (currently only on Demo Trading). One file change.
 
-### 4b. Component
-New `src/pages/Council.tsx` using `StoaShell`. Five panels:
-  1. **Verdict** — single sentence (e.g. "This week thy hand was steady but thy thesis weak."). Server-rendered via Lovable AI Gateway (`google/gemini-2.5-flash`) given the aggregate JSON.
-  2. **Trades** — table with thesis adherence per trade, screenshot thumbnail, playbook tag.
-  3. **Codex** — modules completed this week + weakest quiz tag with a "study this" CTA.
-  4. **Discipline** — rules followed vs. violated, streak.
-  5. **Next week's stoic decree** — one rule the AI suggests adopting next week, savable as a Rulebook entry.
+## Step 4 — Council as a real ritual
 
-### 4c. Trigger
-Surface a "The Council awaits" card on `/profile` and `/` (Index dashboard) every Sunday after 18:00 local, persistent until viewed. One row per week in a tiny new table `council_reviews(user_id, week_starting, viewed_at, ai_summary, decree)` so the AI summary is cached per week and not regenerated on every view.
+### 4a. Sunday banner
+A `<CouncilBanner>` on Index that appears Sunday after 18:00 local until viewed (one row per week in `council_reviews`). Stoic phrasing, one click to `/council`.
 
-### 4d. Edge function
-New `supabase/functions/council-summary/index.ts`. Pulls aggregates with service role for the calling user, calls Gemini 2.5 Flash with a tight Stoa-voiced prompt, upserts `council_reviews`, returns the row. Idempotent per (user, week).
+### 4b. Email-style in-app notification
+Use the existing `NotificationPanel`. On Sunday, insert a `notifications` row "The Council convenes" linking to `/council`. Dismissed when the council review is viewed.
+
+### 4c. Decree adoption count
+On `/council`, show a small "X traders adopted this decree this week" counter (computed from `rulebook` entries with `source='council'`) — social proof without violating user privacy.
 
 ---
 
 ## Technical notes
 
-- Migration file order: cleanup duplicate slug → create `council_reviews` table with RLS (`user_id = auth.uid()`).
-- `pass_score` default change is a one-line `alter table learn_modules alter column pass_score set default 60` — old rows keep their values; only new generations get the lower bar.
-- `council-summary` reuses the Lovable AI Gateway client pattern from `generate-codex-module`.
-- All new UI uses `StoaShell`, `PedimentCap`, `Meander`, `greek-numerals.ts` — no new design tokens.
-- No changes to: `learn_modules` schema, `xp_ledger` schema, `paper_trades` schema, the Stoa visual system, `tradingMissions.ts`, the broker launcher.
+- `bulk-generate-codex` already supports `force_regenerate: string[]`. Add a sibling `regenerate_partials: boolean` branch that queries `where is_published and (quiz_json is null or drill_json is null or scenario_json is null)` and feeds those slugs into the same generation loop. Keep batch size 3 to stay under the 150s edge timeout.
+- `/initiation` is one new route + one new page (`src/pages/Initiation.tsx`) composed of four sub-step components. Reuse `LessonDetail`, `QuizFlow`, `ThesisBuilder`, `Council.tsx` panels — no new design language.
+- `award_xp` source `initiation` is just a string; no enum migration needed.
+- Atrium hero: pure client-side state computation in `useMemo` from existing queries. No new edge function.
+- `CouncilBanner`: reuse `council_reviews` table; existing edge function caches the AI summary so showing the banner is free.
+- Admin "Complete the Codex" button: use the same `bulk-generate-codex` with progress polling against `learn_modules` count of complete rows. No new infra.
+
+## Out of scope (intentionally)
+
+- No new design tokens, no new fonts, no new bottom-nav.
+- No paid tier, no payments, no analytics rebuild.
+- No changes to `xp_ledger`, `paper_trades`, `learn_modules` schemas.
+- No social/community changes (Community page stays as-is).
+- No mobile redesign — the Initiation works at 480px because it's single-column.
 
 ## Acceptance
 
-1. `select count(*) from learn_modules where is_published and length(content_md)>100 and drill_json is not null and quiz_json is not null and scenario_json is not null` returns **20**, and there is no `mind-01-bias-basics` row.
-2. After completing one Codex lesson + quiz as a real user, `xp_ledger` has rows with `source in ('lesson','quiz')` and the `+N XP — Codex` toast fired.
-3. Closing a paper trade opens the Trade Review with the screenshot input visible; saving a thesis as a playbook creates a `playbooks` row visible in the next trade's selector.
-4. Visiting `/council` on a Sunday returns a cached AI verdict (second visit same week makes no Gemini call), shows all five panels populated from real data, and the suggested decree can be one-click saved into the Rulebook.
+1. `select count(*) from learn_modules where is_published and length(content_md)>100 and quiz_json is not null and drill_json is not null and scenario_json is not null` returns **20**.
+2. A new account, taken end-to-end through Initiation, produces: `profiles.onboarded_at` set, ≥1 `xp_ledger` row with `source='initiation'`, ≥1 closed `paper_trades` row, ≥1 `playbooks` row.
+3. Index `/` for that account now shows the Atrium hero with priority-3 prompt ("Review thy last trade") and the Trader OS strip with non-zero counts.
+4. On a Sunday after 18:00 local, the Council banner appears on `/` until clicked; clicking it opens `/council` and the banner disappears for the week.
