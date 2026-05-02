@@ -35,17 +35,17 @@ Deno.serve(async (req) => {
     // Gather context: recent trades, DNA, rules, codex progress, reflections, streak
     const [trades, dna, rules, codex, refl, streak, profile, council] = await Promise.all([
       supabase.from("paper_trades")
-        .select("symbol,side,entry_price,exit_price,pnl,thesis,post_notes,opened_at,closed_at,status,rules_broken")
+        .select("symbol,direction,entry_price,exit_price,pnl,pnl_percent,thesis,post_notes,opened_at,closed_at,status,emotion,stop_loss,take_profit")
         .eq("user_id", user.id).order("opened_at", { ascending: false }).limit(20),
       supabase.from("trading_dna").select("*").eq("user_id", user.id).maybeSingle(),
-      supabase.from("user_rules").select("rule_text,is_active").eq("user_id", user.id).eq("is_active", true).limit(20),
-      supabase.from("learn_progress").select("module_id,completed_at,score")
+      supabase.from("trading_rules").select("rule_text,category").eq("user_id", user.id).eq("is_active", true).limit(20),
+      supabase.from("learn_progress").select("module_id,completed_at,score,status")
         .eq("user_id", user.id).not("completed_at", "is", null).limit(10),
-      supabase.from("evening_reflections").select("reflection_date,summary,lesson,rules_status")
+      supabase.from("evening_reflections").select("reflection_date,trade_summary,lesson,rules_honoured,intent_tomorrow")
         .eq("user_id", user.id).order("reflection_date", { ascending: false }).limit(7),
       supabase.from("practice_streak").select("*").eq("user_id", user.id).maybeSingle(),
-      supabase.from("profiles").select("display_name,xp_total,streak_count,trader_personality,experience_level,trading_goals").eq("user_id", user.id).maybeSingle(),
-      supabase.from("council_reviews").select("verdict,decree,week_starting").eq("user_id", user.id).order("week_starting", { ascending: false }).limit(1).maybeSingle(),
+      supabase.from("profiles").select("display_name,xp_total,streak_count,trading_personality,experience_level,trading_goals,trading_level").eq("user_id", user.id).maybeSingle(),
+      supabase.from("council_reviews").select("ai_summary,decree,week_starting").eq("user_id", user.id).order("week_starting", { ascending: false }).limit(1).maybeSingle(),
     ]);
 
     // Load conversation history
