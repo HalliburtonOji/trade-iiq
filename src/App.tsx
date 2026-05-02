@@ -55,6 +55,40 @@ const PublicOnly = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+/**
+ * On first login (profiles.onboarded_at is null), bounce to /initiation.
+ * Wraps only the root route so deep links still work.
+ */
+const InitiationGate = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+  const [state, setState] = useState<"checking" | "needs" | "ok">("checking");
+
+  useEffect(() => {
+    if (!user) { setState("ok"); return; }
+    let active = true;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("onboarded_at")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!active) return;
+      setState(data?.onboarded_at ? "ok" : "needs");
+    })();
+    return () => { active = false; };
+  }, [user]);
+
+  if (state === "checking") {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+  if (state === "needs") return <Navigate to="/initiation" replace />;
+  return <>{children}</>;
+};
+
 const AppContent = () => {
   const { user } = useAuth();
   return (
