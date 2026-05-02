@@ -1,4 +1,4 @@
-import { Home, TrendingUp, ClipboardList, GraduationCap, PieChart, Sparkles, Lightbulb, LogOut, Filter, BarChart3, ChevronsLeft, ChevronsRight, Gamepad2, Users, User, BookOpen, Image, BarChart } from "lucide-react";
+import { Home, TrendingUp, ClipboardList, GraduationCap, PieChart, Sparkles, Lightbulb, LogOut, Filter, BarChart3, ChevronsLeft, ChevronsRight, Gamepad2, Users, User, BookOpen, Image, BarChart, Eye } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
