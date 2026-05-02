@@ -9,18 +9,16 @@ type PedimentCapProps = {
 /**
  * Two variants:
  *  - "triangle": a small triangular pediment cap (clip-path) in Stoa gold.
- *  - "rule":     a 2px gold rule with a small rotated-square (diamond) tick
- *                centered beneath it.
- * Both inherit color from var(--stoa-accent).
+ *  - "rule":     a 2px gold rule with a small rotated-square (diamond) tick.
  */
-export default function PedimentCap({
-  variant = "triangle",
-  width = 120,
-  className = "",
-}: PedimentCapProps) {
+const PedimentCap = React.forwardRef<HTMLDivElement, PedimentCapProps>(function PedimentCap(
+  { variant = "triangle", width = 120, className = "" },
+  ref,
+) {
   if (variant === "triangle") {
     return (
       <div
+        ref={ref}
         role="presentation"
         aria-hidden="true"
         className={className}
@@ -38,9 +36,9 @@ export default function PedimentCap({
     );
   }
 
-  // rule variant
   return (
     <div
+      ref={ref}
       role="presentation"
       aria-hidden="true"
       className={className}
@@ -65,4 +63,6 @@ export default function PedimentCap({
       />
     </div>
   );
-}
+});
+
+export default PedimentCap;
