@@ -37,6 +37,9 @@ import StoaShell from "@/components/stoa/StoaShell";
 import Altar from "@/components/stoa/Altar";
 import PedimentCap from "@/components/stoa/PedimentCap";
 import Meander from "@/components/stoa/Meander";
+import AtriumHero from "@/components/AtriumHero";
+import CouncilBanner from "@/components/CouncilBanner";
+import TraderOSStrip from "@/components/demo/TraderOSStrip";
 
 const getGreeting = () => {
   const h = new Date().getHours();
