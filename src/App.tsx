@@ -31,6 +31,7 @@ import Council from "./pages/Council";
 import Initiation from "./pages/Initiation";
 import Morning from "./pages/Morning";
 import Evening from "./pages/Evening";
+import Oracle from "./pages/Oracle";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
