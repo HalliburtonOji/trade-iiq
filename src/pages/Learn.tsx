@@ -278,7 +278,7 @@ const Learn = () => {
           onClick={() => navigate(`/learn/${rec.learn_modules!.slug}`)}
           style={{
             background: "var(--stoa-ink)",
-            color: "var(--stoa-shine)",
+            color: "var(--stoa-parchment)",
             borderLeft: "3px solid var(--stoa-accent)",
             borderRadius: 2,
             padding: 20,
@@ -289,10 +289,15 @@ const Learn = () => {
           <div className="stoa-kicker" style={{ color: "var(--stoa-accent)", marginBottom: 6 }}>
             ORACLE · ΧΡΗΣΜΟΣ
           </div>
-          <div className="stoa-display text-xl font-semibold" style={{ color: "var(--stoa-shine)" }}>
+          <div className="stoa-display text-xl font-semibold" style={{ color: "var(--stoa-parchment)" }}>
             {rec.learn_modules.title_en}
           </div>
-          <div style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", marginTop: 6, opacity: 0.85 }}>
+          {rec.learn_modules.title_gr && (
+            <div className="stoa-greek" style={{ color: "var(--stoa-accent)", fontSize: 14, marginTop: 2, opacity: 0.9 }}>
+              {rec.learn_modules.title_gr}
+            </div>
+          )}
+          <div style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", marginTop: 8, opacity: 0.9, color: "var(--stoa-parchment)" }}>
             {rec.reason}
           </div>
         </div>
