@@ -169,12 +169,18 @@ const Learn = () => {
 
         const { data: recs } = await supabase
           .from("learn_recommendations")
-          .select("id,module_id,reason,learn_modules(*)")
+          .select("id,module_id,reason,learn_modules:module_id(id,track,level,slug,title_en,title_gr,summary,ordinal,learn_minutes,xp_reward)")
           .eq("user_id", user.id)
           .is("dismissed_at", null)
           .order("generated_at", { ascending: false })
           .limit(1);
-        if (!cancelled && recs && recs.length > 0) setRec(recs[0] as unknown as Recommendation);
+        if (!cancelled && recs && recs.length > 0) {
+          const r: any = recs[0];
+          if (!r.learn_modules && mods) {
+            r.learn_modules = (mods as any[]).find((m) => m.id === r.module_id) || null;
+          }
+          setRec(r as Recommendation);
+        }
       }
 
       if (!cancelled) setLoading(false);
@@ -272,7 +278,7 @@ const Learn = () => {
           onClick={() => navigate(`/learn/${rec.learn_modules!.slug}`)}
           style={{
             background: "var(--stoa-ink)",
-            color: "var(--stoa-shine)",
+            color: "var(--stoa-parchment)",
             borderLeft: "3px solid var(--stoa-accent)",
             borderRadius: 2,
             padding: 20,
@@ -283,10 +289,15 @@ const Learn = () => {
           <div className="stoa-kicker" style={{ color: "var(--stoa-accent)", marginBottom: 6 }}>
             ORACLE · ΧΡΗΣΜΟΣ
           </div>
-          <div className="stoa-display text-xl font-semibold" style={{ color: "var(--stoa-shine)" }}>
+          <div className="stoa-display text-xl font-semibold" style={{ color: "var(--stoa-parchment)" }}>
             {rec.learn_modules.title_en}
           </div>
-          <div style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", marginTop: 6, opacity: 0.85 }}>
+          {rec.learn_modules.title_gr && (
+            <div className="stoa-greek" style={{ color: "var(--stoa-accent)", fontSize: 14, marginTop: 2, opacity: 0.9 }}>
+              {rec.learn_modules.title_gr}
+            </div>
+          )}
+          <div style={{ fontFamily: "Georgia, serif", fontSize: 14, fontStyle: "italic", marginTop: 8, opacity: 0.9, color: "var(--stoa-parchment)" }}>
             {rec.reason}
           </div>
         </div>

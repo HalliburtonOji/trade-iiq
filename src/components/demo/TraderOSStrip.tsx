@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { BookOpen, Camera, ClipboardCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
  * Three small cards linking to Playbook / Screenshot Vault / Review Workspace,
  * each showing a live count from the user's data so the surface feels alive.
  */
-const TraderOSStrip = () => {
+const TraderOSStrip = forwardRef<HTMLDivElement>((_props, ref) => {
   const { user } = useAuth();
   const [counts, setCounts] = useState({ playbooks: 0, screenshots: 0, reviewsPending: 0 });
 
@@ -20,7 +20,6 @@ const TraderOSStrip = () => {
       const [pb, sv, rev] = await Promise.all([
         supabase.from("playbooks").select("id", { count: "exact", head: true }).eq("user_id", user.id),
         supabase.from("screenshot_vault").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-        // Closed paper trades that have no post_notes yet = pending review
         supabase
           .from("paper_trades")
           .select("id", { count: "exact", head: true })
@@ -44,7 +43,7 @@ const TraderOSStrip = () => {
     "flex-1 flex flex-col items-start gap-1 p-3 border border-border/40 rounded-md bg-secondary/30 hover:bg-secondary/50 transition-colors";
 
   return (
-    <div className="flex flex-col gap-1">
+    <div ref={ref} className="flex flex-col gap-1">
       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
         Trader OS
       </p>
@@ -67,6 +66,7 @@ const TraderOSStrip = () => {
       </div>
     </div>
   );
-};
+});
+TraderOSStrip.displayName = "TraderOSStrip";
 
 export default TraderOSStrip;

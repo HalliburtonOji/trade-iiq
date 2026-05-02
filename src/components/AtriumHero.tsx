@@ -185,7 +185,26 @@ export default function AtriumHero() {
     return () => { active = false; };
   }, [user]);
 
-  if (loading || !prompt) return null;
+  if (loading || !prompt) {
+    return (
+      <div
+        aria-hidden="true"
+        style={{
+          width: "100%",
+          background: "var(--stoa-shine)",
+          border: "1px solid var(--stoa-rule)",
+          borderRadius: 2,
+          padding: "22px 24px",
+          marginBottom: 22,
+          minHeight: 120,
+        }}
+      >
+        <div style={{ width: 140, height: 10, background: "var(--stoa-rule)", marginBottom: 12, opacity: 0.6 }} />
+        <div style={{ width: "70%", height: 18, background: "var(--stoa-rule)", marginBottom: 8, opacity: 0.5 }} />
+        <div style={{ width: "50%", height: 12, background: "var(--stoa-rule)", opacity: 0.35 }} />
+      </div>
+    );
+  }
 
   return (
     <button
