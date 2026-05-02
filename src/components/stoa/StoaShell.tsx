@@ -54,12 +54,10 @@ const SIDEBAR_WIDTH = 248;
 const TOPBAR_HEIGHT = 56;
 const DRAWER_WIDTH = Math.min(SIDEBAR_WIDTH + 20, 280);
 
-export default function StoaShell({
-  children,
-  palette = "delphi",
-  crumb,
-  rightBar,
-}: StoaShellProps) {
+const StoaShell = React.forwardRef<HTMLDivElement, StoaShellProps>(function StoaShell(
+  { children, palette = "delphi", crumb, rightBar },
+  ref,
+) {
   const loc = useLocation();
   const { theme, toggleTheme } = useTheme();
   const isMobile = useIsMobile();
