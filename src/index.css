@@ -70,6 +70,7 @@
     --stoa-rule: rgba(242, 234, 215, 0.12);
     --stoa-gold-rule: rgba(212, 169, 74, 0.35);
     --stoa-shine: rgba(242, 234, 215, 0.04);
+    --stoa-parchment: #F2EAD7;
     --stoa-font-display: 'Cormorant Garamond', 'Georgia', serif;
     --stoa-font-body: 'IBM Plex Serif', 'Georgia', serif;
     --stoa-font-kicker: 'Inter', 'Space Grotesk', system-ui, sans-serif;
