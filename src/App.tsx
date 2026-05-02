@@ -96,7 +96,8 @@ const AppContent = () => {
       <Routes>
         <Route path="/landing" element={<PublicOnly><Landing /></PublicOnly>} />
         <Route path="/auth" element={<PublicOnly><Auth /></PublicOnly>} />
-        <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+        <Route path="/" element={<ProtectedRoute><InitiationGate><Index /></InitiationGate></ProtectedRoute>} />
+        <Route path="/initiation" element={<ProtectedRoute><Initiation /></ProtectedRoute>} />
         <Route path="/analysis" element={<ProtectedRoute><Analysis /></ProtectedRoute>} />
         <Route path="/charts" element={<ProtectedRoute><Charts /></ProtectedRoute>} />
         <Route path="/tracker" element={<ProtectedRoute><Tracker /></ProtectedRoute>} />
