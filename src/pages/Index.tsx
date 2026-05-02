@@ -230,6 +230,21 @@ const Index = () => {
           </div>
         </motion.div>
 
+        {/* Sunday-evening Council banner (auto-hides outside that window) */}
+        <motion.div variants={fadeUp}>
+          <CouncilBanner />
+        </motion.div>
+
+        {/* Atrium hero — single state-aware next-action prompt */}
+        <motion.div variants={fadeUp}>
+          <AtriumHero />
+        </motion.div>
+
+        {/* Trader OS surface — discoverable beyond Demo Trading */}
+        <motion.div variants={fadeUp}>
+          <TraderOSStrip />
+        </motion.div>
+
         {/* Temple — Entablature (hero edge reading) */}
         <motion.div variants={fadeUp}>
           <Altar capped={false} className="">
