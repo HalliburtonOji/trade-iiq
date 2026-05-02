@@ -38,8 +38,10 @@ export default function AtriumHero() {
     (async () => {
       const weekStart = startOfWeek();
       const sevenAgo = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+      const today = new Date().toISOString().slice(0, 10);
+      const hour = new Date().getHours();
 
-      const [council, openTrades, closedTrades, recentClosed, nextModule] = await Promise.all([
+      const [council, openTrades, closedTrades, recentClosed, nextModule, todaysBrief, todaysReflection] = await Promise.all([
         supabase
           .from("council_reviews")
           .select("id, viewed_at, week_starting")
@@ -72,11 +74,23 @@ export default function AtriumHero() {
           .eq("is_published", true)
           .order("ordinal", { ascending: true })
           .limit(1),
+        supabase
+          .from("daily_briefs")
+          .select("acknowledged_at")
+          .eq("user_id", user.id)
+          .eq("brief_date", today)
+          .maybeSingle(),
+        supabase
+          .from("evening_reflections")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("reflection_date", today)
+          .maybeSingle(),
       ]);
 
       if (!active) return;
 
-      // 1. Sunday council (if cached + unread)
+      // 0a. Sunday council always wins
       if (council.data && !council.data.viewed_at) {
         setPrompt({
           kicker: "THE COUNCIL · ΒΟΥΛΗ",
@@ -84,6 +98,32 @@ export default function AtriumHero() {
           body: "Thy week is reviewed. A decree has been drafted.",
           cta: "Enter the Council",
           to: "/council",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // 0b. Morning ritual — before 10:00 local, brief not yet acknowledged
+      if (hour < 10 && !todaysBrief.data?.acknowledged_at) {
+        setPrompt({
+          kicker: "ὌΡΘΡΟΣ · MORNING BRIEF",
+          headline: "Read today's brief before the bell.",
+          body: "One symbol of focus, one bias to watch, one rule to honour.",
+          cta: "Open the brief",
+          to: "/morning",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // 0c. Evening ritual — after 16:00 local, reflection not yet recorded
+      if (hour >= 16 && !todaysReflection.data) {
+        setPrompt({
+          kicker: "ἙΣΠΈΡΑ · EVENING REFLECTION",
+          headline: "Close the day with a single honest sentence.",
+          body: "What did the market teach? Did rules hold? What guides tomorrow?",
+          cta: "Reflect",
+          to: "/evening",
         });
         setLoading(false);
         return;
