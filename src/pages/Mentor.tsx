@@ -13,6 +13,10 @@ import MentorLetter from "@/components/mentor/MentorLetter";
 import MentorCaseStudyCard from "@/components/mentor/MentorCaseStudyCard";
 import MentorMirrorToggle from "@/components/mentor/MentorMirrorToggle";
 import MentorReplay from "@/components/mentor/MentorReplay";
+import MentorPersonaSwitcher from "@/components/mentor/MentorPersonaSwitcher";
+import MentorWeeklyVsYou from "@/components/mentor/MentorWeeklyVsYou";
+import MentorMissedWinners from "@/components/mentor/MentorMissedWinners";
+import MissedTradeSheet from "@/components/mentor/MissedTradeSheet";
 import { useMentorFocus } from "@/hooks/useMentorFocus";
 import { Loader2 } from "lucide-react";
 
@@ -20,6 +24,7 @@ type Tab = "now" | "next" | "past" | "cases" | "replay" | "journal" | "epistle";
 
 const Mentor = () => {
   const [tab, setTab] = useState<Tab>("now");
+  const [mentorSlug, setMentorSlug] = useState<string>("sophos");
   const [profile, setProfile] = useState<any>(null);
   const [trades, setTrades] = useState<any[]>([]);
   const [intents, setIntents] = useState<any[]>([]);
@@ -29,6 +34,9 @@ const Mentor = () => {
   const [loading, setLoading] = useState(true);
   const [lastJournalAt, setLastJournalAt] = useState<string | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
+  const [missedSheet, setMissedSheet] = useState<{ open: boolean; symbol: string; context: string; tradeId: string | null; pnl: number | null }>({
+    open: false, symbol: "", context: "", tradeId: null, pnl: null,
+  });
   const focus = useMentorFocus();
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
