@@ -443,7 +443,8 @@ async function runPersona(sb: any, p: Persona) {
   for (const i of intents || []) {
     if (new Date(i.valid_until).getTime() < Date.now()) {
       const note = "Window passed without trigger. Patience over force.";
-      await sb.from("mentor_intents").update({ status: "expired", resolved_at: nowIso, resolution_note: note }).eq("id", i.id);
+      await sb.from("mentor_intents").update({ status: "expired", outcome: "expired", resolved_at: nowIso, resolution_note: note }).eq("id", i.id);
+      await resolvePredictions(sb, i.id, "expired");
       await sb.from("mentor_journal").insert({
         mentor_slug: p.slug, kind: "intent_resolved", intent_id: i.id, symbol: i.symbol,
         body_text: `Intent on ${i.symbol} expired — ${note}`,
