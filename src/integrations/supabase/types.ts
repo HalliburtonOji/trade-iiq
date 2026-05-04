@@ -862,9 +862,11 @@ export type Database = {
       mentor_intents: {
         Row: {
           asset_type: string
+          conviction: number | null
           created_at: string
           direction: string
           entry_hint: number | null
+          fail_reasons: Json
           id: string
           invalidation_text: string
           resolution_note: string | null
@@ -882,9 +884,11 @@ export type Database = {
         }
         Insert: {
           asset_type?: string
+          conviction?: number | null
           created_at?: string
           direction: string
           entry_hint?: number | null
+          fail_reasons?: Json
           id?: string
           invalidation_text?: string
           resolution_note?: string | null
@@ -902,9 +906,11 @@ export type Database = {
         }
         Update: {
           asset_type?: string
+          conviction?: number | null
           created_at?: string
           direction?: string
           entry_hint?: number | null
+          fail_reasons?: Json
           id?: string
           invalidation_text?: string
           resolution_note?: string | null
