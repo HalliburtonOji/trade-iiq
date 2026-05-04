@@ -230,6 +230,14 @@ const Mentor = () => {
           </>
         )}
       </div>
+      <MissedTradeSheet
+        open={missedSheet.open}
+        onClose={() => setMissedSheet((s) => ({ ...s, open: false }))}
+        symbol={missedSheet.symbol}
+        context={missedSheet.context}
+        tradeId={missedSheet.tradeId}
+        pnl={missedSheet.pnl}
+      />
     </StoaShell>
   );
 };
