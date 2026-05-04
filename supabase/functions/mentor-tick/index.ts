@@ -117,6 +117,12 @@ async function fetchContext(symbol: string, asset_type: string, price: number): 
     const last30 = candles.slice(-30);
     const high30 = Math.max(...last30.map((c) => Number(c.high)));
     const low30 = Math.min(...last30.map((c) => Number(c.low)));
+    // Sanity: candle universe and live quote must match scale (within 5×). Otherwise wrong instrument.
+    const lastClose = closes[closes.length - 1];
+    if (lastClose && (price > lastClose * 5 || price < lastClose / 5)) {
+      console.log(`[mentor-tick] ${symbol} (${asset_type}) candle/quote mismatch — px ${price} vs lastClose ${lastClose}; dropping`);
+      return null;
+    }
     const ema20 = ema(closes.slice(-40), 20);
     const ema50 = ema(closes.slice(-80), 50);
     const rsi14 = rsi(closes.slice(-30), 14);
