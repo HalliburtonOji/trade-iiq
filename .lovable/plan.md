@@ -10,17 +10,18 @@
 - Plan Diff sizing modal (risk %, qty, notional, over-leverage warnings)
 - Weekly Epistle (`mentor-weekly` + `mentor_letters` + EPISTLE tab + Sunday 17:00 UTC cron)
 - Sidebar entry under GROW (Σοφός)
+- Public profile (`/sophos/public`) with public-read RLS
+- Auto-generated Case Studies (`mentor-case-study` + `mentor_case_studies` + CASES tab + `/learn/case/:id`)
+- **Mirror Mode** auto-copy (`mentor-mirror-fanout` + `mentor_followers.mirror_enabled` + MentorMirrorToggle UI)
 
 **Still in the original brainstorm, not built (Tier 2/3):**
 - Mentor vs You weekly leaderboard (MentorVsYou exists but no week-over-week R-multiple game)
 - "Why didn't you take this?" missed-trade reflection prompts
 - Replay Mode for past trades (animated chart + journal scrub)
 - Live ATR / news catalyst tags on intents
-- Public Sophos page (`/sophos/public`)
 - Multi-personas (Θρασύς scalper, Ἥσυχος long-term)
 - "Copy with rules" playbook overlay
 
-The ticker, Conviction Meter, Watchlist Radar, Plan Diff, Weekly Letter — all done. The original Part 1 + Tier 1 list is fully shipped.
 
 ---
 
