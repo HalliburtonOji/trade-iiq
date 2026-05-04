@@ -259,6 +259,14 @@ serve(async (req) => {
           body_text: `Opened ${i.symbol} ${i.direction} at ${price}. ${i.thesis}`,
           payload: { entry: price, sl, tp, qty, direction: i.direction },
         });
+        // Mirror Mode fanout — auto-copy this trade to every follower with mirror_enabled
+        if (tradeRow?.id) {
+          fetch(`${SUPABASE_URL}/functions/v1/mentor-mirror-fanout`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${SERVICE_ROLE}` },
+            body: JSON.stringify({ trade_id: tradeRow.id }),
+          }).catch((e) => console.error("[mentor-tick] mirror fanout failed:", e));
+        }
         // Notify both intent watchers AND general mentor followers about the open
         const [{ data: watchers }, { data: followers }] = await Promise.all([
           sb.from("mentor_intent_watchers").select("user_id").eq("intent_id", i.id),
