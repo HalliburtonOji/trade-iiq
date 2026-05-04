@@ -42,6 +42,7 @@ const NAV: NavSection[] = [
     greek: "Παιδεία",
     items: [
       { kicker: "ORACLE",    greek: "Μαντεῖον", to: "/oracle" },
+      { kicker: "SOPHOS",    greek: "Σοφός",   to: "/mentor" },
       { kicker: "LEARN",     greek: "Κῶδιξ",   to: "/learn" },
       { kicker: "REVIEW",    greek: "Θέατρον", to: "/review" },
       { kicker: "INSIGHTS",  greek: "Γνῶσις",  to: "/insights" },
