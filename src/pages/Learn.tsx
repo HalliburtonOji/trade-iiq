@@ -5,6 +5,7 @@ import PedimentCap from "@/components/stoa/PedimentCap";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { seedCodexInitiates } from "@/scripts/seed-codex-initiates";
+import MentorCaseStudiesSection from "@/components/mentor/MentorCaseStudiesSection";
 import { toast } from "sonner";
 
 type LearnModule = {
@@ -302,6 +303,8 @@ const Learn = () => {
           </div>
         </div>
       )}
+
+      {!loading && <MentorCaseStudiesSection />}
 
       {loading && (
         <div className="stoa-kicker" style={{ color: "var(--stoa-muted)", padding: "20px 0" }}>

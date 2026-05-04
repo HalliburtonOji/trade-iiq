@@ -10,10 +10,11 @@ import MentorVsYou from "@/components/mentor/MentorVsYou";
 import MentorPastList from "@/components/mentor/MentorPastList";
 import MentorWatchlistRadar from "@/components/mentor/MentorWatchlistRadar";
 import MentorLetter from "@/components/mentor/MentorLetter";
+import MentorCaseStudyCard from "@/components/mentor/MentorCaseStudyCard";
 import { useMentorFocus } from "@/hooks/useMentorFocus";
 import { Loader2 } from "lucide-react";
 
-type Tab = "now" | "next" | "past" | "journal" | "epistle";
+type Tab = "now" | "next" | "past" | "cases" | "journal" | "epistle";
 
 const Mentor = () => {
   const [tab, setTab] = useState<Tab>("now");
@@ -22,6 +23,7 @@ const Mentor = () => {
   const [intents, setIntents] = useState<any[]>([]);
   const [journal, setJournal] = useState<any[]>([]);
   const [closed, setClosed] = useState<any[]>([]);
+  const [cases, setCases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastJournalAt, setLastJournalAt] = useState<string | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
@@ -44,14 +46,15 @@ const Mentor = () => {
   }, [focus.stamp]);
 
   const load = async () => {
-    const [{ data: p }, { data: t }, { data: i }, { data: j }, { data: c }] = await Promise.all([
+    const [{ data: p }, { data: t }, { data: i }, { data: j }, { data: c }, { data: cs }] = await Promise.all([
       supabase.from("mentor_profile").select("*").eq("slug","sophos").maybeSingle(),
       supabase.from("mentor_trades").select("*").eq("status","open").order("opened_at",{ascending:false}),
       supabase.from("mentor_intents").select("*").eq("status","pending").order("created_at",{ascending:false}),
       supabase.from("mentor_journal").select("*").order("created_at",{ascending:false}).limit(80),
       supabase.from("mentor_trades").select("*").eq("status","closed").order("closed_at",{ascending:false}).limit(60),
+      supabase.from("mentor_case_studies").select("id,symbol,direction,outcome,r_multiple,title,hook,tags,greek_phrase,created_at").order("created_at",{ascending:false}).limit(30),
     ]);
-    setProfile(p); setTrades(t||[]); setIntents(i||[]); setJournal(j||[]); setClosed(c||[]);
+    setProfile(p); setTrades(t||[]); setIntents(i||[]); setJournal(j||[]); setClosed(c||[]); setCases(cs||[]);
     if (j && j[0]) setLastJournalAt(j[0].created_at);
     setLoading(false);
   };
@@ -82,6 +85,7 @@ const Mentor = () => {
     { key: "now",     label: "NOW",     greek: "Παρόν",     count: trades.length },
     { key: "next",    label: "NEXT",    greek: "Μέλλον",    count: intents.length },
     { key: "past",    label: "PAST",    greek: "Παρελθόν",  count: closed.length },
+    { key: "cases",   label: "CASES",   greek: "Αὐτοψία",   count: cases.length },
     { key: "journal", label: "JOURNAL", greek: "Βίβλος",    count: journal.length },
     { key: "epistle", label: "EPISTLE", greek: "Ἐπιστολή",  count: 0 },
   ];
@@ -151,6 +155,14 @@ const Mentor = () => {
             )}
 
             {tab === "past" && <MentorPastList closed={closed} />}
+
+            {tab === "cases" && (
+              cases.length === 0
+                ? <Empty msg="No case studies yet. Sophos writes one each time he closes a trade." />
+                : <div className="grid gap-4 sm:grid-cols-2">
+                    {cases.map(c => <MentorCaseStudyCard key={c.id} cs={c} />)}
+                  </div>
+            )}
 
             {tab === "journal" && <MentorJournalFeed entries={journal} />}
 

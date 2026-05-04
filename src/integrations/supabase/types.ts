@@ -777,6 +777,72 @@ export type Database = {
         }
         Relationships: []
       }
+      mentor_case_studies: {
+        Row: {
+          asset_type: string
+          created_at: string
+          direction: string
+          entry_rationale: string
+          greek_phrase: string | null
+          hook: string
+          id: string
+          intent_id: string | null
+          key_takeaway: string
+          lesson: string
+          outcome: string
+          pnl_pct: number | null
+          r_multiple: number | null
+          setup: string
+          symbol: string
+          tags: Json
+          title: string
+          trade_id: string
+          what_happened: string
+        }
+        Insert: {
+          asset_type?: string
+          created_at?: string
+          direction: string
+          entry_rationale?: string
+          greek_phrase?: string | null
+          hook?: string
+          id?: string
+          intent_id?: string | null
+          key_takeaway?: string
+          lesson?: string
+          outcome: string
+          pnl_pct?: number | null
+          r_multiple?: number | null
+          setup?: string
+          symbol: string
+          tags?: Json
+          title: string
+          trade_id: string
+          what_happened?: string
+        }
+        Update: {
+          asset_type?: string
+          created_at?: string
+          direction?: string
+          entry_rationale?: string
+          greek_phrase?: string | null
+          hook?: string
+          id?: string
+          intent_id?: string | null
+          key_takeaway?: string
+          lesson?: string
+          outcome?: string
+          pnl_pct?: number | null
+          r_multiple?: number | null
+          setup?: string
+          symbol?: string
+          tags?: Json
+          title?: string
+          trade_id?: string
+          what_happened?: string
+        }
+        Relationships: []
+      }
       mentor_copies: {
         Row: {
           created_at: string

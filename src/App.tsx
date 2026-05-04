@@ -34,6 +34,7 @@ import Evening from "./pages/Evening";
 import Oracle from "./pages/Oracle";
 import Mentor from "./pages/Mentor";
 import SophosPublic from "./pages/SophosPublic";
+import CaseStudyViewer from "./pages/CaseStudyViewer";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -126,6 +127,7 @@ const AppContent = () => {
         <Route path="/oracle" element={<ProtectedRoute><Oracle /></ProtectedRoute>} />
         <Route path="/mentor" element={<ProtectedRoute><Mentor /></ProtectedRoute>} />
         <Route path="/sophos/public" element={<SophosPublic />} />
+        <Route path="/learn/case/:id" element={<CaseStudyViewer />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {user && <FloatingHub />}
