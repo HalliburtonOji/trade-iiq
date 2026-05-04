@@ -22,6 +22,24 @@ const Mentor = () => {
   const [closed, setClosed] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastJournalAt, setLastJournalAt] = useState<string | null>(null);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const focus = useMentorFocus();
+  const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    if (!focus.tab || !focus.stamp) return;
+    setTab(focus.tab);
+    if (!focus.itemId) return;
+    const id = focus.itemId;
+    setHighlightId(id);
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        itemRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 60);
+    });
+    const t = setTimeout(() => setHighlightId(null), 2400);
+    return () => clearTimeout(t);
+  }, [focus.stamp]);
 
   const load = async () => {
     const [{ data: p }, { data: t }, { data: i }, { data: j }, { data: c }] = await Promise.all([
