@@ -45,14 +45,15 @@ const Mentor = () => {
   }, [focus.stamp]);
 
   const load = async () => {
-    const [{ data: p }, { data: t }, { data: i }, { data: j }, { data: c }] = await Promise.all([
+    const [{ data: p }, { data: t }, { data: i }, { data: j }, { data: c }, { data: cs }] = await Promise.all([
       supabase.from("mentor_profile").select("*").eq("slug","sophos").maybeSingle(),
       supabase.from("mentor_trades").select("*").eq("status","open").order("opened_at",{ascending:false}),
       supabase.from("mentor_intents").select("*").eq("status","pending").order("created_at",{ascending:false}),
       supabase.from("mentor_journal").select("*").order("created_at",{ascending:false}).limit(80),
       supabase.from("mentor_trades").select("*").eq("status","closed").order("closed_at",{ascending:false}).limit(60),
+      supabase.from("mentor_case_studies").select("id,symbol,direction,outcome,r_multiple,title,hook,tags,greek_phrase,created_at").order("created_at",{ascending:false}).limit(30),
     ]);
-    setProfile(p); setTrades(t||[]); setIntents(i||[]); setJournal(j||[]); setClosed(c||[]);
+    setProfile(p); setTrades(t||[]); setIntents(i||[]); setJournal(j||[]); setClosed(c||[]); setCases(cs||[]);
     if (j && j[0]) setLastJournalAt(j[0].created_at);
     setLoading(false);
   };
