@@ -44,6 +44,100 @@ async function fetchQuote(symbol: string, asset_type: string) {
   } catch { return null; }
 }
 
+// ── Context: real OHLCV-derived features so Sophos can actually reason. ──
+type Ctx = {
+  symbol: string; price: number; asset_type: string;
+  ema20: number; ema50: number; rsi14: number; atr14: number;
+  vol_regime: "high" | "normal" | "low";
+  high30: number; low30: number;
+  trend: "up" | "down" | "side";
+  pct_from_high30: number; pct_from_low30: number;
+  bars: number;
+};
+
+function ema(values: number[], period: number): number {
+  if (!values.length) return 0;
+  const k = 2 / (period + 1);
+  let e = values[0];
+  for (let i = 1; i < values.length; i++) e = values[i] * k + e * (1 - k);
+  return e;
+}
+function rsi(closes: number[], period = 14): number {
+  if (closes.length < period + 1) return 50;
+  let gains = 0, losses = 0;
+  for (let i = 1; i <= period; i++) {
+    const d = closes[i] - closes[i - 1];
+    if (d >= 0) gains += d; else losses -= d;
+  }
+  let avgG = gains / period, avgL = losses / period;
+  for (let i = period + 1; i < closes.length; i++) {
+    const d = closes[i] - closes[i - 1];
+    avgG = (avgG * (period - 1) + Math.max(d, 0)) / period;
+    avgL = (avgL * (period - 1) + Math.max(-d, 0)) / period;
+  }
+  if (avgL === 0) return 100;
+  const rs = avgG / avgL;
+  return 100 - 100 / (1 + rs);
+}
+function atr(candles: any[], period = 14): number {
+  if (candles.length < period + 1) return 0;
+  const trs: number[] = [];
+  for (let i = 1; i < candles.length; i++) {
+    const h = Number(candles[i].high), l = Number(candles[i].low), pc = Number(candles[i - 1].close);
+    trs.push(Math.max(h - l, Math.abs(h - pc), Math.abs(l - pc)));
+  }
+  const recent = trs.slice(-period);
+  return recent.reduce((a, b) => a + b, 0) / recent.length;
+}
+
+async function fetchContext(symbol: string, asset_type: string, price: number): Promise<Ctx | null> {
+  try {
+    const end = new Date();
+    const start = new Date(end.getTime() - 90 * 24 * 3600_000);
+    const r = await fetch(`${SUPABASE_URL}/functions/v1/historical-candles`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${ANON}`, apikey: ANON },
+      body: JSON.stringify({
+        symbol, // historical-candles handles BTC→BTC-USD, EURUSD→EURUSD=X
+        start_date: start.toISOString().slice(0, 10),
+        end_date: end.toISOString().slice(0, 10),
+      }),
+    });
+    if (!r.ok) return null;
+    const j = await r.json();
+    const candles: any[] = Array.isArray(j?.candles) ? j.candles : [];
+    if (candles.length < 25) return null;
+    const closes = candles.map((c) => Number(c.close)).filter((x) => Number.isFinite(x));
+    const vols = candles.map((c) => Number(c.volume) || 0);
+    const last30 = candles.slice(-30);
+    const high30 = Math.max(...last30.map((c) => Number(c.high)));
+    const low30 = Math.min(...last30.map((c) => Number(c.low)));
+    const ema20 = ema(closes.slice(-40), 20);
+    const ema50 = ema(closes.slice(-80), 50);
+    const rsi14 = rsi(closes.slice(-30), 14);
+    const atr14 = atr(candles.slice(-30), 14);
+    const v20 = vols.slice(-20).reduce((a, b) => a + b, 0) / 20;
+    const vLast = vols[vols.length - 1] || v20;
+    const vol_regime: Ctx["vol_regime"] = vLast > v20 * 1.4 ? "high" : vLast < v20 * 0.6 ? "low" : "normal";
+    const trend: Ctx["trend"] =
+      ema20 > ema50 * 1.005 && price > ema20 ? "up" :
+      ema20 < ema50 * 0.995 && price < ema20 ? "down" : "side";
+    return {
+      symbol, price, asset_type,
+      ema20: +ema20.toFixed(4), ema50: +ema50.toFixed(4),
+      rsi14: +rsi14.toFixed(1), atr14: +atr14.toFixed(4),
+      vol_regime, high30: +high30.toFixed(4), low30: +low30.toFixed(4),
+      trend,
+      pct_from_high30: +(((price - high30) / high30) * 100).toFixed(2),
+      pct_from_low30: +(((price - low30) / low30) * 100).toFixed(2),
+      bars: candles.length,
+    };
+  } catch (e) {
+    console.error("[mentor-tick] fetchContext failed", symbol, e);
+    return null;
+  }
+}
+
 async function aiPlan(opts: {
   candidates: { symbol: string; price: number; asset_type: string }[];
   equity: number;
