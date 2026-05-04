@@ -830,6 +830,35 @@ export type Database = {
         }
         Relationships: []
       }
+      mentor_intent_watchers: {
+        Row: {
+          created_at: string
+          id: string
+          intent_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          intent_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          intent_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_intent_watchers_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "mentor_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentor_intents: {
         Row: {
           asset_type: string
