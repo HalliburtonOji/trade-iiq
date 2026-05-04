@@ -176,6 +176,34 @@ const MentorReplay = () => {
           </div>
         </div>
 
+        {/* Activity mosaic — newest on right, oldest on left */}
+        <div className="mt-2 mb-2">
+          <div className="flex items-end gap-[2px] h-8">
+            {[...days].reverse().map((d, i) => {
+              const oldestFirstIdx = i;
+              const selectedOldestFirstIdx = days.length - 1 - dayIdx;
+              const isSelected = oldestFirstIdx === selectedOldestFirstIdx;
+              const intensity = Math.min(1, (d.opened + d.closed + d.planned + d.skipped) / 8);
+              const profitTone = d.pnl > 0 ? "#22c55e" : d.pnl < 0 ? "#ef4444" : "var(--stoa-accent)";
+              return (
+                <button
+                  key={d.date}
+                  aria-label={`${d.date} · ${d.opened} opened, ${d.closed} closed`}
+                  onClick={() => setDayIdx(days.length - 1 - oldestFirstIdx)}
+                  className="flex-1 transition-all rounded-sm"
+                  style={{
+                    height: `${20 + intensity * 80}%`,
+                    minHeight: 6,
+                    background: isSelected ? profitTone : `color-mix(in oklab, ${profitTone} ${20 + intensity * 50}%, var(--stoa-bg))`,
+                    opacity: isSelected ? 1 : 0.55,
+                    boxShadow: isSelected ? `0 0 8px ${profitTone}` : "none",
+                  }}
+                />
+              );
+            })}
+          </div>
+        </div>
+
         {/* Slider */}
         <input
           type="range"
@@ -188,7 +216,7 @@ const MentorReplay = () => {
         />
         <div className="flex justify-between mt-1 stoa-mono" style={{ fontSize: 10, color: "var(--stoa-muted)" }}>
           <span>{days[days.length - 1]?.date}</span>
-          <span>{days[0]?.date}</span>
+          <span>now · {days[0]?.date}</span>
         </div>
 
         {/* Day stats */}
