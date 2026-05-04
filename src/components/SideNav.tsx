@@ -30,6 +30,7 @@ const navSections = [
     title: "Grow",
     items: [
       { label: "Oracle", icon: Eye, path: "/oracle" },
+      { label: "Sophos", icon: Crown, path: "/mentor" },
       { label: "Learn", icon: GraduationCap, path: "/learn" },
       { label: "Review", icon: BarChart, path: "/review" },
       { label: "Insights", icon: Lightbulb, path: "/insights" },
