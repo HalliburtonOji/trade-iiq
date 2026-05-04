@@ -93,6 +93,25 @@ const MentorReplay = () => {
     return () => window.clearInterval(t);
   }, [playing, days.length]);
 
+  const day = days.length > 0 ? days[Math.min(dayIdx, days.length - 1)] : null;
+
+  // Cumulative running stats up to & including this day (oldest → newest)
+  const cumulative = useMemo(() => {
+    if (!day) return { cumPnl: 0, cumTrades: 0, cumWins: 0 };
+    const oldestFirst = [...days].reverse();
+    let cumPnl = 0, cumTrades = 0, cumWins = 0;
+    const upTo = oldestFirst.findIndex((d) => d.date === day.date);
+    for (let i = 0; i <= upTo; i++) {
+      cumPnl += oldestFirst[i].pnl;
+      cumTrades += oldestFirst[i].closed;
+    }
+    for (const t of closed) {
+      if (!t.closed_at) continue;
+      if (dayKey(t.closed_at) <= day.date && Number(t.pnl) > 0) cumWins++;
+    }
+    return { cumPnl, cumTrades, cumWins };
+  }, [day, days, closed]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16" style={{ color: "var(--stoa-muted)" }}>
@@ -101,7 +120,7 @@ const MentorReplay = () => {
     );
   }
 
-  if (days.length === 0) {
+  if (!day) {
     return (
       <div className="rounded-2xl py-12 text-center" style={{ border: "1px dashed var(--stoa-rule)", color: "var(--stoa-muted)" }}>
         <div className="stoa-greek" style={{ color: "var(--stoa-accent)", marginBottom: 6 }}>Ἀναπόλησις</div>
@@ -109,25 +128,6 @@ const MentorReplay = () => {
       </div>
     );
   }
-
-  const day = days[Math.min(dayIdx, days.length - 1)];
-
-  // Cumulative running stats up to & including this day (oldest → newest)
-  const cumulative = useMemo(() => {
-    const oldestFirst = [...days].reverse();
-    let cumPnl = 0, cumTrades = 0, cumWins = 0;
-    const upTo = oldestFirst.findIndex((d) => d.date === day.date);
-    for (let i = 0; i <= upTo; i++) {
-      cumPnl += oldestFirst[i].pnl;
-      cumTrades += oldestFirst[i].closed;
-    }
-    // count wins by re-scanning closed trades up to this day
-    for (const t of closed) {
-      if (!t.closed_at) continue;
-      if (dayKey(t.closed_at) <= day.date && Number(t.pnl) > 0) cumWins++;
-    }
-    return { cumPnl, cumTrades, cumWins };
-  }, [day.date, days, closed]);
 
   const winRate = cumulative.cumTrades > 0 ? Math.round((cumulative.cumWins / cumulative.cumTrades) * 100) : 0;
 
