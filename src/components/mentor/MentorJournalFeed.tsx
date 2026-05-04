@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { TrendingUp, TrendingDown, SkipForward, Sparkles, CheckCircle2, Settings2, BookOpen, ChevronDown } from "lucide-react";
+import VoiceButton from "./VoiceButton";
 
 const ICONS: Record<string, any> = {
   open: TrendingUp,
