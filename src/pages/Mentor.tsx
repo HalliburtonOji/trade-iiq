@@ -8,6 +8,7 @@ import MentorJournalFeed from "@/components/mentor/MentorJournalFeed";
 import MentorPulse from "@/components/mentor/MentorPulse";
 import MentorVsYou from "@/components/mentor/MentorVsYou";
 import MentorPastList from "@/components/mentor/MentorPastList";
+import MentorWatchlistRadar from "@/components/mentor/MentorWatchlistRadar";
 import { useMentorFocus } from "@/hooks/useMentorFocus";
 import { Loader2 } from "lucide-react";
 
@@ -125,15 +126,18 @@ const Mentor = () => {
             )}
 
             {tab === "next" && (
-              <div className="space-y-3">
-                {intents.length === 0
-                  ? <Empty msg="No pending intents. Sophos is watching, not forcing." />
-                  : intents.map((i) => (
-                      <FocusWrap key={i.id} id={i.id} highlightId={highlightId} refMap={itemRefs}>
-                        <MentorIntentCard intent={i} />
-                      </FocusWrap>
-                    ))}
-              </div>
+              <>
+                <MentorWatchlistRadar />
+                <div className="space-y-3">
+                  {intents.length === 0
+                    ? <Empty msg="No pending intents. Sophos is watching, not forcing." />
+                    : intents.map((i) => (
+                        <FocusWrap key={i.id} id={i.id} highlightId={highlightId} refMap={itemRefs}>
+                          <MentorIntentCard intent={i} />
+                        </FocusWrap>
+                      ))}
+                </div>
+              </>
             )}
 
             {tab === "past" && <MentorPastList closed={closed} />}
