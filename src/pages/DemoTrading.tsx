@@ -259,6 +259,8 @@ const DemoTrading = () => {
         p_ref_id: pos.id,
         p_ref_table: "paper_trades",
       });
+      // Fire Sophos coach note (don't await — runs in background)
+      supabase.functions.invoke("mentor-coach", { body: { user_trade_id: pos.id } }).catch(() => {});
       toast.success(`Closed ${pos.symbol} — P&L: ${pnl >= 0 ? "+" : ""}$${pnl.toFixed(2)}`);
     }
   };
