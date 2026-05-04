@@ -128,29 +128,25 @@ const SophosPublic = () => {
                 openTrades.length === 0
                   ? <Empty text="No open trades. Sophos is patient." />
                   : <div className="grid gap-4 md:grid-cols-2">
-                      {openTrades.map(t => <MentorTradeCard key={t.id} trade={t} readonly />)}
+                      {openTrades.map(t => <MentorTradeCard key={t.id} trade={t} />)}
                     </div>
               )}
               {tab === "next" && (
                 intents.length === 0
                   ? <Empty text="No pending intents. The market hasn't offered an edge." />
                   : <div className="grid gap-4 md:grid-cols-2">
-                      {intents.map(i => <MentorIntentCard key={i.id} intent={i} readonly />)}
+                      {intents.map(i => <MentorIntentCard key={i.id} intent={i} />)}
                     </div>
               )}
               {tab === "past" && (
                 closed.length === 0
                   ? <Empty text="No closed trades yet." />
                   : <div className="grid gap-4 md:grid-cols-2">
-                      {closed.slice(0, 30).map(t => <MentorTradeCard key={t.id} trade={t} readonly />)}
+                      {closed.slice(0, 30).map(t => <MentorTradeCard key={t.id} trade={t} closed />)}
                     </div>
               )}
               {tab === "journal" && <MentorJournalFeed entries={journal} />}
-              {tab === "epistle" && (
-                letters.length === 0
-                  ? <Empty text="No epistles yet. The first arrives Sunday." />
-                  : <div className="space-y-6">{letters.map(l => <MentorLetter key={l.id} letter={l} />)}</div>
-              )}
+              {tab === "epistle" && <MentorLetter />}
             </section>
 
             {/* Footer CTA */}
