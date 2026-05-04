@@ -143,7 +143,10 @@ const Mentor = () => {
             <MentorHero profile={profile} closed={closed} openTrades={trades} />
             {mentorSlug === "sophos" && (
               <>
-                <div className="mt-6"><MentorMirrorToggle /></div>
+                <div className="mt-4 flex justify-end">
+                  <MentorFollowButton mentorSlug="sophos" />
+                </div>
+                <div className="mt-4"><MentorMirrorToggle /></div>
                 <div className="mt-4">
                   <MentorMissedWinners
                     mentorSlug={mentorSlug}
