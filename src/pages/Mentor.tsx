@@ -237,6 +237,8 @@ const Mentor = () => {
                 </div>
                 <MentorVsYou profile={profile} mentorClosed={closed} />
                 <MentorWeeklyVsYou mentorSlug={mentorSlug} />
+                <MentorConvictionScorecard mentorSlug={mentorSlug} />
+                {mentorSlug === "sophos" && <MentorCoachNotes />}
               </>
             )}
 
