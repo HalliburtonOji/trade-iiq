@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   Menu, X, Home, TrendingUp, BarChart3, Filter, Sparkles, ClipboardList,
   PieChart, Lightbulb, GraduationCap, Gamepad2, Users, User as UserIcon,
-  LogOut, BookOpen, Image as ImageIcon, BarChart, Eye, Sun, Moon, Sunrise,
+  LogOut, BookOpen, Image as ImageIcon, BarChart, Eye, Sun, Moon, Sunrise, Crown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
