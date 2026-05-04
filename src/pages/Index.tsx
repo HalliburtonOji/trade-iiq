@@ -379,6 +379,8 @@ const Index = () => {
             lessoned={dm.lessoned}
             watchlisted={dm.watchlisted}
             reviewed={dm.reviewed}
+            mentorVisited={dm.mentorVisited}
+            mentorDiffed={dm.mentorDiffed}
           />
         </motion.div>
 
