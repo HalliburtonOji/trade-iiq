@@ -22,6 +22,7 @@ const Mentor = () => {
   const [intents, setIntents] = useState<any[]>([]);
   const [journal, setJournal] = useState<any[]>([]);
   const [closed, setClosed] = useState<any[]>([]);
+  const [cases, setCases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastJournalAt, setLastJournalAt] = useState<string | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
