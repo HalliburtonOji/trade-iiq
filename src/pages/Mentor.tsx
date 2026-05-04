@@ -5,9 +5,12 @@ import MentorHero from "@/components/mentor/MentorHero";
 import MentorTradeCard from "@/components/mentor/MentorTradeCard";
 import MentorIntentCard from "@/components/mentor/MentorIntentCard";
 import MentorJournalFeed from "@/components/mentor/MentorJournalFeed";
+import MentorPulse from "@/components/mentor/MentorPulse";
+import MentorVsYou from "@/components/mentor/MentorVsYou";
+import MentorPastList from "@/components/mentor/MentorPastList";
 import { Loader2 } from "lucide-react";
 
-type Tab = "now" | "next" | "journal";
+type Tab = "now" | "next" | "past" | "journal";
 
 const Mentor = () => {
   const [tab, setTab] = useState<Tab>("now");
@@ -17,16 +20,18 @@ const Mentor = () => {
   const [journal, setJournal] = useState<any[]>([]);
   const [closed, setClosed] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastJournalAt, setLastJournalAt] = useState<string | null>(null);
 
   const load = async () => {
     const [{ data: p }, { data: t }, { data: i }, { data: j }, { data: c }] = await Promise.all([
       supabase.from("mentor_profile").select("*").eq("slug","sophos").maybeSingle(),
       supabase.from("mentor_trades").select("*").eq("status","open").order("opened_at",{ascending:false}),
       supabase.from("mentor_intents").select("*").eq("status","pending").order("created_at",{ascending:false}),
-      supabase.from("mentor_journal").select("*").order("created_at",{ascending:false}).limit(50),
-      supabase.from("mentor_trades").select("*").eq("status","closed").order("closed_at",{ascending:false}).limit(20),
+      supabase.from("mentor_journal").select("*").order("created_at",{ascending:false}).limit(80),
+      supabase.from("mentor_trades").select("*").eq("status","closed").order("closed_at",{ascending:false}).limit(60),
     ]);
     setProfile(p); setTrades(t||[]); setIntents(i||[]); setJournal(j||[]); setClosed(c||[]);
+    if (j && j[0]) setLastJournalAt(j[0].created_at);
     setLoading(false);
   };
 
@@ -35,16 +40,20 @@ const Mentor = () => {
     const ch = supabase.channel("mentor-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "mentor_trades" }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "mentor_intents" }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "mentor_journal" }, load)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "mentor_journal" }, (p: any) => {
+        setLastJournalAt(p?.new?.created_at || new Date().toISOString());
+        load();
+      })
       .on("postgres_changes", { event: "*", schema: "public", table: "mentor_profile" }, load)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
 
   const tabs: { key: Tab; label: string; greek: string; count: number }[] = [
-    { key: "now", label: "NOW", greek: "Παρόν", count: trades.length },
-    { key: "next", label: "NEXT", greek: "Μέλλον", count: intents.length },
-    { key: "journal", label: "JOURNAL", greek: "Βίβλος", count: journal.length },
+    { key: "now",     label: "NOW",     greek: "Παρόν",     count: trades.length },
+    { key: "next",    label: "NEXT",    greek: "Μέλλον",    count: intents.length },
+    { key: "past",    label: "PAST",    greek: "Παρελθόν",  count: closed.length },
+    { key: "journal", label: "JOURNAL", greek: "Βίβλος",    count: journal.length },
   ];
 
   return (
@@ -56,14 +65,15 @@ const Mentor = () => {
           </div>
         ) : (
           <>
+            <MentorPulse profile={profile} lastJournalAt={lastJournalAt} />
             <MentorHero profile={profile} closed={closed} openTrades={trades} />
 
-            <div className="flex items-center gap-1 mb-6 mt-8" style={{ borderBottom: "1px solid var(--stoa-rule)" }}>
+            <div className="flex items-center gap-1 mb-6 mt-8 overflow-x-auto" style={{ borderBottom: "1px solid var(--stoa-rule)" }}>
               {tabs.map((t) => (
                 <button
                   key={t.key}
                   onClick={() => setTab(t.key)}
-                  className="relative px-4 py-3 text-left transition-all"
+                  className="relative px-4 py-3 text-left transition-all shrink-0"
                   style={{
                     color: tab === t.key ? "var(--stoa-ink)" : "var(--stoa-muted)",
                     borderBottom: tab === t.key ? "2px solid var(--stoa-accent)" : "2px solid transparent",
@@ -81,28 +91,25 @@ const Mentor = () => {
             </div>
 
             {tab === "now" && (
-              <div className="space-y-3">
-                {trades.length === 0 ? (
-                  <Empty msg="Sophos is in cash. Patience is a position." />
-                ) : trades.map((t) => <MentorTradeCard key={t.id} trade={t} />)}
-                {closed.length > 0 && (
-                  <>
-                    <div className="stoa-kicker mt-8 mb-3" style={{ color: "var(--stoa-muted)" }}>RECENTLY CLOSED · Παρελθόν</div>
-                    <div className="space-y-2">
-                      {closed.slice(0, 5).map((t) => <MentorTradeCard key={t.id} trade={t} closed />)}
-                    </div>
-                  </>
-                )}
-              </div>
+              <>
+                <div className="space-y-3">
+                  {trades.length === 0
+                    ? <Empty msg="Sophos is in cash. Patience is a position." />
+                    : trades.map((t) => <MentorTradeCard key={t.id} trade={t} />)}
+                </div>
+                <MentorVsYou profile={profile} mentorClosed={closed} />
+              </>
             )}
 
             {tab === "next" && (
               <div className="space-y-3">
-                {intents.length === 0 ? (
-                  <Empty msg="No pending intents. Sophos is watching, not forcing." />
-                ) : intents.map((i) => <MentorIntentCard key={i.id} intent={i} />)}
+                {intents.length === 0
+                  ? <Empty msg="No pending intents. Sophos is watching, not forcing." />
+                  : intents.map((i) => <MentorIntentCard key={i.id} intent={i} />)}
               </div>
             )}
+
+            {tab === "past" && <MentorPastList closed={closed} />}
 
             {tab === "journal" && <MentorJournalFeed entries={journal} />}
           </>

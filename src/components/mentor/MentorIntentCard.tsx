@@ -37,15 +37,17 @@ const MentorIntentCard = ({ intent }: { intent: any }) => {
   };
 
   const setAlert = async () => {
-    if (!intent.trigger_value) return toast({ title: "No price trigger", description: "This intent uses a non-price trigger." });
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    await supabase.from("price_alerts").insert({
-      user_id: user.id, symbol: intent.symbol,
-      target_price: Number(intent.trigger_value),
-      direction: intent.trigger_kind === "price_above" ? "above" : "below",
-    });
-    toast({ title: "Alert set", description: `We'll ping you when ${intent.symbol} hits ${intent.trigger_value}.` });
+    await supabase.from("mentor_intent_watchers").insert({ user_id: user.id, intent_id: intent.id });
+    if (intent.trigger_value && (intent.trigger_kind === "price_above" || intent.trigger_kind === "price_below")) {
+      await supabase.from("price_alerts").insert({
+        user_id: user.id, symbol: intent.symbol,
+        target_price: Number(intent.trigger_value),
+        direction: intent.trigger_kind === "price_above" ? "above" : "below",
+      });
+    }
+    toast({ title: "Watching this plan", description: `We'll ping you when Sophos opens ${intent.symbol}.` });
   };
 
   return (

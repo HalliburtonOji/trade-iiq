@@ -38,7 +38,7 @@ async function fetchQuote(symbol: string, asset_type: string) {
     });
     if (!r.ok) return null;
     const j = await r.json();
-    const q = j?.quotes?.[0] ?? j?.[0] ?? j;
+    const q = j?.quotes?.[symbol] ?? (Array.isArray(j?.quotes) ? j.quotes[0] : null) ?? j?.[0] ?? j;
     const price = q?.current_price ?? q?.price ?? null;
     return price ? Number(price) : null;
   } catch { return null; }
@@ -239,6 +239,16 @@ serve(async (req) => {
           body_text: `Opened ${i.symbol} ${i.direction} at ${price}. ${i.thesis}`,
           payload: { entry: price, sl, tp, qty },
         });
+        const { data: watchers } = await sb.from("mentor_intent_watchers").select("user_id").eq("intent_id", i.id);
+        if (watchers && watchers.length) {
+          await sb.from("notifications").insert(watchers.map((w: any) => ({
+            user_id: w.user_id,
+            type: "info",
+            title: `Sophos opened ${i.symbol}`,
+            body: `${i.direction.toUpperCase()} at ${price}. ${(i.thesis || "").slice(0,140)}`,
+            link: "/mentor",
+          })));
+        }
         summary.triggered++;
       }
     }
