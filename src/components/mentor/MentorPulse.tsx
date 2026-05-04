@@ -40,6 +40,8 @@ const MentorPulse = ({ profile, lastJournalAt }: Props) => {
     return `${Math.floor(ageSec/3600)}h ago`;
   }, [ageSec]);
 
+  const statusColor = stalled ? "var(--stoa-signal)" : inSession ? "var(--stoa-secondary)" : "var(--stoa-muted)";
+
   return (
     <div
       className="rounded-xl p-3 mb-4 transition-all space-y-3"
@@ -51,20 +53,47 @@ const MentorPulse = ({ profile, lastJournalAt }: Props) => {
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <div
-            className="h-2 w-2 rounded-full shrink-0"
-            style={{
-              background: stalled ? "var(--stoa-signal)" : inSession ? "var(--stoa-secondary)" : "var(--stoa-muted)",
-              boxShadow: inSession && !stalled ? "0 0 8px var(--stoa-secondary)" : "none",
-              animation: inSession && !stalled ? "stoa-pulse 1.6s ease-in-out infinite" : "none",
-            }}
-          />
+          <div className="relative shrink-0" style={{ width: 14, height: 14 }}>
+            {inSession && !stalled && (
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: statusColor,
+                  opacity: 0.35,
+                  animation: "stoa-ripple 2.2s ease-out infinite",
+                }}
+              />
+            )}
+            <div
+              className="absolute rounded-full"
+              style={{
+                inset: 4,
+                background: statusColor,
+                boxShadow: inSession && !stalled ? `0 0 8px ${statusColor}` : "none",
+              }}
+            />
+          </div>
           <div className="min-w-0">
-            <div className="stoa-kicker" style={{ color: stalled ? "var(--stoa-signal)" : "var(--stoa-ink)" }}>
-              {stalled ? "HEARTBEAT STALLED" : inSession ? "AWAKE · SCANNING" : "RESTING · OFF-SESSION"}
+            <div className="flex items-center gap-2">
+              <div className="stoa-kicker" style={{ color: stalled ? "var(--stoa-signal)" : "var(--stoa-ink)" }}>
+                {stalled ? "HEARTBEAT STALLED" : inSession ? "AWAKE · SCANNING" : "RESTING · OFF-SESSION"}
+              </div>
+              <span
+                className="stoa-mono"
+                style={{
+                  fontSize: 9,
+                  padding: "1px 6px",
+                  borderRadius: 4,
+                  background: "var(--stoa-bg)",
+                  color: "var(--stoa-muted)",
+                  border: "1px solid var(--stoa-rule)",
+                }}
+              >
+                {inSession ? "5m cadence" : "30m cadence"}
+              </span>
             </div>
             <div className="stoa-mono" style={{ fontSize: 11, color: "var(--stoa-muted)", marginTop: 2 }}>
-              last tick {ageLabel}{nextInSec !== null && !stalled ? ` · next in ${Math.floor(nextInSec/60)}m ${nextInSec%60}s` : ""}
+              last tick {ageLabel}{nextInSec !== null && !stalled ? ` · next in ${Math.floor(nextInSec / 60)}m ${nextInSec % 60}s` : ""}
             </div>
           </div>
         </div>
@@ -75,7 +104,13 @@ const MentorPulse = ({ profile, lastJournalAt }: Props) => {
 
       <MentorIntentTicker />
 
-      <style>{`@keyframes stoa-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }`}</style>
+      <style>{`
+        @keyframes stoa-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+        @keyframes stoa-ripple {
+          0% { transform: scale(0.6); opacity: 0.5; }
+          100% { transform: scale(1.8); opacity: 0; }
+        }
+      `}</style>
     </div>
   );
 };
