@@ -85,8 +85,9 @@ const MentorLetter = () => {
             {l.body_md}
           </div>
 
-          <div className="stoa-greek text-right" style={{ color: "var(--stoa-muted)", fontSize: 13, fontStyle: "italic" }}>
-            — Σοφός
+          <div className="flex items-center justify-between pt-2" style={{ borderTop: "1px dashed var(--stoa-rule)" }}>
+            <VoiceButton text={`${l.title}. ${l.greek_phrase || ""}. ${l.body_md}`} label="Listen to letter" />
+            <div className="stoa-greek" style={{ color: "var(--stoa-muted)", fontSize: 13, fontStyle: "italic" }}>— Σοφός</div>
           </div>
         </article>
       ))}
