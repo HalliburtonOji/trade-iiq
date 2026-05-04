@@ -312,13 +312,15 @@ serve(async (req) => {
               size_pct: Math.min(Number(plan.size_pct||1), 1),
               invalidation_text: plan.invalidation_text || "",
               thesis: plan.thesis || "",
+              conviction: plan.conviction ? Math.max(1, Math.min(5, Math.round(Number(plan.conviction)))) : null,
+              fail_reasons: Array.isArray(plan.fail_reasons) ? plan.fail_reasons.slice(0,3) : [],
               valid_until: new Date(Date.now() + validHours * 3600_000).toISOString(),
               status: "pending",
             }).select().single();
             await sb.from("mentor_journal").insert({
               kind: "intent_published", intent_id: intentRow?.id, symbol: plan.symbol,
               body_text: `New plan on ${plan.symbol}: ${plan.trigger_condition_text}. ${plan.thesis}`,
-              payload: { trigger: plan.trigger_condition_text },
+              payload: { trigger: plan.trigger_condition_text, conviction: plan.conviction || null },
             });
             summary.planned++;
           }
