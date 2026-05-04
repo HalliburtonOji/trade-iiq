@@ -976,6 +976,54 @@ export type Database = {
           },
         ]
       }
+      mentor_letters: {
+        Row: {
+          body_md: string
+          created_at: string
+          greek_phrase: string | null
+          id: string
+          intents_published: number
+          intents_skipped: number
+          mentor_slug: string
+          pnl_pct: number | null
+          stats: Json
+          title: string
+          trades_lost: number
+          trades_won: number
+          week_starting: string
+        }
+        Insert: {
+          body_md: string
+          created_at?: string
+          greek_phrase?: string | null
+          id?: string
+          intents_published?: number
+          intents_skipped?: number
+          mentor_slug?: string
+          pnl_pct?: number | null
+          stats?: Json
+          title: string
+          trades_lost?: number
+          trades_won?: number
+          week_starting: string
+        }
+        Update: {
+          body_md?: string
+          created_at?: string
+          greek_phrase?: string | null
+          id?: string
+          intents_published?: number
+          intents_skipped?: number
+          mentor_slug?: string
+          pnl_pct?: number | null
+          stats?: Json
+          title?: string
+          trades_lost?: number
+          trades_won?: number
+          week_starting?: string
+        }
+        Relationships: []
+      }
       mentor_locks: {
         Row: {
           id: number
