@@ -242,6 +242,21 @@ Choose ONE candidate to publish a pending intent for, OR skip with a data-ground
   try { return JSON.parse(call.function.arguments); } catch { return null; }
 }
 
+// Resolve user predictions when an intent reaches a terminal outcome
+async function resolvePredictions(sb: any, intentId: string | null | undefined, outcome: string) {
+  if (!intentId) return;
+  await sb.from("mentor_intents").update({ outcome }).eq("id", intentId);
+  const { data: preds } = await sb.from("mentor_predictions").select("id,prediction").eq("intent_id", intentId).is("resolved_at", null);
+  if (!preds?.length) return;
+  for (const pr of preds) {
+    await sb.from("mentor_predictions").update({
+      resolved_at: new Date().toISOString(),
+      outcome,
+      correct: pr.prediction === outcome,
+    }).eq("id", pr.id);
+  }
+}
+
 async function aiReflection(displayName: string, prompt: string): Promise<string> {
   try {
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
