@@ -155,4 +155,20 @@ const Empty = ({ msg }: { msg: string }) => (
   </div>
 );
 
+const FocusWrap = ({ id, highlightId, refMap, children }: { id: string; highlightId: string | null; refMap: React.MutableRefObject<Record<string, HTMLDivElement | null>>; children: React.ReactNode }) => {
+  const isHi = highlightId === id;
+  return (
+    <div
+      ref={(el) => { refMap.current[id] = el; }}
+      className="rounded-2xl transition-all"
+      style={{
+        boxShadow: isHi ? "0 0 0 3px var(--stoa-accent)" : "none",
+        transform: isHi ? "scale(1.005)" : "none",
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
 export default Mentor;
