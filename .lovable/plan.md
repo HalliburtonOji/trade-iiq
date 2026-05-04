@@ -13,11 +13,12 @@
 - Public profile (`/sophos/public`) with public-read RLS
 - Auto-generated Case Studies (`mentor-case-study` + `mentor_case_studies` + CASES tab + `/learn/case/:id`)
 - **Mirror Mode** auto-copy (`mentor-mirror-fanout` + `mentor_followers.mirror_enabled` + MentorMirrorToggle UI)
+- **Replay Mode** (REPLAY tab + `MentorReplay`) — day scrubber, autoplay, cumulative stats
 
 **Still in the original brainstorm, not built (Tier 2/3):**
 - Mentor vs You weekly leaderboard (MentorVsYou exists but no week-over-week R-multiple game)
 - "Why didn't you take this?" missed-trade reflection prompts
-- Replay Mode for past trades (animated chart + journal scrub)
+- Replay Mode (REPLAY tab) — day-by-day scrubber + autoplay through past Sophos decisions, with cumulative stats. Shipped as `MentorReplay`.
 - Live ATR / news catalyst tags on intents
 - Multi-personas (Θρασύς scalper, Ἥσυχος long-term)
 - "Copy with rules" playbook overlay
