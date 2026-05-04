@@ -1175,46 +1175,76 @@ export type Database = {
         Row: {
           bio: string
           born_at: string
+          cadence_minutes: number
           display_name: string
+          enabled: boolean
           equity: number
           id: string
+          last_tick_at: string | null
+          max_intents: number
+          max_open: number
+          max_valid_hours: number
+          min_valid_hours: number
           name: string
           persona_color: string
           persona_kind: string
+          persona_prompt: string
           persona_tagline: string
+          risk_pct: number
           slug: string
           starting_balance: number
           stats_json: Json
+          time_stop_hours: number
           updated_at: string
         }
         Insert: {
           bio?: string
           born_at?: string
+          cadence_minutes?: number
           display_name?: string
+          enabled?: boolean
           equity?: number
           id?: string
+          last_tick_at?: string | null
+          max_intents?: number
+          max_open?: number
+          max_valid_hours?: number
+          min_valid_hours?: number
           name?: string
           persona_color?: string
           persona_kind?: string
+          persona_prompt?: string
           persona_tagline?: string
+          risk_pct?: number
           slug?: string
           starting_balance?: number
           stats_json?: Json
+          time_stop_hours?: number
           updated_at?: string
         }
         Update: {
           bio?: string
           born_at?: string
+          cadence_minutes?: number
           display_name?: string
+          enabled?: boolean
           equity?: number
           id?: string
+          last_tick_at?: string | null
+          max_intents?: number
+          max_open?: number
+          max_valid_hours?: number
+          min_valid_hours?: number
           name?: string
           persona_color?: string
           persona_kind?: string
+          persona_prompt?: string
           persona_tagline?: string
+          risk_pct?: number
           slug?: string
           starting_balance?: number
           stats_json?: Json
+          time_stop_hours?: number
           updated_at?: string
         }
         Relationships: []
@@ -1222,6 +1252,7 @@ export type Database = {
       mentor_trades: {
         Row: {
           asset_type: string
+          breakeven_moved: boolean
           close_reflection: string | null
           closed_at: string | null
           direction: string
@@ -1231,17 +1262,26 @@ export type Database = {
           intent_id: string | null
           mentor_slug: string
           opened_at: string
+          partial_pnl: number | null
+          partial_price: number | null
+          partial_qty: number | null
+          partial_taken: boolean
           pnl: number | null
           pnl_percent: number | null
           quantity: number
+          r_initial: number | null
           status: string
           stop_loss: number
           symbol: string
           take_profit: number
           thesis: string
+          time_stop_at: string | null
+          trail_atr_mult: number | null
+          trail_high_water: number | null
         }
         Insert: {
           asset_type?: string
+          breakeven_moved?: boolean
           close_reflection?: string | null
           closed_at?: string | null
           direction: string
@@ -1251,17 +1291,26 @@ export type Database = {
           intent_id?: string | null
           mentor_slug?: string
           opened_at?: string
+          partial_pnl?: number | null
+          partial_price?: number | null
+          partial_qty?: number | null
+          partial_taken?: boolean
           pnl?: number | null
           pnl_percent?: number | null
           quantity: number
+          r_initial?: number | null
           status?: string
           stop_loss: number
           symbol: string
           take_profit: number
           thesis?: string
+          time_stop_at?: string | null
+          trail_atr_mult?: number | null
+          trail_high_water?: number | null
         }
         Update: {
           asset_type?: string
+          breakeven_moved?: boolean
           close_reflection?: string | null
           closed_at?: string | null
           direction?: string
@@ -1271,14 +1320,22 @@ export type Database = {
           intent_id?: string | null
           mentor_slug?: string
           opened_at?: string
+          partial_pnl?: number | null
+          partial_price?: number | null
+          partial_qty?: number | null
+          partial_taken?: boolean
           pnl?: number | null
           pnl_percent?: number | null
           quantity?: number
+          r_initial?: number | null
           status?: string
           stop_loss?: number
           symbol?: string
           take_profit?: number
           thesis?: string
+          time_stop_at?: string | null
+          trail_atr_mult?: number | null
+          trail_high_water?: number | null
         }
         Relationships: [
           {
