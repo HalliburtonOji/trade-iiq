@@ -159,26 +159,63 @@ const Mentor = () => {
               </div>
             )}
 
-            <div className="flex items-center gap-1 mb-6 mt-8 overflow-x-auto" style={{ borderBottom: "1px solid var(--stoa-rule)" }}>
-              {tabs.map((t) => (
-                <button
-                  key={t.key}
-                  onClick={() => setTab(t.key)}
-                  className="relative px-4 py-3 text-left transition-all shrink-0"
-                  style={{
-                    color: tab === t.key ? "var(--stoa-ink)" : "var(--stoa-muted)",
-                    borderBottom: tab === t.key ? "2px solid var(--stoa-accent)" : "2px solid transparent",
-                    marginBottom: -1,
-                  }}
-                >
-                  <div className="stoa-kicker" style={{ color: "inherit" }}>
-                    {t.label} <span style={{ opacity: 0.6 }}>· {t.count}</span>
-                  </div>
-                  <div className="stoa-greek" style={{ fontSize: 11, color: "var(--stoa-accent)", opacity: 0.7 }}>
-                    {t.greek}
-                  </div>
-                </button>
-              ))}
+            <div
+              className="sticky z-20 -mx-1 px-1 mb-6 mt-8 backdrop-blur"
+              style={{
+                top: 0,
+                background: "color-mix(in oklab, var(--stoa-bg) 88%, transparent)",
+                borderBottom: "1px solid var(--stoa-rule)",
+              }}
+            >
+              <div className="flex items-center gap-1 overflow-x-auto">
+                {tabs.map((t) => {
+                  const isActive = tab === t.key;
+                  return (
+                    <button
+                      key={t.key}
+                      onClick={() => setTab(t.key)}
+                      className="relative px-4 py-3 text-left transition-all shrink-0"
+                      style={{
+                        color: isActive ? "var(--stoa-ink)" : "var(--stoa-muted)",
+                      }}
+                    >
+                      <div className="stoa-kicker" style={{ color: "inherit" }}>
+                        {t.label}
+                        {t.count > 0 && (
+                          <span
+                            className="ml-1.5 inline-flex items-center justify-center rounded-full"
+                            style={{
+                              fontSize: 9,
+                              minWidth: 16,
+                              height: 16,
+                              padding: "0 5px",
+                              background: isActive ? "var(--stoa-accent)" : "var(--stoa-rule)",
+                              color: isActive ? "var(--stoa-bg)" : "var(--stoa-muted)",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {t.count}
+                          </span>
+                        )}
+                      </div>
+                      <div className="stoa-greek" style={{ fontSize: 11, color: "var(--stoa-accent)", opacity: isActive ? 0.95 : 0.55, marginTop: 2 }}>
+                        {t.greek}
+                      </div>
+                      {isActive && (
+                        <div
+                          className="absolute left-3 right-3"
+                          style={{
+                            bottom: -1,
+                            height: 2,
+                            background: "var(--stoa-accent)",
+                            borderRadius: 2,
+                          }}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {tab === "now" && (
