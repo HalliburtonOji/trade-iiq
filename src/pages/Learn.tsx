@@ -5,6 +5,7 @@ import PedimentCap from "@/components/stoa/PedimentCap";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { seedCodexInitiates } from "@/scripts/seed-codex-initiates";
+import MentorCaseStudiesSection from "@/components/mentor/MentorCaseStudiesSection";
 import { toast } from "sonner";
 
 type LearnModule = {
