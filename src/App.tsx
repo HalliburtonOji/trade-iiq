@@ -32,6 +32,7 @@ import Initiation from "./pages/Initiation";
 import Morning from "./pages/Morning";
 import Evening from "./pages/Evening";
 import Oracle from "./pages/Oracle";
+import Mentor from "./pages/Mentor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -122,6 +123,7 @@ const AppContent = () => {
         <Route path="/morning" element={<ProtectedRoute><Morning /></ProtectedRoute>} />
         <Route path="/evening" element={<ProtectedRoute><Evening /></ProtectedRoute>} />
         <Route path="/oracle" element={<ProtectedRoute><Oracle /></ProtectedRoute>} />
+        <Route path="/mentor" element={<ProtectedRoute><Mentor /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {user && <FloatingHub />}

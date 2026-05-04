@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   Menu, X, Home, TrendingUp, BarChart3, Filter, Sparkles, ClipboardList,
   PieChart, Lightbulb, GraduationCap, Gamepad2, Users, User as UserIcon,
-  LogOut, BookOpen, Image as ImageIcon, BarChart, Eye, Sun, Moon, Sunrise,
+  LogOut, BookOpen, Image as ImageIcon, BarChart, Eye, Sun, Moon, Sunrise, Crown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -38,6 +38,7 @@ const SECTIONS: Section[] = [
   {
     title: "Grow", greek: "Παιδεία",
     items: [
+      { label: "Sophos", icon: Crown, path: "/mentor" },
       { label: "Learn", icon: GraduationCap, path: "/learn" },
       { label: "Review", icon: BarChart, path: "/review" },
       { label: "Insights", icon: Lightbulb, path: "/insights" },
