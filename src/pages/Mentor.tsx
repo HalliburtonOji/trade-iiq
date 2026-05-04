@@ -23,7 +23,7 @@ import MissedTradeSheet from "@/components/mentor/MissedTradeSheet";
 import { useMentorFocus } from "@/hooks/useMentorFocus";
 import { Loader2 } from "lucide-react";
 
-type Tab = "now" | "next" | "past" | "cases" | "replay" | "journal" | "epistle";
+type Tab = "now" | "next" | "past" | "cases" | "replay" | "journal" | "epistle" | "arena";
 
 const Mentor = () => {
   const [tab, setTab] = useState<Tab>("now");
@@ -127,6 +127,7 @@ const Mentor = () => {
     { key: "replay",  label: "REPLAY",  greek: "Ἀναπόλησις",   count: 0 },
     { key: "journal", label: "JOURNAL", greek: "Βίβλος",       count: journal.length },
     { key: "epistle", label: "EPISTLE", greek: "Ἐπιστολή",     count: 0 },
+    { key: "arena",   label: "ARENA",   greek: "Ἀγών",         count: 0 },
   ];
 
   return (
