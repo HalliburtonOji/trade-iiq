@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import MentorHero from "@/components/mentor/MentorHero";
+import MentorFollowButton from "@/components/mentor/MentorFollowButton";
 import MentorTradeCard from "@/components/mentor/MentorTradeCard";
 import MentorIntentCard from "@/components/mentor/MentorIntentCard";
 import MentorJournalFeed from "@/components/mentor/MentorJournalFeed";
@@ -109,6 +110,7 @@ const SophosPublic = () => {
         ) : (
           <>
             <MentorHero profile={profile} closed={closed} openTrades={openTrades} />
+            <div className="mt-4 flex justify-end"><MentorFollowButton mentorSlug="sophos" /></div>
 
             {/* Tab nav */}
             <div className="flex gap-1 overflow-x-auto pb-1" style={{ borderBottom: "1px solid var(--stoa-rule)" }}>

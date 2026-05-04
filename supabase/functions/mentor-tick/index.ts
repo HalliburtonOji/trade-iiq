@@ -242,6 +242,21 @@ Choose ONE candidate to publish a pending intent for, OR skip with a data-ground
   try { return JSON.parse(call.function.arguments); } catch { return null; }
 }
 
+// Resolve user predictions when an intent reaches a terminal outcome
+async function resolvePredictions(sb: any, intentId: string | null | undefined, outcome: string) {
+  if (!intentId) return;
+  await sb.from("mentor_intents").update({ outcome }).eq("id", intentId);
+  const { data: preds } = await sb.from("mentor_predictions").select("id,prediction").eq("intent_id", intentId).is("resolved_at", null);
+  if (!preds?.length) return;
+  for (const pr of preds) {
+    await sb.from("mentor_predictions").update({
+      resolved_at: new Date().toISOString(),
+      outcome,
+      correct: pr.prediction === outcome,
+    }).eq("id", pr.id);
+  }
+}
+
 async function aiReflection(displayName: string, prompt: string): Promise<string> {
   try {
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -315,6 +330,8 @@ async function managePosition(sb: any, p: Persona, t: any, price: number, summar
         body: JSON.stringify({ trade_id: t.id }),
       }).catch((e) => console.error("[mentor-tick] case-study trigger failed:", e));
     } catch {}
+    const intentOutcome = hitTP ? "tp_hit" : hitSL ? "sl_hit" : "closed";
+    await resolvePredictions(sb, t.intent_id, intentOutcome);
     summary.closed++;
     return { closed: true, realizedDelta: totalPnl, unrealized: 0 };
   }
@@ -426,7 +443,8 @@ async function runPersona(sb: any, p: Persona) {
   for (const i of intents || []) {
     if (new Date(i.valid_until).getTime() < Date.now()) {
       const note = "Window passed without trigger. Patience over force.";
-      await sb.from("mentor_intents").update({ status: "expired", resolved_at: nowIso, resolution_note: note }).eq("id", i.id);
+      await sb.from("mentor_intents").update({ status: "expired", outcome: "expired", resolved_at: nowIso, resolution_note: note }).eq("id", i.id);
+      await resolvePredictions(sb, i.id, "expired");
       await sb.from("mentor_journal").insert({
         mentor_slug: p.slug, kind: "intent_resolved", intent_id: i.id, symbol: i.symbol,
         body_text: `Intent on ${i.symbol} expired — ${note}`,

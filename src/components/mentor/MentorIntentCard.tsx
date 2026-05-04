@@ -3,6 +3,7 @@ import { Clock, Copy, Bell, Hourglass } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import MentorPlanDiff from "./MentorPlanDiff";
+import MentorPredictionPoll from "./MentorPredictionPoll";
 
 const MentorIntentCard = ({ intent }: { intent: any }) => {
   const [copies, setCopies] = useState<number | null>(null);
@@ -100,6 +101,8 @@ const MentorIntentCard = ({ intent }: { intent: any }) => {
           INVALIDATE IF · {intent.invalidation_text}
         </p>
       )}
+
+      <MentorPredictionPoll intentId={intent.id} mentorSlug={intent.mentor_slug || "sophos"} symbol={intent.symbol} />
 
       <div className="flex gap-2 pt-2" style={{ borderTop: "1px solid var(--stoa-rule)" }}>
         <button onClick={() => setDiffOpen(true)}

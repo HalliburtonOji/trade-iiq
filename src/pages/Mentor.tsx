@@ -16,6 +16,9 @@ import MentorReplay from "@/components/mentor/MentorReplay";
 import MentorPersonaSwitcher from "@/components/mentor/MentorPersonaSwitcher";
 import MentorWeeklyVsYou from "@/components/mentor/MentorWeeklyVsYou";
 import MentorMissedWinners from "@/components/mentor/MentorMissedWinners";
+import MentorFollowButton from "@/components/mentor/MentorFollowButton";
+import MentorConvictionScorecard from "@/components/mentor/MentorConvictionScorecard";
+import MentorCoachNotes from "@/components/mentor/MentorCoachNotes";
 import MissedTradeSheet from "@/components/mentor/MissedTradeSheet";
 import { useMentorFocus } from "@/hooks/useMentorFocus";
 import { Loader2 } from "lucide-react";
@@ -140,7 +143,10 @@ const Mentor = () => {
             <MentorHero profile={profile} closed={closed} openTrades={trades} />
             {mentorSlug === "sophos" && (
               <>
-                <div className="mt-6"><MentorMirrorToggle /></div>
+                <div className="mt-4 flex justify-end">
+                  <MentorFollowButton mentorSlug="sophos" />
+                </div>
+                <div className="mt-4"><MentorMirrorToggle /></div>
                 <div className="mt-4">
                   <MentorMissedWinners
                     mentorSlug={mentorSlug}
@@ -231,6 +237,8 @@ const Mentor = () => {
                 </div>
                 <MentorVsYou profile={profile} mentorClosed={closed} />
                 <MentorWeeklyVsYou mentorSlug={mentorSlug} />
+                <MentorConvictionScorecard mentorSlug={mentorSlug} />
+                {mentorSlug === "sophos" && <MentorCoachNotes />}
               </>
             )}
 
