@@ -1,143 +1,105 @@
 
-# Where the Sophos plan stands
+# Sophos — Deep Research & Roadmap
 
-**Shipped:**
-- Live heartbeat + Intent Ticker (MentorPulse + MentorIntentTicker)
-- Tab focus / scroll highlighting from ticker → NOW/NEXT/PAST cards
-- `intent_resolved` journaling fix in `mentor-tick`
-- Conviction Meter (1–5) + "How this could fail" on every intent
-- Watchlist Radar (24h skip aggregator, bucketed reasons)
-- Plan Diff sizing modal (risk %, qty, notional, over-leverage warnings)
-- Weekly Epistle (`mentor-weekly` + `mentor_letters` + EPISTLE tab + Sunday 17:00 UTC cron)
-- Sidebar entry under GROW (Σοφός)
-- Public profile (`/sophos/public`) with public-read RLS
-- Auto-generated Case Studies (`mentor-case-study` + `mentor_case_studies` + CASES tab + `/learn/case/:id`)
-- **Mirror Mode** auto-copy (`mentor-mirror-fanout` + `mentor_followers.mirror_enabled` + MentorMirrorToggle UI)
-- **Replay Mode** (REPLAY tab + `MentorReplay`) — day scrubber, autoplay, cumulative stats
+## What Sophos already is (audit)
 
-**Still in the original brainstorm, not built (Tier 2/3):**
-- Mentor vs You weekly leaderboard (MentorVsYou exists but no week-over-week R-multiple game)
-- "Why didn't you take this?" missed-trade reflection prompts
-- Replay Mode (REPLAY tab) — day-by-day scrubber + autoplay through past Sophos decisions, with cumulative stats. Shipped as `MentorReplay`.
-- Live ATR / news catalyst tags on intents
-- Multi-personas (Θρασύς scalper, Ἥσυχος long-term)
-- "Copy with rules" playbook overlay
+**Core:** A live, transparent AI swing trader at `/mentor`. Each ~5min tick, an LLM publishes one INTENT (or a SKIP) → real-time triggers fill paper trades → P&L runs against £10k.
 
+**Built layers (27 components, 6 edge functions, 8 mentor_* tables):**
+- 7-tab life: NOW / NEXT / PAST / CASES / REPLAY / JOURNAL / EPISTLE
+- Personas (Σοφός / Θρασύς / Ἥσυχος), Mirror Mode, Missed Winners, Weekly R-Contest, Case Studies, Public Profile, Letter (Sundays)
 
----
+**State of the data (right now):**
+| Surface     | Rows |
+|-------------|-----:|
+| Journal     |  122 |
+| Skip events |  117 |
+| Intents     |    4 |
+| Open trades |    1 |
+| Closed      |    0 |
+| Case studies|    0 |
+| Followers   |    0 |
+| Mirror copies | 0 |
+| Missed reflections | 0 |
 
-# Brainstorm: linking Sophos to the rest of the app
+## The honest diagnosis
 
-Right now Sophos is a beautiful island at `/mentor`. Everywhere else (Demo Trading, Learn, Review, Morning/Evening, Insights, Playbook) acts like he doesn't exist. The win is making him *the connective tissue* — a single voice that shows up wherever the user is making, reviewing or learning a decision.
+**1. The brain is starved.** `mentor-tick` feeds the LLM ONE current price per symbol. No candles, no RSI, no support/resistance, no volume. Result: ~97% skip rate ("a single price point provides no context"). Every downstream ritual (cases, leaderboard, missed reflections, mirror) is empty because there are almost no closed trades.
 
-Mapped by surface:
+**2. Feedback loops aren't closed.** Followers table = 0 because there's no "follow" action; Mirror is on the page but you can mirror nothing if Sophos never opens. Public profile, case studies, and replay all look hollow.
 
-### 1. Demo Trading (`/demo-trading`) — "Trade alongside the master"
-- **Sophos Sidebar Strip** on the trade ticket: while the user is sizing a trade on AAPL, show "Sophos has an open AAPL long since 2 days ago, +1.4%" or "Sophos skipped AAPL 3h ago — reason: ATR too tight." Pulls from `mentor_trades` + `mentor_journal` filtered by symbol.
-- **"Sophos disagrees" warning**: if user opens a long where Sophos has a published *short* intent (or vice versa), Setup Score modal shows a Σοφός badge with his thesis. Friction without forcing.
-- **Mirror Mode toggle** (per account, opt-in): every Sophos open → push notification + one-tap copy via existing `mentor-copy`. Existing PlanDiff reused.
-- **Post-trade attribution**: when a copied trade closes, the Trade Review screen shows side-by-side "Yours vs Sophos" R-multiple — surfaces the cost of late entries / early exits.
+**3. The personas are dressing.** Thrasys & Hesychos exist in DB and switcher, but `mentor-tick` is hardcoded to Sophos only.
 
-### 2. Learn (`/learn`) — "Sophos is the textbook in motion"
-- **Live exemplar links on lessons**: every lesson tags a `concept_slug` (e.g. `breakout-retest`, `risk-1pct`). When Sophos publishes/closes a trade tagged with that concept, surface a "Sophos just did this — go watch" card on the matching lesson. Built off `mentor_journal.payload.tags[]` (add to AI schema).
-- **Sophos Case Studies tab in Learn**: auto-generated lesson library from his closed trades. Each closed trade → 1-screen case study (Setup → Thesis → Outcome → Lesson). Reuses `MentorPastList` styling, plus a small AI summary via Gemini Flash.
-- **Drill cross-link**: when the user fails a Pattern Drill (e.g. "Identify a fakeout"), suggest the closest matching closed Sophos trade as a real-world example.
+**4. Sophos doesn't know what users do.** The mentor never references your trades, your DNA, your rulebook — it's a one-way broadcast.
 
-### 3. Review (`/review`) + Evening (`/evening`)
-- **"Sophos's day" block**: every evening reflection shows what Sophos did today (1 line per event). Cheap, daily, makes the app feel alive even on quiet user days.
-- **Decision diff in Weekly Coaching**: for the user's losing trades, run a quick check — "On this same day, Sophos was in cash" or "Sophos took the opposite side and won." Hard truth, plain English.
-- **Council Banner** could include Sophos as the 4th voice ("The Disciplined Trader") alongside the existing personas in `CouncilBanner.tsx`.
+## Ranked roadmap (impact × leverage)
 
-### 4. Morning Brief (`/morning`)
-- **Sophos's Watchlist** — top of the brief, 3 symbols he's currently watching (pending intents) with one-line reasons. Steers user attention before the day starts.
-- **"Conviction tells you the weather"**: average conviction across pending intents → mood pill ("Sophos is cautious today — only 2/5 average conviction").
+### Tier 1 — Make Sophos actually trade (existential)
+Without this, every other feature stays cold.
 
-### 5. Playbook (`/playbook`)
-- **Import a Sophos rule**: every time Sophos's weekly Letter mentions a discipline ("never copy when conviction <3"), offer a one-click "Add this to my Rulebook." Compounds with existing `daily_rules` + `rule_violations` infra.
-- **Strategy alignment badge**: tag each user playbook with a strategy_type; show "Sophos's win rate on this strategy: 62% over 14 trades" using `mentor_trades` filtered by playbook tags.
+1. **Multi-bar context for the brain.** Pass last 30 candles + RSI + 20/50 EMA + ATR + volume regime to the LLM. Reuse `historical-candles` + `analyze-symbol`. Expected effect: skip rate drops from ~97% → ~40%, intents per day go from ~1 → ~5.
+2. **Activate Thrasys & Hesychos.** Run `mentor-tick` per persona with persona-specific prompts (scalper: 4–8h windows, 0.3% risk, RSI extremes; long-term: weekly intents, 2% risk, trend + macro). Three living traders ≫ one.
+3. **Open-position management.** Today Sophos opens & forgets until SL/TP. Add: trailing stops, partial profit-taking, "Sophos moves stop to breakeven" journal entries. Each becomes a teachable journal moment.
 
-### 6. Insights (`/insights`) / DQS
-- **Sophos benchmark line** on the user's equity curve and DQS sparkline. Comparative, not punitive — "your DQS 71, Sophos 84."
-- **Bias overlap detection**: cross-reference user bias detector flags with Sophos's same-day journal. If user revenge-traded and Sophos was patient, surface that as a coaching moment.
+### Tier 2 — Close the feedback loops (engagement)
+Turn the broadcast into a relationship.
 
-### 7. Oracle (`/oracle`) chatbot
-- **Sophos context injection**: the chat prompt already knows the user; also pass last 5 mentor journal entries + open intents. Now the user can ask "Why is Sophos in NVDA?" and get a real answer from Oracle, not Sophos's voice but Oracle citing him. Cheap unification.
+4. **Sophos Reads You.** A `mentor-coach` function that, on user trade close, posts a journal entry like *"You sold AAPL after 2h. I would have held — my stop sits at $187.20, 1.4R away. Patience."* Uses your trade + Sophos's open positions. Pure retention magic — turns the mentor from broadcaster to coach.
+5. **Follow / unfollow buttons.** Add explicit `Follow` CTA on `/mentor` and `/sophos/public`. Followers get push/email/in-app on intents+opens (already plumbed via `notifications`). Without follow, Mirror Mode and notifications can't reach anyone.
+6. **Conviction calibration scorecard.** Group closed trades by published conviction (1–5). Show "When Sophos is 5/5, win rate is 71%. When 2/5, 38%. Use this." Adds epistemic honesty + makes the conviction number actually mean something.
+7. **Predict-the-outcome polls.** When a new intent publishes, give followers 2 hrs to vote "will it trigger? hit TP? hit SL?" before resolution. Tracks user prediction accuracy. Drives daily check-ins and contrasts user instinct vs Sophos.
+8. **"Why did you skip?" expand-on-tap.** SKIP entries dominate the journal. Make them studyable: small chart thumbnail, the rejected setup, and a 1-line takeaway. Skipping IS the lesson — surface it like one.
 
-### 8. Daily Practice (Hexis) + Missions
-- **Mission: "Read Sophos's journal today"** (+5 XP) — drives daily return to /mentor.
-- **Mission: "Diff your trade against Sophos"** — opens Plan Diff on any open user trade, awards XP for the comparison even without copying.
-- **Streak tie-in**: weekly Epistle published on Sunday auto-grants a "Letter Read" mission Monday morning.
+### Tier 3 — Expand the product surface (depth)
+9. **Sophos Live Stream room.** During US session, a sticky drawer at `/dashboard` with Sophos's last 6 thoughts (skip/plan/open/close), heart-rate dot, and a "Watch live" link. Social-proof feeling without any social.
+10. **Voice mode.** TTS-narrated daily brief and weekly Letter (browser SpeechSynthesis or ElevenLabs). 60-sec "morning thought from Sophos." Massive perceived intelligence with little code.
+11. **Sophos vs Sophos: persona arena.** A leaderboard tab comparing the three mentors over 7/30/90d (P&L, R-multiple, win rate, max DD). Lets users *choose their voice* with evidence.
+12. **Lesson Threads.** Cluster case studies by tag ("FOMO", "Trailing stops", "News-driven exits") into mini-series in `/learn`. Turns one-off cases into structured curriculum.
+13. **Sophos Cards (shareable).** OG-image generator for closed trades & case studies. `/api/og/case/:id` returns a beautiful Stoa-styled PNG. One-click share to X/Discord. Free distribution loop.
+14. **Sophos Daily Brief notification at 09:30 ET.** Single push with: "Open: 2. Watching: 4. Conviction today: high. Read his journal →". Reliable retention beat.
+15. **Personal Sophos Verdict on YOUR trades.** Hook into your `paper_trades`/`trades` lifecycle: when you open a trade, fetch Sophos's stance on the symbol (open? watching? skipped today and why?) and surface as a calm second opinion — *not* a block. Ties Sophos directly to user behavior.
 
-### 9. Notifications + Floating Hub
-- Push real-time `notifications` rows when Sophos opens/closes/publishes — already have the table + RLS, just not wired. Tap → focus to the matching card via existing `useMentorFocus`.
+### Tier 4 — Polish & mechanics
+16. **Sophos Greek-numeral day counter** ("Day ΞΓʹ alive"), age compounding shown on hero.
+17. **Replay → "Make this a teaching moment"** button that converts any past day into a saved scenario in `/learn/scenario`.
+18. **Public profile SEO** — server-rendered OG meta + JSON-LD for /sophos/public. Free top-of-funnel.
+19. **Audit Mode on Letter** — on each Sunday letter, show diff vs predictions made the previous week (kept promises / broke promises). Builds trust.
+20. **Multi-month Skill Map for Sophos himself** — surface his own evolving Trading DNA so users can see him become a different trader over time.
 
-### 10. Onboarding
-- New "Pick your mentor" step in OnboardingWizard. For now only Sophos exists, but it sets up the multi-personas Tier 3 work cleanly and primes the user to expect this voice everywhere.
+## Implementation slices (suggested order)
 
----
+```text
+SPRINT 1 — Brain & Body            (existential)
+  ├─ 1  Multi-bar context for mentor-tick prompt
+  ├─ 2  Persona-specific tick runners (3 mentors live)
+  └─ 3  Position management (trailing/breakeven/partials)
 
-# Recommended next build (one round)
+SPRINT 2 — The Loop                (engagement)
+  ├─ 4  Follow/unfollow CTA + persistence
+  ├─ 5  Sophos-reads-your-trade coach function
+  ├─ 6  Conviction calibration scorecard (NOW tab)
+  └─ 7  Predict-the-outcome polls
 
-Pick the 3 that give the biggest "Sophos is everywhere" feel for the least new infra. My recommendation:
+SPRINT 3 — Reach & Retention       (growth)
+  ├─ 8  Daily brief push + voice mode
+  ├─ 9  Shareable OG cards for case studies
+  ├─ 10 Persona arena leaderboard
+  └─ 11 Lesson threads in /learn
+```
 
-### A. **Sophos Sidebar Strip on Demo Trading** (highest leverage)
-A small `MentorSymbolStrip` component that, given a symbol, queries:
-- open `mentor_trades` for that symbol
-- pending `mentor_intents` for that symbol
-- last 24h `mentor_journal` skips for that symbol
+## Technical notes (for the engineer)
 
-Renders one compact card with a "View on Sophos" CTA (uses `focusMentor()` + navigate). Drop into:
-- `DemoTrading.tsx` trade ticket
-- `Analysis.tsx` symbol page
-- `Charts.tsx` toolbar
+- `mentor-tick` candidate enrichment: call `historical-candles` for top-3 candidates → derive RSI(14), EMA20/50, ATR(14), vol-vs-20MA before the LLM call. This is the single highest-leverage code change in the project.
+- Persona variation: store persona-specific prompts on `mentor_profile.persona_prompt` (jsonb). Run one tick per persona with its own pool, MAX_OPEN, MAX_INTENTS, RISK_PCT.
+- `mentor-coach` (new fn): trigger on `paper_trades` close, compare to mentor's stance, write a `mentor_journal` entry with `kind='coach_note'` and `payload.user_trade_id`.
+- Daily brief: extend existing `daily-brief` with a Sophos block. Use service-role to read mentor_* tables.
+- OG images: edge fn returning `image/png` via `npm:satori` + `npm:resvg`.
+- All new LLM calls should keep using the Lovable AI Gateway (Gemini 2.5 Flash for cheap, 2.5 Pro only for Letter/Cases).
 
-Two new files, three insertions. Massive perceived integration.
+## Open questions for you
+- Do you want all three personas live now, or keep Thrasys/Hesychos as "coming soon" until Sophos is healthy?
+- Mirror Mode — keep paper-only, or eventually surface deep-links to brokers (`/broker-launcher`) for Sophos's plans?
+- Voice mode: free Web SpeechSynthesis (good enough), or ElevenLabs (premium feel, ~£5/mo per active user)?
+- Do you want me to start with SPRINT 1 in full, or just the single highest-leverage item (multi-bar context) so you can see the skip-rate fall before committing to the rest?
 
-### B. **"Sophos's Day" block in Evening + Morning**
-Top-of-page strip on `/evening` and `/morning` listing today's mentor events (max 4) with timestamps. Uses existing `mentor_journal`. ~80 lines.
-
-### C. **Notifications wiring + missed-trade reflection**
-- Add inserts to `notifications` inside `mentor-tick` for `intent_published` and `open` events (one row per follower).
-- New "Why didn't you take this?" sheet on the notification — saves a row to `evening_reflections` with the missed trade context.
-
-### D. **Oracle context injection** (1-line backend change, huge UX)
-In `supabase/functions/oracle/index.ts`, before the Gemini call, fetch latest 5 `mentor_journal` + open intents and append to system prompt. Now Oracle knows Sophos.
-
-### E. **Mission integration**
-Add 2 mission types to `tradingMissions.ts`:
-- `read_mentor_journal` (visit /mentor + scroll JOURNAL tab)
-- `mentor_plan_diff` (open PlanDiff on any Sophos intent)
-
-Wire detection in `useDailyMissionsState.ts`.
-
----
-
-# Out of scope for this build
-- Replay Mode (needs historical-candles scrubbing UI, big standalone task)
-- Public `/sophos/public` page (SEO/marketing surface, separate round)
-- Multi-personas (engine work, separate round)
-- Mirror Mode auto-copy (regulatory/UX care needed)
-- Sophos Case Studies auto-generator (needs concept tagging schema first)
-
----
-
-# Files to change if you approve A–E
-
-**New:**
-- `src/components/mentor/MentorSymbolStrip.tsx`
-- `src/components/mentor/MentorTodayStrip.tsx`
-- `src/components/mentor/MissedTradeSheet.tsx`
-
-**Edit:**
-- `src/pages/DemoTrading.tsx`, `src/pages/Analysis.tsx`, `src/pages/Charts.tsx` — drop in symbol strip
-- `src/pages/Morning.tsx`, `src/pages/Evening.tsx` — drop in today strip
-- `src/components/NotificationPanel.tsx` — handle mentor notif tap → MissedTradeSheet
-- `supabase/functions/mentor-tick/index.ts` — insert notifications on publish/open
-- `supabase/functions/oracle/index.ts` — inject mentor context
-- `src/data/tradingMissions.ts` + `src/hooks/useDailyMissionsState.ts` — 2 new missions
-
-No DB migrations needed — every table already exists.
-
----
-
-**Tell me which of A–E to ship in the next round.** A + B + D is my minimum-viable "Sophos is everywhere" pass; A + B + C + D + E is the full integration.
+Approve to start; tell me which item or sprint to pick up first.

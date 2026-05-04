@@ -44,8 +44,113 @@ async function fetchQuote(symbol: string, asset_type: string) {
   } catch { return null; }
 }
 
+// ── Context: real OHLCV-derived features so Sophos can actually reason. ──
+type Ctx = {
+  symbol: string; price: number; asset_type: string;
+  ema20: number; ema50: number; rsi14: number; atr14: number;
+  vol_regime: "high" | "normal" | "low";
+  high30: number; low30: number;
+  trend: "up" | "down" | "side";
+  pct_from_high30: number; pct_from_low30: number;
+  bars: number;
+};
+
+function ema(values: number[], period: number): number {
+  if (!values.length) return 0;
+  const k = 2 / (period + 1);
+  let e = values[0];
+  for (let i = 1; i < values.length; i++) e = values[i] * k + e * (1 - k);
+  return e;
+}
+function rsi(closes: number[], period = 14): number {
+  if (closes.length < period + 1) return 50;
+  let gains = 0, losses = 0;
+  for (let i = 1; i <= period; i++) {
+    const d = closes[i] - closes[i - 1];
+    if (d >= 0) gains += d; else losses -= d;
+  }
+  let avgG = gains / period, avgL = losses / period;
+  for (let i = period + 1; i < closes.length; i++) {
+    const d = closes[i] - closes[i - 1];
+    avgG = (avgG * (period - 1) + Math.max(d, 0)) / period;
+    avgL = (avgL * (period - 1) + Math.max(-d, 0)) / period;
+  }
+  if (avgL === 0) return 100;
+  const rs = avgG / avgL;
+  return 100 - 100 / (1 + rs);
+}
+function atr(candles: any[], period = 14): number {
+  if (candles.length < period + 1) return 0;
+  const trs: number[] = [];
+  for (let i = 1; i < candles.length; i++) {
+    const h = Number(candles[i].high), l = Number(candles[i].low), pc = Number(candles[i - 1].close);
+    trs.push(Math.max(h - l, Math.abs(h - pc), Math.abs(l - pc)));
+  }
+  const recent = trs.slice(-period);
+  return recent.reduce((a, b) => a + b, 0) / recent.length;
+}
+
+async function fetchContext(symbol: string, asset_type: string, price: number): Promise<Ctx | null> {
+  try {
+    // Disambiguate per asset_type so historical-candles doesn't grab a same-ticker stock.
+    let candleSym = symbol;
+    if (asset_type === "crypto") candleSym = `${symbol.replace(/USD[TC]?$/i, "")}-USD`;
+    else if (asset_type === "forex") candleSym = `${symbol.replace(/[^A-Za-z]/g, "").toUpperCase()}=X`;
+
+    const end = new Date();
+    const start = new Date(end.getTime() - 90 * 24 * 3600_000);
+    const r = await fetch(`${SUPABASE_URL}/functions/v1/historical-candles`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${ANON}`, apikey: ANON },
+      body: JSON.stringify({
+        symbol: candleSym,
+        start_date: start.toISOString().slice(0, 10),
+        end_date: end.toISOString().slice(0, 10),
+      }),
+    });
+    if (!r.ok) return null;
+    const j = await r.json();
+    const candles: any[] = Array.isArray(j?.candles) ? j.candles : [];
+    if (candles.length < 25) return null;
+    const closes = candles.map((c) => Number(c.close)).filter((x) => Number.isFinite(x));
+    const vols = candles.map((c) => Number(c.volume) || 0);
+    const last30 = candles.slice(-30);
+    const high30 = Math.max(...last30.map((c) => Number(c.high)));
+    const low30 = Math.min(...last30.map((c) => Number(c.low)));
+    // Sanity: candle universe and live quote must match scale (within 5×). Otherwise wrong instrument.
+    const lastClose = closes[closes.length - 1];
+    if (lastClose && (price > lastClose * 5 || price < lastClose / 5)) {
+      console.log(`[mentor-tick] ${symbol} (${asset_type}) candle/quote mismatch — px ${price} vs lastClose ${lastClose}; dropping`);
+      return null;
+    }
+    const ema20 = ema(closes.slice(-40), 20);
+    const ema50 = ema(closes.slice(-80), 50);
+    const rsi14 = rsi(closes.slice(-30), 14);
+    const atr14 = atr(candles.slice(-30), 14);
+    const v20 = vols.slice(-20).reduce((a, b) => a + b, 0) / 20;
+    const vLast = vols[vols.length - 1] || v20;
+    const vol_regime: Ctx["vol_regime"] = vLast > v20 * 1.4 ? "high" : vLast < v20 * 0.6 ? "low" : "normal";
+    const trend: Ctx["trend"] =
+      ema20 > ema50 * 1.005 && price > ema20 ? "up" :
+      ema20 < ema50 * 0.995 && price < ema20 ? "down" : "side";
+    return {
+      symbol, price, asset_type,
+      ema20: +ema20.toFixed(4), ema50: +ema50.toFixed(4),
+      rsi14: +rsi14.toFixed(1), atr14: +atr14.toFixed(4),
+      vol_regime, high30: +high30.toFixed(4), low30: +low30.toFixed(4),
+      trend,
+      pct_from_high30: +(((price - high30) / high30) * 100).toFixed(2),
+      pct_from_low30: +(((price - low30) / low30) * 100).toFixed(2),
+      bars: candles.length,
+    };
+  } catch (e) {
+    console.error("[mentor-tick] fetchContext failed", symbol, e);
+    return null;
+  }
+}
+
 async function aiPlan(opts: {
-  candidates: { symbol: string; price: number; asset_type: string }[];
+  candidates: Ctx[];
   equity: number;
   openCount: number;
   intentCount: number;
@@ -53,21 +158,29 @@ async function aiPlan(opts: {
 }) {
   const sys = `You are Σοφός (Sophos), a disciplined stoic swing trader publishing trade plans for students.
 You publish FORWARD-LOOKING INTENTS, not immediate trades. Each intent is a conditional plan with a clear trigger.
-Risk strictly ≤ 1% per trade. Mandatory stop-loss. Voice: stoic, second person, ≤ 3 sentences thesis.
-For every INTENT you must include a conviction score 1–5 and 1–3 specific fail_reasons — be honest about what could go wrong.
-For every SKIP you must include a SHORT specific skip_reason (e.g. "ATR too tight", "awaiting volume", "mid-range, no edge"). Never say "no setup earned its place".
-Return ONE intent OR a SKIP if nothing earns its place.`;
+Risk strictly ≤ 1% per trade. Mandatory stop-loss derived from structure (e.g. swing low, 1.5×ATR, prior support). Take-profit ≥ 1.5R.
+Voice: stoic, second person, ≤ 3 sentences thesis. Reference the actual structure (trend, RSI, ATR, 30-day range) you see — never vague.
+For every INTENT include a conviction 1–5 and 1–3 specific fail_reasons grounded in the data shown.
+SKIP only when the data genuinely offers no edge — give ONE short specific reason citing the data (e.g. "RSI 52 mid-range, ATR compressed", "price 4% from 30d high with weakening volume").
+Never say "no setup earned its place" or "single price point — no context": you DO have context now.`;
+
+  const candLines = opts.candidates.map((c) => {
+    return `- ${c.symbol} (${c.asset_type}) px ${c.price}
+    trend ${c.trend} | EMA20 ${c.ema20} EMA50 ${c.ema50} | RSI14 ${c.rsi14} | ATR14 ${c.atr14} | vol ${c.vol_regime}
+    30d range [${c.low30} → ${c.high30}] · ${c.pct_from_high30}% from high · ${c.pct_from_low30}% from low · ${c.bars} bars`;
+  }).join("\n");
 
   const userMsg = `Current equity: £${opts.equity.toFixed(0)}.
 Open positions: ${opts.openCount}/${MAX_OPEN}. Pending intents: ${opts.intentCount}/${MAX_INTENTS}.
 
-Candidates (live prices):
-${opts.candidates.map(c => `- ${c.symbol} (${c.asset_type}) @ ${c.price}`).join("\n")}
+Candidates with structural context:
+${candLines}
 
 Recent decisions:
 ${opts.recentJournal.slice(0,5).map(t => `- ${t}`).join("\n") || "- (none yet)"}
 
-Choose ONE candidate to publish a pending intent for, OR skip with a reason.`;
+Choose ONE candidate to publish a pending intent for, OR skip with a data-grounded reason.
+When sizing the stop, use ATR or visible structure. When choosing trigger price, prefer breakout above 30d high, reclaim of EMA, or pullback to support.`;
 
   const tools = [{
     type: "function",
@@ -309,10 +422,13 @@ serve(async (req) => {
       // rotate by minute
       const offset = Math.floor(Date.now() / 60_000) % pool.length;
       const slice = [pool[offset], pool[(offset+3)%pool.length], pool[(offset+7)%pool.length]];
-      const candidates: any[] = [];
+      const candidates: Ctx[] = [];
       for (const c of slice) {
         const p = await fetchQuote(c.symbol, c.asset_type);
-        if (p) candidates.push({ ...c, price: p });
+        if (!p) continue;
+        const ctx = await fetchContext(c.symbol, c.asset_type, p);
+        if (ctx) candidates.push(ctx);
+        else console.log(`[mentor-tick] no context for ${c.symbol} — dropped from candidate set`);
       }
       if (candidates.length) {
         const { data: recent } = await sb.from("mentor_journal").select("body_text").order("created_at",{ascending:false}).limit(5);
