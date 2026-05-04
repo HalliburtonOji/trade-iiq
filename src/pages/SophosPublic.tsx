@@ -110,6 +110,7 @@ const SophosPublic = () => {
         ) : (
           <>
             <MentorHero profile={profile} closed={closed} openTrades={openTrades} />
+            <div className="mt-4 flex justify-end"><MentorFollowButton mentorSlug="sophos" /></div>
 
             {/* Tab nav */}
             <div className="flex gap-1 overflow-x-auto pb-1" style={{ borderBottom: "1px solid var(--stoa-rule)" }}>
