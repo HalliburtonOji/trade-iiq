@@ -114,7 +114,11 @@ const Mentor = () => {
                 <div className="space-y-3">
                   {trades.length === 0
                     ? <Empty msg="Sophos is in cash. Patience is a position." />
-                    : trades.map((t) => <MentorTradeCard key={t.id} trade={t} />)}
+                    : trades.map((t) => (
+                        <FocusWrap key={t.id} id={t.id} highlightId={highlightId} refMap={itemRefs}>
+                          <MentorTradeCard trade={t} />
+                        </FocusWrap>
+                      ))}
                 </div>
                 <MentorVsYou profile={profile} mentorClosed={closed} />
               </>
@@ -124,7 +128,11 @@ const Mentor = () => {
               <div className="space-y-3">
                 {intents.length === 0
                   ? <Empty msg="No pending intents. Sophos is watching, not forcing." />
-                  : intents.map((i) => <MentorIntentCard key={i.id} intent={i} />)}
+                  : intents.map((i) => (
+                      <FocusWrap key={i.id} id={i.id} highlightId={highlightId} refMap={itemRefs}>
+                        <MentorIntentCard intent={i} />
+                      </FocusWrap>
+                    ))}
               </div>
             )}
 
