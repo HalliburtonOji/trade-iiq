@@ -9,8 +9,9 @@ import MentorTradeCard from "@/components/mentor/MentorTradeCard";
 import MentorIntentCard from "@/components/mentor/MentorIntentCard";
 import MentorJournalFeed from "@/components/mentor/MentorJournalFeed";
 import MentorLetter from "@/components/mentor/MentorLetter";
+import MentorCaseStudyCard from "@/components/mentor/MentorCaseStudyCard";
 
-type Tab = "now" | "next" | "past" | "journal" | "epistle";
+type Tab = "now" | "next" | "past" | "cases" | "journal" | "epistle";
 
 const SophosPublic = () => {
   const [profile, setProfile] = useState<any>(null);
