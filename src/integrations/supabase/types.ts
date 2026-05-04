@@ -789,6 +789,7 @@ export type Database = {
           intent_id: string | null
           key_takeaway: string
           lesson: string
+          mentor_slug: string
           outcome: string
           pnl_pct: number | null
           r_multiple: number | null
@@ -810,6 +811,7 @@ export type Database = {
           intent_id?: string | null
           key_takeaway?: string
           lesson?: string
+          mentor_slug?: string
           outcome: string
           pnl_pct?: number | null
           r_multiple?: number | null
@@ -831,6 +833,7 @@ export type Database = {
           intent_id?: string | null
           key_takeaway?: string
           lesson?: string
+          mentor_slug?: string
           outcome?: string
           pnl_pct?: number | null
           r_multiple?: number | null
@@ -944,6 +947,7 @@ export type Database = {
           fail_reasons: Json
           id: string
           invalidation_text: string
+          mentor_slug: string
           resolution_note: string | null
           resolved_at: string | null
           size_pct: number
@@ -966,6 +970,7 @@ export type Database = {
           fail_reasons?: Json
           id?: string
           invalidation_text?: string
+          mentor_slug?: string
           resolution_note?: string | null
           resolved_at?: string | null
           size_pct?: number
@@ -988,6 +993,7 @@ export type Database = {
           fail_reasons?: Json
           id?: string
           invalidation_text?: string
+          mentor_slug?: string
           resolution_note?: string | null
           resolved_at?: string | null
           size_pct?: number
@@ -1010,6 +1016,7 @@ export type Database = {
           id: string
           intent_id: string | null
           kind: string
+          mentor_slug: string
           payload: Json
           symbol: string | null
           trade_id: string | null
@@ -1020,6 +1027,7 @@ export type Database = {
           id?: string
           intent_id?: string | null
           kind: string
+          mentor_slug?: string
           payload?: Json
           symbol?: string | null
           trade_id?: string | null
@@ -1030,6 +1038,7 @@ export type Database = {
           id?: string
           intent_id?: string | null
           kind?: string
+          mentor_slug?: string
           payload?: Json
           symbol?: string | null
           trade_id?: string | null
@@ -1117,6 +1126,51 @@ export type Database = {
         }
         Relationships: []
       }
+      mentor_missed_reflections: {
+        Row: {
+          dismissed_at: string | null
+          id: string
+          intent_id: string | null
+          mentor_slug: string
+          note: string | null
+          pnl_at_reflection: number | null
+          prompted_at: string
+          reason: string | null
+          reflected_at: string | null
+          symbol: string
+          trade_id: string | null
+          user_id: string
+        }
+        Insert: {
+          dismissed_at?: string | null
+          id?: string
+          intent_id?: string | null
+          mentor_slug?: string
+          note?: string | null
+          pnl_at_reflection?: number | null
+          prompted_at?: string
+          reason?: string | null
+          reflected_at?: string | null
+          symbol: string
+          trade_id?: string | null
+          user_id: string
+        }
+        Update: {
+          dismissed_at?: string | null
+          id?: string
+          intent_id?: string | null
+          mentor_slug?: string
+          note?: string | null
+          pnl_at_reflection?: number | null
+          prompted_at?: string
+          reason?: string | null
+          reflected_at?: string | null
+          symbol?: string
+          trade_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       mentor_profile: {
         Row: {
           bio: string
@@ -1125,6 +1179,9 @@ export type Database = {
           equity: number
           id: string
           name: string
+          persona_color: string
+          persona_kind: string
+          persona_tagline: string
           slug: string
           starting_balance: number
           stats_json: Json
@@ -1137,6 +1194,9 @@ export type Database = {
           equity?: number
           id?: string
           name?: string
+          persona_color?: string
+          persona_kind?: string
+          persona_tagline?: string
           slug?: string
           starting_balance?: number
           stats_json?: Json
@@ -1149,6 +1209,9 @@ export type Database = {
           equity?: number
           id?: string
           name?: string
+          persona_color?: string
+          persona_kind?: string
+          persona_tagline?: string
           slug?: string
           starting_balance?: number
           stats_json?: Json
@@ -1166,6 +1229,7 @@ export type Database = {
           exit_price: number | null
           id: string
           intent_id: string | null
+          mentor_slug: string
           opened_at: string
           pnl: number | null
           pnl_percent: number | null
@@ -1185,6 +1249,7 @@ export type Database = {
           exit_price?: number | null
           id?: string
           intent_id?: string | null
+          mentor_slug?: string
           opened_at?: string
           pnl?: number | null
           pnl_percent?: number | null
@@ -1204,6 +1269,7 @@ export type Database = {
           exit_price?: number | null
           id?: string
           intent_id?: string | null
+          mentor_slug?: string
           opened_at?: string
           pnl?: number | null
           pnl_percent?: number | null
