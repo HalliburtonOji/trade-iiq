@@ -330,6 +330,8 @@ async function managePosition(sb: any, p: Persona, t: any, price: number, summar
         body: JSON.stringify({ trade_id: t.id }),
       }).catch((e) => console.error("[mentor-tick] case-study trigger failed:", e));
     } catch {}
+    const intentOutcome = hitTP ? "tp_hit" : hitSL ? "sl_hit" : "closed";
+    await resolvePredictions(sb, t.intent_id, intentOutcome);
     summary.closed++;
     return { closed: true, realizedDelta: totalPnl, unrealized: 0 };
   }
