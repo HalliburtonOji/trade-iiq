@@ -13,7 +13,7 @@ import MentorLetter from "@/components/mentor/MentorLetter";
 import { useMentorFocus } from "@/hooks/useMentorFocus";
 import { Loader2 } from "lucide-react";
 
-type Tab = "now" | "next" | "past" | "journal" | "epistle";
+type Tab = "now" | "next" | "past" | "cases" | "journal" | "epistle";
 
 const Mentor = () => {
   const [tab, setTab] = useState<Tab>("now");
