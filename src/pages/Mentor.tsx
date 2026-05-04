@@ -10,6 +10,7 @@ import MentorVsYou from "@/components/mentor/MentorVsYou";
 import MentorPastList from "@/components/mentor/MentorPastList";
 import MentorWatchlistRadar from "@/components/mentor/MentorWatchlistRadar";
 import MentorLetter from "@/components/mentor/MentorLetter";
+import MentorCaseStudyCard from "@/components/mentor/MentorCaseStudyCard";
 import { useMentorFocus } from "@/hooks/useMentorFocus";
 import { Loader2 } from "lucide-react";
 
