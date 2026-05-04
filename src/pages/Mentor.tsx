@@ -135,9 +135,29 @@ const Mentor = () => {
           </div>
         ) : (
           <>
+            <MentorPersonaSwitcher active={mentorSlug} onChange={setMentorSlug} />
             <MentorPulse profile={profile} lastJournalAt={lastJournalAt} />
             <MentorHero profile={profile} closed={closed} openTrades={trades} />
-            <div className="mt-6"><MentorMirrorToggle /></div>
+            {mentorSlug === "sophos" && (
+              <>
+                <div className="mt-6"><MentorMirrorToggle /></div>
+                <div className="mt-4">
+                  <MentorMissedWinners
+                    mentorSlug={mentorSlug}
+                    onReflect={(t) => setMissedSheet({
+                      open: true, symbol: t.symbol, tradeId: t.id, pnl: t.pnl,
+                      context: `Sophos closed ${t.symbol} ${t.direction.toUpperCase()} for +£${Number(t.pnl).toFixed(0)}.`,
+                    })}
+                  />
+                </div>
+              </>
+            )}
+            {mentorSlug !== "sophos" && trades.length === 0 && intents.length === 0 && closed.length === 0 && (
+              <div className="rounded-2xl py-10 text-center mt-6" style={{ border: "1px dashed var(--stoa-rule)", color: "var(--stoa-muted)" }}>
+                <div className="stoa-greek mb-1" style={{ color: profile?.persona_color || "var(--stoa-accent)" }}>{profile?.name || "—"} · ἔρχεται</div>
+                <div style={{ fontSize: 13 }}>{profile?.display_name || "This mentor"} is awakening soon. Live decisions begin shortly.</div>
+              </div>
+            )}
 
             <div className="flex items-center gap-1 mb-6 mt-8 overflow-x-auto" style={{ borderBottom: "1px solid var(--stoa-rule)" }}>
               {tabs.map((t) => (
@@ -173,6 +193,7 @@ const Mentor = () => {
                       ))}
                 </div>
                 <MentorVsYou profile={profile} mentorClosed={closed} />
+                <MentorWeeklyVsYou mentorSlug={mentorSlug} />
               </>
             )}
 
