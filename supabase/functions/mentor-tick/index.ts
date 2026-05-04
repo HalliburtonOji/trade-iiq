@@ -38,7 +38,7 @@ async function fetchQuote(symbol: string, asset_type: string) {
     });
     if (!r.ok) return null;
     const j = await r.json();
-    const q = j?.quotes?.[0] ?? j?.[0] ?? j;
+    const q = j?.quotes?.[symbol] ?? (Array.isArray(j?.quotes) ? j.quotes[0] : null) ?? j?.[0] ?? j;
     const price = q?.current_price ?? q?.price ?? null;
     return price ? Number(price) : null;
   } catch { return null; }
