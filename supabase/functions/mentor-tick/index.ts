@@ -139,7 +139,7 @@ async function fetchContext(symbol: string, asset_type: string, price: number): 
 }
 
 async function aiPlan(opts: {
-  candidates: { symbol: string; price: number; asset_type: string }[];
+  candidates: Ctx[];
   equity: number;
   openCount: number;
   intentCount: number;
@@ -147,21 +147,29 @@ async function aiPlan(opts: {
 }) {
   const sys = `You are Σοφός (Sophos), a disciplined stoic swing trader publishing trade plans for students.
 You publish FORWARD-LOOKING INTENTS, not immediate trades. Each intent is a conditional plan with a clear trigger.
-Risk strictly ≤ 1% per trade. Mandatory stop-loss. Voice: stoic, second person, ≤ 3 sentences thesis.
-For every INTENT you must include a conviction score 1–5 and 1–3 specific fail_reasons — be honest about what could go wrong.
-For every SKIP you must include a SHORT specific skip_reason (e.g. "ATR too tight", "awaiting volume", "mid-range, no edge"). Never say "no setup earned its place".
-Return ONE intent OR a SKIP if nothing earns its place.`;
+Risk strictly ≤ 1% per trade. Mandatory stop-loss derived from structure (e.g. swing low, 1.5×ATR, prior support). Take-profit ≥ 1.5R.
+Voice: stoic, second person, ≤ 3 sentences thesis. Reference the actual structure (trend, RSI, ATR, 30-day range) you see — never vague.
+For every INTENT include a conviction 1–5 and 1–3 specific fail_reasons grounded in the data shown.
+SKIP only when the data genuinely offers no edge — give ONE short specific reason citing the data (e.g. "RSI 52 mid-range, ATR compressed", "price 4% from 30d high with weakening volume").
+Never say "no setup earned its place" or "single price point — no context": you DO have context now.`;
+
+  const candLines = opts.candidates.map((c) => {
+    return `- ${c.symbol} (${c.asset_type}) px ${c.price}
+    trend ${c.trend} | EMA20 ${c.ema20} EMA50 ${c.ema50} | RSI14 ${c.rsi14} | ATR14 ${c.atr14} | vol ${c.vol_regime}
+    30d range [${c.low30} → ${c.high30}] · ${c.pct_from_high30}% from high · ${c.pct_from_low30}% from low · ${c.bars} bars`;
+  }).join("\n");
 
   const userMsg = `Current equity: £${opts.equity.toFixed(0)}.
 Open positions: ${opts.openCount}/${MAX_OPEN}. Pending intents: ${opts.intentCount}/${MAX_INTENTS}.
 
-Candidates (live prices):
-${opts.candidates.map(c => `- ${c.symbol} (${c.asset_type}) @ ${c.price}`).join("\n")}
+Candidates with structural context:
+${candLines}
 
 Recent decisions:
 ${opts.recentJournal.slice(0,5).map(t => `- ${t}`).join("\n") || "- (none yet)"}
 
-Choose ONE candidate to publish a pending intent for, OR skip with a reason.`;
+Choose ONE candidate to publish a pending intent for, OR skip with a data-grounded reason.
+When sizing the stop, use ATR or visible structure. When choosing trigger price, prefer breakout above 30d high, reclaim of EMA, or pullback to support.`;
 
   const tools = [{
     type: "function",
