@@ -846,6 +846,45 @@ export type Database = {
         }
         Relationships: []
       }
+      mentor_coach_notes: {
+        Row: {
+          body_text: string
+          created_at: string
+          headline: string | null
+          id: string
+          mentor_slug: string
+          payload: Json | null
+          symbol: string | null
+          tone: string | null
+          user_id: string
+          user_trade_id: string | null
+        }
+        Insert: {
+          body_text: string
+          created_at?: string
+          headline?: string | null
+          id?: string
+          mentor_slug?: string
+          payload?: Json | null
+          symbol?: string | null
+          tone?: string | null
+          user_id: string
+          user_trade_id?: string | null
+        }
+        Update: {
+          body_text?: string
+          created_at?: string
+          headline?: string | null
+          id?: string
+          mentor_slug?: string
+          payload?: Json | null
+          symbol?: string | null
+          tone?: string | null
+          user_id?: string
+          user_trade_id?: string | null
+        }
+        Relationships: []
+      }
       mentor_copies: {
         Row: {
           created_at: string
@@ -948,6 +987,7 @@ export type Database = {
           id: string
           invalidation_text: string
           mentor_slug: string
+          outcome: string | null
           resolution_note: string | null
           resolved_at: string | null
           size_pct: number
@@ -971,6 +1011,7 @@ export type Database = {
           id?: string
           invalidation_text?: string
           mentor_slug?: string
+          outcome?: string | null
           resolution_note?: string | null
           resolved_at?: string | null
           size_pct?: number
@@ -994,6 +1035,7 @@ export type Database = {
           id?: string
           invalidation_text?: string
           mentor_slug?: string
+          outcome?: string | null
           resolution_note?: string | null
           resolved_at?: string | null
           size_pct?: number
@@ -1170,6 +1212,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      mentor_predictions: {
+        Row: {
+          correct: boolean | null
+          created_at: string
+          id: string
+          intent_id: string
+          mentor_slug: string
+          outcome: string | null
+          prediction: string
+          resolved_at: string | null
+          symbol: string
+          user_id: string
+        }
+        Insert: {
+          correct?: boolean | null
+          created_at?: string
+          id?: string
+          intent_id: string
+          mentor_slug: string
+          outcome?: string | null
+          prediction: string
+          resolved_at?: string | null
+          symbol: string
+          user_id: string
+        }
+        Update: {
+          correct?: boolean | null
+          created_at?: string
+          id?: string
+          intent_id?: string
+          mentor_slug?: string
+          outcome?: string | null
+          prediction?: string
+          resolved_at?: string | null
+          symbol?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_predictions_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "mentor_intents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mentor_profile: {
         Row: {
