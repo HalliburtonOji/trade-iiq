@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+// MentorHero — Sophos profile card
 
 type Props = { profile: any; closed: any[]; openTrades: any[] };
 
