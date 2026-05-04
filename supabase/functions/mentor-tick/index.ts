@@ -92,13 +92,18 @@ function atr(candles: any[], period = 14): number {
 
 async function fetchContext(symbol: string, asset_type: string, price: number): Promise<Ctx | null> {
   try {
+    // Disambiguate per asset_type so historical-candles doesn't grab a same-ticker stock.
+    let candleSym = symbol;
+    if (asset_type === "crypto") candleSym = `${symbol.replace(/USD[TC]?$/i, "")}-USD`;
+    else if (asset_type === "forex") candleSym = `${symbol.replace(/[^A-Za-z]/g, "").toUpperCase()}=X`;
+
     const end = new Date();
     const start = new Date(end.getTime() - 90 * 24 * 3600_000);
     const r = await fetch(`${SUPABASE_URL}/functions/v1/historical-candles`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${ANON}`, apikey: ANON },
       body: JSON.stringify({
-        symbol, // historical-candles handles BTC→BTC-USD, EURUSD→EURUSD=X
+        symbol: candleSym,
         start_date: start.toISOString().slice(0, 10),
         end_date: end.toISOString().slice(0, 10),
       }),
