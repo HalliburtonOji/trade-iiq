@@ -49,7 +49,7 @@ const SECTIONS: Section[] = [
 
 const RITUALS: Item[] = [
   { label: "Morning Brief", icon: Sunrise, path: "/morning" },
-  { label: "Evening Reflection", icon: MoonIcon, path: "/evening" },
+  { label: "Evening Reflection", icon: Moon, path: "/evening" },
 ];
 
 const FloatingHub = () => {
