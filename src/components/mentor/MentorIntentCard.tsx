@@ -102,6 +102,8 @@ const MentorIntentCard = ({ intent }: { intent: any }) => {
         </p>
       )}
 
+      <MentorPredictionPoll intentId={intent.id} mentorSlug={intent.mentor_slug || "sophos"} symbol={intent.symbol} />
+
       <div className="flex gap-2 pt-2" style={{ borderTop: "1px solid var(--stoa-rule)" }}>
         <button onClick={() => setDiffOpen(true)}
           className="flex-1 rounded-lg py-2 px-3 flex items-center justify-center gap-2"
