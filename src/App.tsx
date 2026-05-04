@@ -33,6 +33,7 @@ import Morning from "./pages/Morning";
 import Evening from "./pages/Evening";
 import Oracle from "./pages/Oracle";
 import Mentor from "./pages/Mentor";
+import SophosPublic from "./pages/SophosPublic";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
