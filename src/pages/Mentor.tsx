@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import StoaShell from "@/components/stoa/StoaShell";
 import MentorHero from "@/components/mentor/MentorHero";
@@ -8,6 +8,7 @@ import MentorJournalFeed from "@/components/mentor/MentorJournalFeed";
 import MentorPulse from "@/components/mentor/MentorPulse";
 import MentorVsYou from "@/components/mentor/MentorVsYou";
 import MentorPastList from "@/components/mentor/MentorPastList";
+import { useMentorFocus } from "@/hooks/useMentorFocus";
 import { Loader2 } from "lucide-react";
 
 type Tab = "now" | "next" | "past" | "journal";
