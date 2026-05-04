@@ -39,6 +39,12 @@ const MentorPlanDiff = ({ open, onClose, source }: Props) => {
       if (!user) return;
       const { data } = await supabase.from("profiles").select("paper_balance").eq("user_id", user.id).maybeSingle();
       setBalance(Number(data?.paper_balance ?? 10000));
+      // Daily Mission tick: opened a Plan Diff (idempotent per day)
+      const today = new Date().toISOString().slice(0, 10);
+      await supabase.rpc("award_xp", {
+        p_amount: 5, p_source: "mentor_plan_diff",
+        p_ref_id: today, p_ref_table: null as any,
+      });
     });
   }, [open, source.id]);
 
