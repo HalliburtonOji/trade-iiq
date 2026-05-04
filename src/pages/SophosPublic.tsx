@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import MentorHero from "@/components/mentor/MentorHero";
+import MentorFollowButton from "@/components/mentor/MentorFollowButton";
 import MentorTradeCard from "@/components/mentor/MentorTradeCard";
 import MentorIntentCard from "@/components/mentor/MentorIntentCard";
 import MentorJournalFeed from "@/components/mentor/MentorJournalFeed";
