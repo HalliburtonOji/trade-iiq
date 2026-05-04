@@ -83,6 +83,11 @@ const FeedRow = ({ e }: { e: any }) => {
           {isSkip && <ChevronDown size={12} style={{ color: "var(--stoa-muted)", transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />}
         </div>
         <p style={{ color: "var(--stoa-ink)", fontSize: 14, lineHeight: 1.5, marginTop: 4 }}>{e.body_text}</p>
+        {!isSkip && e.body_text && e.body_text.length > 60 && (
+          <div className="mt-2" onClick={(ev) => ev.stopPropagation()}>
+            <VoiceButton text={`${e.symbol || ""}. ${e.body_text}`} />
+          </div>
+        )}
         {isSkip && open && <SkipDetails payload={e.payload || {}} body_text={e.body_text} />}
       </div>
     </div>
