@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ScrollText } from "lucide-react";
+import VoiceButton from "./VoiceButton";
 
 type Letter = {
   id: string;
