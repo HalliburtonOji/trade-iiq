@@ -72,6 +72,7 @@ const SophosPublic = () => {
     { id: "now", label: "NOW", greek: "Νῦν", count: openTrades.length },
     { id: "next", label: "NEXT", greek: "Μέλλον", count: intents.length },
     { id: "past", label: "PAST", greek: "Παρελθόν", count: closed.length },
+    { id: "cases", label: "CASES", greek: "Αὐτοψία", count: cases.length },
     { id: "journal", label: "JOURNAL", greek: "Ἡμερολόγιον" },
     { id: "epistle", label: "EPISTLE", greek: "Ἐπιστολή", count: letters.length },
   ];
