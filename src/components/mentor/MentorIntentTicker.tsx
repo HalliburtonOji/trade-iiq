@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Sparkles, CheckCircle2, TrendingUp, TrendingDown, Hourglass, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useMentorFocus } from "@/hooks/useMentorFocus";
+import { focusMentor } from "@/hooks/useMentorFocus";
 
 type JournalRow = {
   id: string;
@@ -117,7 +117,6 @@ const PendingDistance = ({ intent }: { intent: IntentRow }) => {
 const MentorIntentTicker = () => {
   const [rows, setRows] = useState<JournalRow[]>([]);
   const [intents, setIntents] = useState<Map<string, IntentRow>>(new Map());
-  const focus = useMentorFocus((s) => s.focus);
   const [flashId, setFlashId] = useState<string | null>(null);
 
   const load = async () => {
@@ -179,7 +178,7 @@ const MentorIntentTicker = () => {
           return (
             <button
               key={r.id}
-              onClick={() => focus(tab, itemId)}
+              onClick={() => focusMentor(tab, itemId)}
               className="shrink-0 text-left rounded-xl px-3 py-2 transition-all hover:translate-y-[-1px]"
               style={{
                 minWidth: 220,
