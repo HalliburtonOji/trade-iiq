@@ -12,10 +12,11 @@ import MentorWatchlistRadar from "@/components/mentor/MentorWatchlistRadar";
 import MentorLetter from "@/components/mentor/MentorLetter";
 import MentorCaseStudyCard from "@/components/mentor/MentorCaseStudyCard";
 import MentorMirrorToggle from "@/components/mentor/MentorMirrorToggle";
+import MentorReplay from "@/components/mentor/MentorReplay";
 import { useMentorFocus } from "@/hooks/useMentorFocus";
 import { Loader2 } from "lucide-react";
 
-type Tab = "now" | "next" | "past" | "cases" | "journal" | "epistle";
+type Tab = "now" | "next" | "past" | "cases" | "replay" | "journal" | "epistle";
 
 const Mentor = () => {
   const [tab, setTab] = useState<Tab>("now");
@@ -83,12 +84,13 @@ const Mentor = () => {
   }, []);
 
   const tabs: { key: Tab; label: string; greek: string; count: number }[] = [
-    { key: "now",     label: "NOW",     greek: "Παρόν",     count: trades.length },
-    { key: "next",    label: "NEXT",    greek: "Μέλλον",    count: intents.length },
-    { key: "past",    label: "PAST",    greek: "Παρελθόν",  count: closed.length },
-    { key: "cases",   label: "CASES",   greek: "Αὐτοψία",   count: cases.length },
-    { key: "journal", label: "JOURNAL", greek: "Βίβλος",    count: journal.length },
-    { key: "epistle", label: "EPISTLE", greek: "Ἐπιστολή",  count: 0 },
+    { key: "now",     label: "NOW",     greek: "Παρόν",        count: trades.length },
+    { key: "next",    label: "NEXT",    greek: "Μέλλον",       count: intents.length },
+    { key: "past",    label: "PAST",    greek: "Παρελθόν",     count: closed.length },
+    { key: "cases",   label: "CASES",   greek: "Αὐτοψία",      count: cases.length },
+    { key: "replay",  label: "REPLAY",  greek: "Ἀναπόλησις",   count: 0 },
+    { key: "journal", label: "JOURNAL", greek: "Βίβλος",       count: journal.length },
+    { key: "epistle", label: "EPISTLE", greek: "Ἐπιστολή",     count: 0 },
   ];
 
   return (
@@ -167,6 +169,8 @@ const Mentor = () => {
             )}
 
             {tab === "journal" && <MentorJournalFeed entries={journal} />}
+
+            {tab === "replay" && <MentorReplay />}
 
             {tab === "epistle" && <MentorLetter />}
           </>
