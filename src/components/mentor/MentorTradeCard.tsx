@@ -1,17 +1,14 @@
 import { useEffect, useState } from "react";
-import { ChevronDown, Copy, TrendingUp, TrendingDown, Loader2, Check } from "lucide-react";
+import { ChevronDown, Copy, TrendingUp, TrendingDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import MentorPlanDiff from "./MentorPlanDiff";
 
 type Props = { trade: any; closed?: boolean };
 
 const MentorTradeCard = ({ trade, closed = false }: Props) => {
   const [open, setOpen] = useState(false);
   const [copies, setCopies] = useState<number | null>(null);
-  const [copying, setCopying] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const navigate = useNavigate();
+  const [diffOpen, setDiffOpen] = useState(false);
 
   useEffect(() => {
     supabase.rpc("mentor_source_copy_count", { p_kind: "trade", p_id: trade.id })
@@ -19,29 +16,8 @@ const MentorTradeCard = ({ trade, closed = false }: Props) => {
   }, [trade.id]);
 
   const isLong = trade.direction === "long";
-  const ref = closed ? Number(trade.exit_price) : Number(trade.entry_price);
   const pnl = closed ? Number(trade.pnl ?? 0) : 0;
   const pct = closed ? Number(trade.pnl_percent ?? 0) : 0;
-
-  const copy = async () => {
-    setCopying(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const r = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mentor-copy`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ source_kind: "trade", source_id: trade.id }),
-      });
-      if (!r.ok) throw new Error((await r.json()).error || "Copy failed");
-      setCopied(true);
-      toast({ title: "Copied to your demo book", description: `${trade.symbol} ${trade.direction} mirrored from Sophos.` });
-      setTimeout(() => navigate("/demo-trading"), 1200);
-    } catch (e: any) {
-      toast({ title: "Could not copy", description: e.message, variant: "destructive" });
-    } finally {
-      setCopying(false);
-    }
-  };
 
   return (
     <div className="rounded-2xl overflow-hidden" style={{
@@ -106,8 +82,7 @@ const MentorTradeCard = ({ trade, closed = false }: Props) => {
           )}
           {!closed && (
             <button
-              onClick={copy}
-              disabled={copying || copied}
+              onClick={() => setDiffOpen(true)}
               className="w-full rounded-lg py-2.5 px-4 flex items-center justify-center gap-2 transition-all"
               style={{
                 background: "var(--stoa-accent)",
@@ -117,14 +92,29 @@ const MentorTradeCard = ({ trade, closed = false }: Props) => {
                 fontSize: 12,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
-                opacity: copying || copied ? 0.6 : 1,
               }}
             >
-              {copying ? <Loader2 size={14} className="animate-spin" /> : copied ? <Check size={14} /> : <Copy size={14} />}
-              {copied ? "Copied" : "Copy this plan to my book"}
+              <Copy size={14} /> Preview & copy this plan
             </button>
           )}
         </div>
+      )}
+
+      {!closed && (
+        <MentorPlanDiff
+          open={diffOpen}
+          onClose={() => setDiffOpen(false)}
+          source={{
+            kind: "trade",
+            id: trade.id,
+            symbol: trade.symbol,
+            direction: trade.direction,
+            entry: Number(trade.entry_price),
+            stop_loss: Number(trade.stop_loss),
+            take_profit: Number(trade.take_profit),
+            thesis: trade.thesis,
+          }}
+        />
       )}
     </div>
   );

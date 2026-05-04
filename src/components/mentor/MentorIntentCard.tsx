@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
-import { Clock, Copy, Bell, Loader2, Check, Hourglass } from "lucide-react";
+import { Clock, Copy, Bell, Hourglass } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import MentorPlanDiff from "./MentorPlanDiff";
 
 const MentorIntentCard = ({ intent }: { intent: any }) => {
   const [copies, setCopies] = useState<number | null>(null);
-  const [copying, setCopying] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const navigate = useNavigate();
+  const [diffOpen, setDiffOpen] = useState(false);
 
   useEffect(() => {
     supabase.rpc("mentor_source_copy_count", { p_kind: "intent", p_id: intent.id })
@@ -17,24 +15,6 @@ const MentorIntentCard = ({ intent }: { intent: any }) => {
 
   const hoursLeft = Math.max(0, Math.round((new Date(intent.valid_until).getTime() - Date.now()) / 3600_000));
   const isLong = intent.direction === "long";
-
-  const copy = async () => {
-    setCopying(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const r = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/mentor-copy`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ source_kind: "intent", source_id: intent.id }),
-      });
-      if (!r.ok) throw new Error((await r.json()).error || "Copy failed");
-      setCopied(true);
-      toast({ title: "Plan copied", description: `${intent.symbol} pending plan added to your demo book.` });
-      setTimeout(() => navigate("/demo-trading"), 1200);
-    } catch (e: any) {
-      toast({ title: "Could not copy", description: e.message, variant: "destructive" });
-    } finally { setCopying(false); }
-  };
 
   const setAlert = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -122,11 +102,10 @@ const MentorIntentCard = ({ intent }: { intent: any }) => {
       )}
 
       <div className="flex gap-2 pt-2" style={{ borderTop: "1px solid var(--stoa-rule)" }}>
-        <button onClick={copy} disabled={copying || copied}
+        <button onClick={() => setDiffOpen(true)}
           className="flex-1 rounded-lg py-2 px-3 flex items-center justify-center gap-2"
-          style={{ background: "var(--stoa-accent)", color: "var(--stoa-bg)", fontFamily: "var(--stoa-font-kicker)", fontWeight: 600, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", opacity: copying||copied?0.6:1 }}>
-          {copying ? <Loader2 size={12} className="animate-spin" /> : copied ? <Check size={12} /> : <Copy size={12} />}
-          {copied ? "Copied" : "Copy plan"}
+          style={{ background: "var(--stoa-accent)", color: "var(--stoa-bg)", fontFamily: "var(--stoa-font-kicker)", fontWeight: 600, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+          <Copy size={12} /> Preview & copy
         </button>
         <button onClick={setAlert}
           className="rounded-lg py-2 px-3 flex items-center gap-2"
@@ -134,6 +113,22 @@ const MentorIntentCard = ({ intent }: { intent: any }) => {
           <Bell size={12} /> Alert
         </button>
       </div>
+
+      <MentorPlanDiff
+        open={diffOpen}
+        onClose={() => setDiffOpen(false)}
+        source={{
+          kind: "intent",
+          id: intent.id,
+          symbol: intent.symbol,
+          direction: intent.direction,
+          entry: Number(intent.entry_hint || intent.trigger_value),
+          stop_loss: Number(intent.stop_loss),
+          take_profit: Number(intent.take_profit),
+          size_pct: Number(intent.size_pct),
+          thesis: intent.thesis,
+        }}
+      />
     </div>
   );
 };
