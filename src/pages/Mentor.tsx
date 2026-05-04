@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import StoaShell from "@/components/stoa/StoaShell";
 import MentorHero from "@/components/mentor/MentorHero";
@@ -8,6 +8,7 @@ import MentorJournalFeed from "@/components/mentor/MentorJournalFeed";
 import MentorPulse from "@/components/mentor/MentorPulse";
 import MentorVsYou from "@/components/mentor/MentorVsYou";
 import MentorPastList from "@/components/mentor/MentorPastList";
+import { useMentorFocus } from "@/hooks/useMentorFocus";
 import { Loader2 } from "lucide-react";
 
 type Tab = "now" | "next" | "past" | "journal";
@@ -21,6 +22,24 @@ const Mentor = () => {
   const [closed, setClosed] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastJournalAt, setLastJournalAt] = useState<string | null>(null);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const focus = useMentorFocus();
+  const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    if (!focus.tab || !focus.stamp) return;
+    setTab(focus.tab);
+    if (!focus.itemId) return;
+    const id = focus.itemId;
+    setHighlightId(id);
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        itemRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 60);
+    });
+    const t = setTimeout(() => setHighlightId(null), 2400);
+    return () => clearTimeout(t);
+  }, [focus.stamp]);
 
   const load = async () => {
     const [{ data: p }, { data: t }, { data: i }, { data: j }, { data: c }] = await Promise.all([
@@ -95,7 +114,11 @@ const Mentor = () => {
                 <div className="space-y-3">
                   {trades.length === 0
                     ? <Empty msg="Sophos is in cash. Patience is a position." />
-                    : trades.map((t) => <MentorTradeCard key={t.id} trade={t} />)}
+                    : trades.map((t) => (
+                        <FocusWrap key={t.id} id={t.id} highlightId={highlightId} refMap={itemRefs}>
+                          <MentorTradeCard trade={t} />
+                        </FocusWrap>
+                      ))}
                 </div>
                 <MentorVsYou profile={profile} mentorClosed={closed} />
               </>
@@ -105,7 +128,11 @@ const Mentor = () => {
               <div className="space-y-3">
                 {intents.length === 0
                   ? <Empty msg="No pending intents. Sophos is watching, not forcing." />
-                  : intents.map((i) => <MentorIntentCard key={i.id} intent={i} />)}
+                  : intents.map((i) => (
+                      <FocusWrap key={i.id} id={i.id} highlightId={highlightId} refMap={itemRefs}>
+                        <MentorIntentCard intent={i} />
+                      </FocusWrap>
+                    ))}
               </div>
             )}
 
@@ -127,5 +154,21 @@ const Empty = ({ msg }: { msg: string }) => (
     <div style={{ fontSize: 14 }}>{msg}</div>
   </div>
 );
+
+const FocusWrap = ({ id, highlightId, refMap, children }: { id: string; highlightId: string | null; refMap: React.MutableRefObject<Record<string, HTMLDivElement | null>>; children: React.ReactNode }) => {
+  const isHi = highlightId === id;
+  return (
+    <div
+      ref={(el) => { refMap.current[id] = el; }}
+      className="rounded-2xl transition-all"
+      style={{
+        boxShadow: isHi ? "0 0 0 3px var(--stoa-accent)" : "none",
+        transform: isHi ? "scale(1.005)" : "none",
+      }}
+    >
+      {children}
+    </div>
+  );
+};
 
 export default Mentor;

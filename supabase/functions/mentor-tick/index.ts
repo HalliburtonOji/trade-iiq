@@ -235,9 +235,14 @@ serve(async (req) => {
 
         await sb.from("mentor_intents").update({ status: "triggered", resolved_at: nowIso, resolution_note: `Triggered at ${price}` }).eq("id", i.id);
         await sb.from("mentor_journal").insert({
+          kind: "intent_resolved", intent_id: i.id, symbol: i.symbol,
+          body_text: `Intent on ${i.symbol} triggered at ${price}. Opening ${i.direction} per plan.`,
+          payload: { resolution: "triggered", trigger_price: price, trigger_kind: i.trigger_kind, trigger_value: Number(i.trigger_value) },
+        });
+        await sb.from("mentor_journal").insert({
           kind: "open", trade_id: tradeRow?.id, intent_id: i.id, symbol: i.symbol,
           body_text: `Opened ${i.symbol} ${i.direction} at ${price}. ${i.thesis}`,
-          payload: { entry: price, sl, tp, qty },
+          payload: { entry: price, sl, tp, qty, direction: i.direction },
         });
         const { data: watchers } = await sb.from("mentor_intent_watchers").select("user_id").eq("intent_id", i.id);
         if (watchers && watchers.length) {

@@ -1,65 +1,83 @@
-# Fix: Sophos in nav + finish the living-trader spec
 
-Two real problems to fix:
+# Where Sophos stands today
 
-1. **"No mentor on sidebar"** — `SideNav` has Sophos, but every Stoa-styled page (including `/mentor`, `/oracle`, etc.) renders inside `StoaShell`, whose own `NAV` array (the drawer on mobile, the rail on desktop) does **not** include Sophos. That's why you don't see it.
-2. **"All we talked about is not built"** — the original P23 spec promised six components: MentorHero, MentorTradeCard, MentorIntentCard, MentorJournalFeed, **MentorPulse**, **MentorVsYou**. Only the first four exist. There's also no dedicated PAST view, no "watch / alert me" on intents, and no visible heartbeat status so users can't tell Sophos is actually alive.
+Verified against the live database and edge function logs:
 
-## What gets built
+- Heartbeat is healthy — `mentor-tick` ran at 11:10 UTC, cron firing every 5 min.
+- 113 journal entries (108 are `skip`, 4 are `intent_published`, 1 is `open`).
+- 1 open trade, 4 intents (3 still pending, BTC triggered at $79,993 → opened a position).
+- BTC's trigger event wrote `kind: "open"` to the journal but **no** `intent_resolved` entry, so the "intent → trigger → trade" lineage is invisible to users.
+- Existing `MentorPulse.tsx` only shows last-tick age + countdown. No intent activity, no trigger context, no "what just happened" surface.
 
-### 1. Put Sophos in the actual shell nav
-- `src/components/stoa/StoaShell.tsx` — add `{ kicker: "SOPHOS", greek: "Σοφός", to: "/mentor" }` at the top of the GROW section (right under ORACLE). This is the change that makes Sophos appear in the drawer on mobile and the side rail on desktop.
+So: not everything is done. Three things are broken/incomplete, and there is real room to make Sophos feel more alive.
 
-### 2. Add a PAST tab + proper closed-trade timeline
-- `src/pages/Mentor.tsx` — change tabs from NOW/NEXT/JOURNAL to **NOW / NEXT / PAST / JOURNAL** (Παρόν · Μέλλον · Παρελθόν · Βίβλος). Stop dumping closed trades under NOW.
-- New `src/components/mentor/MentorPastList.tsx` — chronological list of closed trades grouped by week, each showing entry/exit, P&L, and the original thesis + Sophos's reflection inline. Cards reuse `MentorTradeCard closed`.
+---
 
-### 3. Build the missing components
+# Part 1 — MentorPulse becomes a live intent ticker
 
-**`src/components/mentor/MentorPulse.tsx`** (rendered above the tabs)
-- Shows last `mentor_tick` time + countdown to next tick (5min during US session 13:30–20:00 UTC, else 30min).
-- Status pill: "Awake · scanning" / "Resting · off-session".
-- Subscribes to `mentor_journal` realtime — pulses gold when a new entry arrives.
-- If last tick > 15 min ago in-session, shows "Heartbeat stalled" warning (helps surface broken cron).
+Replace the current single-line heartbeat with a two-row component:
 
-**`src/components/mentor/MentorVsYou.tsx`** (rendered on the NOW tab, below hero)
-- Pulls caller's `paper_trades` aggregate stats vs `mentor_profile` stats.
-- Three-column row: Win rate · Avg R · Equity curve %. Each cell shows "You / Sophos / Δ".
-- Plain-English takeaway underneath ("Sophos holds losers 2× shorter than you do").
+**Row A — heartbeat (kept):** awake/resting pill, last tick age, next tick countdown, stalled warning.
 
-### 4. Intent improvements
-- `MentorIntentCard.tsx` — add a second action next to "Copy this plan": **"Alert me when triggered"** which writes to a new lightweight `mentor_intent_watchers (user_id, intent_id)` table. When `mentor-tick` flips an intent to `triggered`, it inserts a row into the existing `notifications` flow for each watcher.
-- Show `valid_until` countdown and `trigger_condition_text` more prominently.
+**Row B — Latest intent activity (new):** horizontally scrollable strip of the 5 most recent `intent_published`, `intent_resolved`, `open` (when `intent_id` is set), and `close` (when `intent_id` is set) journal entries. Each chip shows:
 
-### 5. Verify the heartbeat actually runs
-- Read `mentor_profile`, `mentor_journal`, `mentor_trades` rows to confirm the cron job from `20260504015405_*.sql` is firing. If empty, either the cron payload is malformed or `mentor-tick` is erroring.
-- Check edge function logs for `mentor-tick`. If broken, fix it (most likely culprit: missing `LOVABLE_API_KEY` env reference or Gemini schema rejection).
-- If the table is still empty after a fix, manually invoke `mentor-tick` once so the user sees Sophos populated immediately.
+- Icon + status word: PUBLISHED / TRIGGERED / EXPIRED / CLOSED
+- Symbol + direction
+- Trigger line ("If AVAX moves above $10.00") or trigger result ("Triggered at $79,993")
+- "X min ago", and a live distance-to-trigger for still-pending intents (e.g., "AVAX $9.42 → needs +6.2% to fire") computed from `quote_cache` / a tiny `live-quote` call
+- Tapping a chip scrolls to the matching card in NEXT/NOW/PAST tab and highlights it (uses existing tab state via a small `useMentorFocus` zustand-style ref).
 
-## Database
+Realtime: subscribe to `mentor_intents` and `mentor_journal` so the strip flashes gold whenever a new intent is published or an existing one resolves. Reuses the existing pulse animation.
 
-```sql
-create table public.mentor_intent_watchers (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null,
-  intent_id uuid not null references public.mentor_intents(id) on delete cascade,
-  created_at timestamptz default now(),
-  unique (user_id, intent_id)
-);
-alter table public.mentor_intent_watchers enable row level security;
-create policy "own watchers select" on public.mentor_intent_watchers for select using (auth.uid() = user_id);
-create policy "own watchers insert" on public.mentor_intent_watchers for insert with check (auth.uid() = user_id);
-create policy "own watchers delete" on public.mentor_intent_watchers for delete using (auth.uid() = user_id);
-```
+**Backend gap to fix at the same time:** in `mentor-tick`, when an intent fires, also write a `kind: "intent_resolved"` journal row (with `payload.resolution: "triggered"` and the trigger price). Today only an `open` row is written, so the "intent_resolved" history is empty. Same for the manual/time triggers later.
 
-Then patch `mentor-tick` (the RESOLVE phase) to insert notifications for watchers when an intent triggers.
+**Files**
+- rewrite: `src/components/mentor/MentorPulse.tsx`
+- new: `src/components/mentor/MentorIntentTicker.tsx` (the Row B sub-component, kept separate so the heartbeat stays cheap)
+- new tiny hook: `src/hooks/useMentorFocus.ts` (just a setter/ref shared with `Mentor.tsx`)
+- edit: `src/pages/Mentor.tsx` (read focus → switch tab + scrollIntoView)
+- edit: `supabase/functions/mentor-tick/index.ts` (also write `intent_resolved` on trigger)
 
-## Out of scope
-- Multiple personas — still one Sophos.
-- Real-money copy — paper book only.
-- Voice / audio reflections.
+---
 
-## Files touched
-- edit: `src/components/stoa/StoaShell.tsx`, `src/pages/Mentor.tsx`, `src/components/mentor/MentorIntentCard.tsx`, `supabase/functions/mentor-tick/index.ts`
-- new: `src/components/mentor/MentorPulse.tsx`, `src/components/mentor/MentorVsYou.tsx`, `src/components/mentor/MentorPastList.tsx`
-- new migration: `mentor_intent_watchers` table + RLS
+# Part 2 — Brainstorm: what makes a "living and breathing" mentor
+
+These are the next features I'd build on top, ranked by how much they reinforce the past/present/future feel without bloating the page.
+
+**Tier 1 — ship next (still on /mentor)**
+
+1. **Conviction Meter on each intent.** Sophos already returns a thesis; have the AI also output a 1–5 conviction score and the 2 strongest "reasons it could fail." Render a small bar on `MentorIntentCard`. This makes the mentor honest about uncertainty and gives the user a real signal to filter copies.
+
+2. **"Plan diff" on copy.** When a user clicks Copy Plan, before sending to the demo book show a 2-second diff modal: "Sophos sized at 1% (£100). Your account size = £8,420 → suggested qty 0.18. Adjust?" Educates the user that copying ≠ cloning blindly.
+
+3. **Watchlist Radar.** A 5-row strip below MentorPulse showing every symbol Sophos has skipped in the last 24h with the *reason* he skipped ("waiting for volume", "ATR too tight"). Turns 108 noisy `skip` entries into one useful widget and proves he's actually scanning.
+
+4. **Weekly Letter from Σοφός.** Every Sunday, an edge function (`mentor-weekly`) summarises the week's trades + skips into one short stoic note ("This week you watched me take 3 trades. The losing one taught me more than the winners."). Displayed at the top of the JOURNAL tab and pushed to followers via `notifications`.
+
+**Tier 2 — deeper engagement**
+
+5. **Mentor vs You — head-to-head game.** Extend `MentorVsYou` into a weekly leaderboard: who had better R-multiple last week, you or Sophos? Adds a drip of competitiveness without leaderboards-against-other-users.
+
+6. **"Why didn't you take this?" prompts.** When Sophos opens a trade on a symbol the user is watching but didn't trade, push a notification and reveal a one-tap reflection input ("I was scared / I missed it / I disagreed"). Logs into `evening_reflections` for pattern detection.
+
+7. **Replay Mode.** A scrubber on PAST trades that animates the price chart from open → close with Sophos's journal entries appearing at the time they were written. Uses `historical-candles`. Best teaching tool for swing trades.
+
+8. **Live ATR / news context on each intent.** Tag intents with the catalyst ("Earnings Tuesday", "FOMC tomorrow") via `economic-calendar` data so users understand *why* the trigger is set where it is.
+
+**Tier 3 — community & growth**
+
+9. **Public Sophos page.** `/sophos/public` — unauthenticated, SEO-friendly snapshot (latest closed trade, equity curve, win rate). Drives signup. Cache via the existing `analysis_cache` pattern.
+
+10. **Multi-personas (already deferred, but worth flagging).** Σοφός is the disciplined swing trader. Add Θρασύς (aggressive scalper) and Ἥσυχος (long-term holder) once the engine is proven. Same `mentor-tick` engine, parameterised by `mentor_profile.slug`.
+
+11. **"Copy with rules" — playbook overlay.** When copying, automatically attach a Rulebook entry ("Don't copy any Sophos trade where conviction < 3"). Compounds with the Rulebook feature already in the app.
+
+I'm proposing to **build only Part 1 now** (the MentorPulse rewrite + the journaling fix). For Part 2, after you read the brainstorm, pick the items you want next and I'll plan & ship them in the next round — Conviction Meter (#1) and Watchlist Radar (#3) are my recommendations because they directly make Sophos feel more alive and they reuse infrastructure that's already in place.
+
+---
+
+# Out of scope for this build
+- Real-money copy trading.
+- Multiple personas.
+- Voice/audio reflections.
+- Anything from Tier 2/3 above (those need their own approval round).
