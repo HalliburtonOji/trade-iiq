@@ -239,6 +239,16 @@ serve(async (req) => {
           body_text: `Opened ${i.symbol} ${i.direction} at ${price}. ${i.thesis}`,
           payload: { entry: price, sl, tp, qty },
         });
+        const { data: watchers } = await sb.from("mentor_intent_watchers").select("user_id").eq("intent_id", i.id);
+        if (watchers && watchers.length) {
+          await sb.from("notifications").insert(watchers.map((w: any) => ({
+            user_id: w.user_id,
+            type: "info",
+            title: `Sophos opened ${i.symbol}`,
+            body: `${i.direction.toUpperCase()} at ${price}. ${(i.thesis || "").slice(0,140)}`,
+            link: "/mentor",
+          })));
+        }
         summary.triggered++;
       }
     }
