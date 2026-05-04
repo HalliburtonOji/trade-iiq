@@ -102,6 +102,7 @@ const Mentor = () => {
           <>
             <MentorPulse profile={profile} lastJournalAt={lastJournalAt} />
             <MentorHero profile={profile} closed={closed} openTrades={trades} />
+            <div className="mt-6"><MentorMirrorToggle /></div>
 
             <div className="flex items-center gap-1 mb-6 mt-8 overflow-x-auto" style={{ borderBottom: "1px solid var(--stoa-rule)" }}>
               {tabs.map((t) => (
