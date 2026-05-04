@@ -90,14 +90,28 @@ const MentorMissedWinners = ({ mentorSlug = "sophos", onReflect }: Props) => {
 
   if (loading || !user || missed.length === 0) return null;
 
+  const totalMissedPnl = missed.reduce((s, t) => s + Number(t.pnl || 0), 0);
+
   return (
     <div className="rounded-2xl p-4 mb-6" style={{ background: "var(--stoa-shine)", border: "1px solid var(--stoa-accent)" }}>
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-start justify-between mb-3 gap-3 flex-wrap">
         <div>
           <div className="stoa-kicker" style={{ color: "var(--stoa-accent)" }}>SOPHOS WON · YOU DIDN'T</div>
-          <div className="stoa-greek" style={{ fontSize: 11, color: "var(--stoa-accent)", opacity: 0.7 }}>
-            Παράλειψις · {missed.length} missed winner{missed.length === 1 ? "" : "s"} (14d)
+          <div className="stoa-greek" style={{ fontSize: 11, color: "var(--stoa-accent)", opacity: 0.75, marginTop: 2 }}>
+            Παράλειψις · {missed.length} missed winner{missed.length === 1 ? "" : "s"} in 14d
           </div>
+        </div>
+        <div
+          className="stoa-mono rounded-lg px-3 py-1.5"
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: "#22c55e",
+            background: "color-mix(in oklab, #22c55e 10%, transparent)",
+            border: "1px solid color-mix(in oklab, #22c55e 30%, transparent)",
+          }}
+        >
+          +£{totalMissedPnl.toFixed(0)} on the table
         </div>
       </div>
 
@@ -105,15 +119,40 @@ const MentorMissedWinners = ({ mentorSlug = "sophos", onReflect }: Props) => {
         {missed.slice(0, 4).map((t) => {
           const closed = t.closed_at ? new Date(t.closed_at) : null;
           return (
-            <div key={t.id} className="rounded-xl p-3 flex items-center gap-3 flex-wrap" style={{ background: "var(--stoa-bg)", border: "1px solid var(--stoa-rule)" }}>
-              <TrendingUp size={16} style={{ color: "#22c55e" }} />
+            <div
+              key={t.id}
+              className="rounded-xl p-3 flex items-center gap-3 flex-wrap transition-colors hover:bg-[color-mix(in_oklab,var(--stoa-accent)_4%,var(--stoa-bg))]"
+              style={{ background: "var(--stoa-bg)", border: "1px solid var(--stoa-rule)" }}
+            >
+              <div
+                className="h-8 w-8 rounded-full flex items-center justify-center shrink-0"
+                style={{ background: "color-mix(in oklab, #22c55e 14%, transparent)", color: "#22c55e" }}
+              >
+                <TrendingUp size={14} />
+              </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="stoa-mono" style={{ fontSize: 13, fontWeight: 600, color: "var(--stoa-ink)" }}>{t.symbol}</span>
-                  <span className="stoa-kicker" style={{ fontSize: 9, color: "var(--stoa-muted)" }}>{t.direction.toUpperCase()}</span>
-                  <span className="stoa-mono" style={{ fontSize: 12, color: "#22c55e", fontWeight: 600 }}>
-                    +£{Number(t.pnl).toFixed(0)} · {Number(t.pnl_percent || 0).toFixed(1)}%
+                  <span
+                    className="stoa-kicker"
+                    style={{
+                      fontSize: 9,
+                      color: t.direction === "long" ? "#22c55e" : "#ef4444",
+                      padding: "1px 5px",
+                      borderRadius: 3,
+                      background: `color-mix(in oklab, ${t.direction === "long" ? "#22c55e" : "#ef4444"} 10%, transparent)`,
+                    }}
+                  >
+                    {t.direction.toUpperCase()}
                   </span>
+                  <span className="stoa-mono" style={{ fontSize: 12, color: "#22c55e", fontWeight: 600 }}>
+                    +£{Number(t.pnl).toFixed(0)}
+                  </span>
+                  {t.pnl_percent !== null && (
+                    <span className="stoa-mono" style={{ fontSize: 11, color: "var(--stoa-muted)" }}>
+                      · {Number(t.pnl_percent).toFixed(1)}%
+                    </span>
+                  )}
                 </div>
                 {closed && (
                   <div className="stoa-mono" style={{ fontSize: 11, color: "var(--stoa-muted)", marginTop: 2 }}>
@@ -124,15 +163,15 @@ const MentorMissedWinners = ({ mentorSlug = "sophos", onReflect }: Props) => {
               <div className="flex gap-2 shrink-0">
                 <button
                   onClick={() => onReflect(t)}
-                  className="rounded-lg px-3 py-1.5 text-sm"
-                  style={{ background: "var(--stoa-accent)", color: "var(--stoa-bg)", border: "none", fontWeight: 500 }}
+                  className="rounded-lg px-3 py-1.5 text-sm transition-transform hover:scale-[1.02]"
+                  style={{ background: "var(--stoa-accent)", color: "var(--stoa-bg)", border: "none", fontWeight: 600 }}
                 >
                   Reflect · +5 XP
                 </button>
                 <button
                   onClick={() => dismiss(t)}
                   aria-label="Dismiss"
-                  className="rounded-lg p-1.5"
+                  className="rounded-lg p-1.5 transition-colors hover:bg-[var(--stoa-shine)]"
                   style={{ background: "transparent", border: "1px solid var(--stoa-rule)", color: "var(--stoa-muted)" }}
                 >
                   <X size={14} />
