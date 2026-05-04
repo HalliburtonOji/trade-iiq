@@ -84,6 +84,7 @@ const Mentor = () => {
     { key: "now",     label: "NOW",     greek: "Παρόν",     count: trades.length },
     { key: "next",    label: "NEXT",    greek: "Μέλλον",    count: intents.length },
     { key: "past",    label: "PAST",    greek: "Παρελθόν",  count: closed.length },
+    { key: "cases",   label: "CASES",   greek: "Αὐτοψία",   count: cases.length },
     { key: "journal", label: "JOURNAL", greek: "Βίβλος",    count: journal.length },
     { key: "epistle", label: "EPISTLE", greek: "Ἐπιστολή",  count: 0 },
   ];
