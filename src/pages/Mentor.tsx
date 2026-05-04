@@ -55,14 +55,15 @@ const Mentor = () => {
     return () => clearTimeout(t);
   }, [focus.stamp]);
 
-  const load = async () => {
+  const load = async (slug: string = mentorSlug) => {
+    setLoading(true);
     const [{ data: p }, { data: t }, { data: i }, { data: j }, { data: c }, { data: cs }] = await Promise.all([
-      supabase.from("mentor_profile").select("*").eq("slug","sophos").maybeSingle(),
-      supabase.from("mentor_trades").select("*").eq("status","open").order("opened_at",{ascending:false}),
-      supabase.from("mentor_intents").select("*").eq("status","pending").order("created_at",{ascending:false}),
-      supabase.from("mentor_journal").select("*").order("created_at",{ascending:false}).limit(80),
-      supabase.from("mentor_trades").select("*").eq("status","closed").order("closed_at",{ascending:false}).limit(60),
-      supabase.from("mentor_case_studies").select("id,symbol,direction,outcome,r_multiple,title,hook,tags,greek_phrase,created_at").order("created_at",{ascending:false}).limit(30),
+      supabase.from("mentor_profile").select("*").eq("slug", slug).maybeSingle(),
+      supabase.from("mentor_trades").select("*").eq("mentor_slug", slug).eq("status","open").order("opened_at",{ascending:false}),
+      supabase.from("mentor_intents").select("*").eq("mentor_slug", slug).eq("status","pending").order("created_at",{ascending:false}),
+      supabase.from("mentor_journal").select("*").eq("mentor_slug", slug).order("created_at",{ascending:false}).limit(80),
+      supabase.from("mentor_trades").select("*").eq("mentor_slug", slug).eq("status","closed").order("closed_at",{ascending:false}).limit(60),
+      supabase.from("mentor_case_studies").select("id,symbol,direction,outcome,r_multiple,title,hook,tags,greek_phrase,created_at,mentor_slug").eq("mentor_slug", slug).order("created_at",{ascending:false}).limit(30),
     ]);
     setProfile(p); setTrades(t||[]); setIntents(i||[]); setJournal(j||[]); setClosed(c||[]); setCases(cs||[]);
     if (j && j[0]) setLastJournalAt(j[0].created_at);
@@ -70,7 +71,31 @@ const Mentor = () => {
   };
 
   useEffect(() => {
-    load();
+    load(mentorSlug);
+  }, [mentorSlug]);
+
+  // URL-driven Missed Trade prompt: /mentor?missed=AAPL&dir=long&price=192.40&trade=<id>
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const symbol = params.get("missed");
+    if (!symbol) return;
+    const dir = params.get("dir") || "long";
+    const price = params.get("price") || "";
+    const tradeId = params.get("trade");
+    setMissedSheet({
+      open: true,
+      symbol,
+      context: `Sophos opened ${symbol} ${dir.toUpperCase()}${price ? ` at ${price}` : ""}.`,
+      tradeId,
+      pnl: null,
+    });
+    // Clean the URL so refresh doesn't re-trigger
+    const url = new URL(window.location.href);
+    ["missed", "dir", "price", "trade"].forEach((k) => url.searchParams.delete(k));
+    window.history.replaceState({}, "", url.toString());
+  }, []);
+
+  useEffect(() => {
     // Daily Mission tick: visited the mentor (idempotent per day)
     (async () => {
       const today = new Date().toISOString().slice(0, 10);
@@ -80,16 +105,16 @@ const Mentor = () => {
       });
     })();
     const ch = supabase.channel("mentor-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "mentor_trades" }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "mentor_intents" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "mentor_trades" }, () => load(mentorSlug))
+      .on("postgres_changes", { event: "*", schema: "public", table: "mentor_intents" }, () => load(mentorSlug))
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "mentor_journal" }, (p: any) => {
         setLastJournalAt(p?.new?.created_at || new Date().toISOString());
-        load();
+        load(mentorSlug);
       })
-      .on("postgres_changes", { event: "*", schema: "public", table: "mentor_profile" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "mentor_profile" }, () => load(mentorSlug))
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, []);
+  }, [mentorSlug]);
 
   const tabs: { key: Tab; label: string; greek: string; count: number }[] = [
     { key: "now",     label: "NOW",     greek: "Παρόν",        count: trades.length },
