@@ -3,6 +3,7 @@ import { Clock, Copy, Bell, Hourglass } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import MentorPlanDiff from "./MentorPlanDiff";
+import MentorPredictionPoll from "./MentorPredictionPoll";
 
 const MentorIntentCard = ({ intent }: { intent: any }) => {
   const [copies, setCopies] = useState<number | null>(null);
