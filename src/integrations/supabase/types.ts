@@ -882,16 +882,25 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          mirror_enabled: boolean
+          mirror_risk_pct: number
+          mirror_started_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
+          mirror_enabled?: boolean
+          mirror_risk_pct?: number
+          mirror_started_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
+          mirror_enabled?: boolean
+          mirror_risk_pct?: number
+          mirror_started_at?: string | null
           user_id?: string
         }
         Relationships: []
