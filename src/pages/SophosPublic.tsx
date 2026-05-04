@@ -36,12 +36,13 @@ const SophosPublic = () => {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const [p, t, i, j, l] = await Promise.all([
+      const [p, t, i, j, l, c] = await Promise.all([
         supabase.from("mentor_profile").select("*").eq("slug", "sophos").maybeSingle(),
         supabase.from("mentor_trades").select("*").order("opened_at", { ascending: false }).limit(100),
         supabase.from("mentor_intents").select("*").order("created_at", { ascending: false }).limit(40),
         supabase.from("mentor_journal").select("*").order("created_at", { ascending: false }).limit(60),
         supabase.from("mentor_letters").select("*").order("week_starting", { ascending: false }).limit(8),
+        supabase.from("mentor_case_studies").select("id,symbol,direction,outcome,r_multiple,title,hook,tags,greek_phrase,created_at").order("created_at", { ascending: false }).limit(30),
       ]);
       if (cancelled) return;
       setProfile(p.data);
@@ -51,6 +52,7 @@ const SophosPublic = () => {
       setIntents((i.data || []).filter((x: any) => x.status === "pending"));
       setJournal(j.data || []);
       setLetters(l.data || []);
+      setCases(c.data || []);
       setLoading(false);
     })();
     return () => { cancelled = true; };
