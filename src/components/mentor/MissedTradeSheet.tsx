@@ -9,6 +9,8 @@ type Props = {
   onClose: () => void;
   symbol: string;
   context: string; // e.g. "Sophos opened AAPL long at 192.40"
+  tradeId?: string | null; // optional: links reflection to a specific mentor_trade
+  pnl?: number | null;
 };
 
 const REASONS = [
@@ -19,7 +21,7 @@ const REASONS = [
   { id: "size", label: "Couldn't size it properly" },
 ];
 
-export default function MissedTradeSheet({ open, onClose, symbol, context }: Props) {
+export default function MissedTradeSheet({ open, onClose, symbol, context, tradeId, pnl }: Props) {
   const { user } = useAuth();
   const [picked, setPicked] = useState<string | null>(null);
   const [note, setNote] = useState("");
@@ -61,6 +63,18 @@ export default function MissedTradeSheet({ open, onClose, symbol, context }: Pro
       p_ref_id: `${symbol}_${today}`,
       p_ref_table: "evening_reflections",
     });
+    // Also record the reflection so the missed-winners panel hides it.
+    if (tradeId) {
+      await supabase.from("mentor_missed_reflections").upsert({
+        user_id: user.id,
+        trade_id: tradeId,
+        symbol,
+        reason: picked,
+        note,
+        pnl_at_reflection: pnl ?? null,
+        reflected_at: new Date().toISOString(),
+      }, { onConflict: "user_id,trade_id" });
+    }
     toast.success("+5 XP — reflection saved", { description: "Honest answers compound." });
     setBusy(false);
     onClose();

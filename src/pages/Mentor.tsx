@@ -13,6 +13,10 @@ import MentorLetter from "@/components/mentor/MentorLetter";
 import MentorCaseStudyCard from "@/components/mentor/MentorCaseStudyCard";
 import MentorMirrorToggle from "@/components/mentor/MentorMirrorToggle";
 import MentorReplay from "@/components/mentor/MentorReplay";
+import MentorPersonaSwitcher from "@/components/mentor/MentorPersonaSwitcher";
+import MentorWeeklyVsYou from "@/components/mentor/MentorWeeklyVsYou";
+import MentorMissedWinners from "@/components/mentor/MentorMissedWinners";
+import MissedTradeSheet from "@/components/mentor/MissedTradeSheet";
 import { useMentorFocus } from "@/hooks/useMentorFocus";
 import { Loader2 } from "lucide-react";
 
@@ -20,6 +24,7 @@ type Tab = "now" | "next" | "past" | "cases" | "replay" | "journal" | "epistle";
 
 const Mentor = () => {
   const [tab, setTab] = useState<Tab>("now");
+  const [mentorSlug, setMentorSlug] = useState<string>("sophos");
   const [profile, setProfile] = useState<any>(null);
   const [trades, setTrades] = useState<any[]>([]);
   const [intents, setIntents] = useState<any[]>([]);
@@ -29,6 +34,9 @@ const Mentor = () => {
   const [loading, setLoading] = useState(true);
   const [lastJournalAt, setLastJournalAt] = useState<string | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
+  const [missedSheet, setMissedSheet] = useState<{ open: boolean; symbol: string; context: string; tradeId: string | null; pnl: number | null }>({
+    open: false, symbol: "", context: "", tradeId: null, pnl: null,
+  });
   const focus = useMentorFocus();
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -47,14 +55,15 @@ const Mentor = () => {
     return () => clearTimeout(t);
   }, [focus.stamp]);
 
-  const load = async () => {
+  const load = async (slug: string = mentorSlug) => {
+    setLoading(true);
     const [{ data: p }, { data: t }, { data: i }, { data: j }, { data: c }, { data: cs }] = await Promise.all([
-      supabase.from("mentor_profile").select("*").eq("slug","sophos").maybeSingle(),
-      supabase.from("mentor_trades").select("*").eq("status","open").order("opened_at",{ascending:false}),
-      supabase.from("mentor_intents").select("*").eq("status","pending").order("created_at",{ascending:false}),
-      supabase.from("mentor_journal").select("*").order("created_at",{ascending:false}).limit(80),
-      supabase.from("mentor_trades").select("*").eq("status","closed").order("closed_at",{ascending:false}).limit(60),
-      supabase.from("mentor_case_studies").select("id,symbol,direction,outcome,r_multiple,title,hook,tags,greek_phrase,created_at").order("created_at",{ascending:false}).limit(30),
+      supabase.from("mentor_profile").select("*").eq("slug", slug).maybeSingle(),
+      supabase.from("mentor_trades").select("*").eq("mentor_slug", slug).eq("status","open").order("opened_at",{ascending:false}),
+      supabase.from("mentor_intents").select("*").eq("mentor_slug", slug).eq("status","pending").order("created_at",{ascending:false}),
+      supabase.from("mentor_journal").select("*").eq("mentor_slug", slug).order("created_at",{ascending:false}).limit(80),
+      supabase.from("mentor_trades").select("*").eq("mentor_slug", slug).eq("status","closed").order("closed_at",{ascending:false}).limit(60),
+      supabase.from("mentor_case_studies").select("id,symbol,direction,outcome,r_multiple,title,hook,tags,greek_phrase,created_at,mentor_slug").eq("mentor_slug", slug).order("created_at",{ascending:false}).limit(30),
     ]);
     setProfile(p); setTrades(t||[]); setIntents(i||[]); setJournal(j||[]); setClosed(c||[]); setCases(cs||[]);
     if (j && j[0]) setLastJournalAt(j[0].created_at);
@@ -62,7 +71,31 @@ const Mentor = () => {
   };
 
   useEffect(() => {
-    load();
+    load(mentorSlug);
+  }, [mentorSlug]);
+
+  // URL-driven Missed Trade prompt: /mentor?missed=AAPL&dir=long&price=192.40&trade=<id>
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const symbol = params.get("missed");
+    if (!symbol) return;
+    const dir = params.get("dir") || "long";
+    const price = params.get("price") || "";
+    const tradeId = params.get("trade");
+    setMissedSheet({
+      open: true,
+      symbol,
+      context: `Sophos opened ${symbol} ${dir.toUpperCase()}${price ? ` at ${price}` : ""}.`,
+      tradeId,
+      pnl: null,
+    });
+    // Clean the URL so refresh doesn't re-trigger
+    const url = new URL(window.location.href);
+    ["missed", "dir", "price", "trade"].forEach((k) => url.searchParams.delete(k));
+    window.history.replaceState({}, "", url.toString());
+  }, []);
+
+  useEffect(() => {
     // Daily Mission tick: visited the mentor (idempotent per day)
     (async () => {
       const today = new Date().toISOString().slice(0, 10);
@@ -72,16 +105,16 @@ const Mentor = () => {
       });
     })();
     const ch = supabase.channel("mentor-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "mentor_trades" }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "mentor_intents" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "mentor_trades" }, () => load(mentorSlug))
+      .on("postgres_changes", { event: "*", schema: "public", table: "mentor_intents" }, () => load(mentorSlug))
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "mentor_journal" }, (p: any) => {
         setLastJournalAt(p?.new?.created_at || new Date().toISOString());
-        load();
+        load(mentorSlug);
       })
-      .on("postgres_changes", { event: "*", schema: "public", table: "mentor_profile" }, load)
+      .on("postgres_changes", { event: "*", schema: "public", table: "mentor_profile" }, () => load(mentorSlug))
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, []);
+  }, [mentorSlug]);
 
   const tabs: { key: Tab; label: string; greek: string; count: number }[] = [
     { key: "now",     label: "NOW",     greek: "Παρόν",        count: trades.length },
@@ -102,9 +135,29 @@ const Mentor = () => {
           </div>
         ) : (
           <>
+            <MentorPersonaSwitcher active={mentorSlug} onChange={setMentorSlug} />
             <MentorPulse profile={profile} lastJournalAt={lastJournalAt} />
             <MentorHero profile={profile} closed={closed} openTrades={trades} />
-            <div className="mt-6"><MentorMirrorToggle /></div>
+            {mentorSlug === "sophos" && (
+              <>
+                <div className="mt-6"><MentorMirrorToggle /></div>
+                <div className="mt-4">
+                  <MentorMissedWinners
+                    mentorSlug={mentorSlug}
+                    onReflect={(t) => setMissedSheet({
+                      open: true, symbol: t.symbol, tradeId: t.id, pnl: t.pnl,
+                      context: `Sophos closed ${t.symbol} ${t.direction.toUpperCase()} for +£${Number(t.pnl).toFixed(0)}.`,
+                    })}
+                  />
+                </div>
+              </>
+            )}
+            {mentorSlug !== "sophos" && trades.length === 0 && intents.length === 0 && closed.length === 0 && (
+              <div className="rounded-2xl py-10 text-center mt-6" style={{ border: "1px dashed var(--stoa-rule)", color: "var(--stoa-muted)" }}>
+                <div className="stoa-greek mb-1" style={{ color: profile?.persona_color || "var(--stoa-accent)" }}>{profile?.name || "—"} · ἔρχεται</div>
+                <div style={{ fontSize: 13 }}>{profile?.display_name || "This mentor"} is awakening soon. Live decisions begin shortly.</div>
+              </div>
+            )}
 
             <div className="flex items-center gap-1 mb-6 mt-8 overflow-x-auto" style={{ borderBottom: "1px solid var(--stoa-rule)" }}>
               {tabs.map((t) => (
@@ -140,6 +193,7 @@ const Mentor = () => {
                       ))}
                 </div>
                 <MentorVsYou profile={profile} mentorClosed={closed} />
+                <MentorWeeklyVsYou mentorSlug={mentorSlug} />
               </>
             )}
 
@@ -176,6 +230,14 @@ const Mentor = () => {
           </>
         )}
       </div>
+      <MissedTradeSheet
+        open={missedSheet.open}
+        onClose={() => setMissedSheet((s) => ({ ...s, open: false }))}
+        symbol={missedSheet.symbol}
+        context={missedSheet.context}
+        tradeId={missedSheet.tradeId}
+        pnl={missedSheet.pnl}
+      />
     </StoaShell>
   );
 };
