@@ -411,10 +411,13 @@ serve(async (req) => {
       // rotate by minute
       const offset = Math.floor(Date.now() / 60_000) % pool.length;
       const slice = [pool[offset], pool[(offset+3)%pool.length], pool[(offset+7)%pool.length]];
-      const candidates: any[] = [];
+      const candidates: Ctx[] = [];
       for (const c of slice) {
         const p = await fetchQuote(c.symbol, c.asset_type);
-        if (p) candidates.push({ ...c, price: p });
+        if (!p) continue;
+        const ctx = await fetchContext(c.symbol, c.asset_type, p);
+        if (ctx) candidates.push(ctx);
+        else console.log(`[mentor-tick] no context for ${c.symbol} — dropped from candidate set`);
       }
       if (candidates.length) {
         const { data: recent } = await sb.from("mentor_journal").select("body_text").order("created_at",{ascending:false}).limit(5);
