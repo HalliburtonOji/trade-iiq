@@ -34,6 +34,7 @@ import SmartAlerts from "@/components/SmartAlerts";
 import NotificationPanel from "@/components/NotificationPanel";
 import EconomicCalendar from "@/components/EconomicCalendar";
 import StoaShell from "@/components/stoa/StoaShell";
+import SophosLiveDrawer from "@/components/mentor/SophosLiveDrawer";
 import Altar from "@/components/stoa/Altar";
 import PedimentCap from "@/components/stoa/PedimentCap";
 import Meander from "@/components/stoa/Meander";
@@ -520,6 +521,7 @@ const Index = () => {
           </div>
         </div>
       </motion.div>
+      <SophosLiveDrawer />
     </StoaShell>
   );
 };
