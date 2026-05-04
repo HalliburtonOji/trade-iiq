@@ -77,72 +77,107 @@ const MentorMirrorToggle = () => {
   if (loading) return null;
   if (!userId) return null;
 
+  const RISK_OPTIONS = [0.25, 0.5, 0.75, 1, 1.5, 2];
+
   return (
     <div
-      className="rounded-2xl p-4 mb-4"
+      className="rounded-2xl p-4 mb-4 transition-colors"
       style={{
-        background: "var(--stoa-surface)",
+        background: mirrorEnabled
+          ? "color-mix(in oklab, var(--stoa-accent) 6%, var(--stoa-surface))"
+          : "var(--stoa-surface)",
         border: `1px solid ${mirrorEnabled ? "var(--stoa-accent)" : "var(--stoa-rule)"}`,
       }}
     >
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3 min-w-0">
           <div
-            className="rounded-full p-2 shrink-0"
+            className="rounded-full p-2 shrink-0 transition-colors"
             style={{
-              background: mirrorEnabled ? "var(--stoa-accent)" : "var(--stoa-rule)",
+              background: mirrorEnabled ? "var(--stoa-accent)" : "var(--stoa-bg)",
               color: mirrorEnabled ? "var(--stoa-bg)" : "var(--stoa-muted)",
+              border: mirrorEnabled ? "none" : "1px solid var(--stoa-rule)",
             }}
           >
             <Activity className="h-4 w-4" />
           </div>
           <div className="min-w-0">
-            <div className="stoa-kicker" style={{ color: "var(--stoa-ink)" }}>
-              MIRROR MODE {mirrorEnabled && <span style={{ color: "var(--stoa-accent)" }}>· LIVE</span>}
+            <div className="flex items-center gap-2">
+              <div className="stoa-kicker" style={{ color: "var(--stoa-ink)" }}>MIRROR MODE</div>
+              {mirrorEnabled && (
+                <span
+                  className="stoa-mono inline-flex items-center gap-1"
+                  style={{
+                    fontSize: 9,
+                    padding: "1px 6px",
+                    borderRadius: 4,
+                    background: "var(--stoa-accent)",
+                    color: "var(--stoa-bg)",
+                    fontWeight: 600,
+                  }}
+                >
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--stoa-bg)", animation: "stoa-pulse 1.4s ease-in-out infinite" }} />
+                  LIVE
+                </span>
+              )}
             </div>
-            <div className="stoa-greek" style={{ fontSize: 11, color: "var(--stoa-accent)", opacity: 0.8 }}>
+            <div className="stoa-greek" style={{ fontSize: 11, color: "var(--stoa-accent)", opacity: 0.85, marginTop: 2 }}>
               Μίμησις — auto-copy every Sophos trade
             </div>
-            {copyCount !== null && copyCount > 0 && (
-              <div style={{ fontSize: 12, color: "var(--stoa-muted)", marginTop: 4 }}>
-                {copyCount} trade{copyCount === 1 ? "" : "s"} mirrored to date
-              </div>
-            )}
+            <div style={{ fontSize: 12, color: "var(--stoa-muted)", marginTop: 4 }}>
+              {mirrorEnabled
+                ? <>Sizing each trade to <b style={{ color: "var(--stoa-ink)" }}>{riskPct}% risk</b>{copyCount && copyCount > 0 ? <> · {copyCount} mirrored to date</> : null}</>
+                : copyCount && copyCount > 0
+                  ? <>Off · {copyCount} mirrored historically</>
+                  : <>Off — turn on to auto-copy future trades</>}
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {mirrorEnabled && (
-            <select
-              value={riskPct}
-              disabled={saving}
-              onChange={(e) => persist(true, Number(e.target.value))}
-              className="rounded-lg px-3 py-2 text-sm"
-              style={{
-                background: "var(--stoa-bg)",
-                border: "1px solid var(--stoa-rule)",
-                color: "var(--stoa-ink)",
-              }}
-            >
-              {[0.25, 0.5, 0.75, 1, 1.5, 2].map(p => (
-                <option key={p} value={p}>{p}% risk</option>
-              ))}
-            </select>
-          )}
-          <button
-            onClick={handleToggle}
-            disabled={saving}
-            className="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-            style={{
-              background: mirrorEnabled ? "transparent" : "var(--stoa-accent)",
-              border: `1px solid ${mirrorEnabled ? "var(--stoa-rule)" : "var(--stoa-accent)"}`,
-              color: mirrorEnabled ? "var(--stoa-muted)" : "var(--stoa-bg)",
-            }}
-          >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : mirrorEnabled ? "Turn off" : "Turn on Mirror"}
-          </button>
-        </div>
+        <button
+          onClick={handleToggle}
+          disabled={saving}
+          className="rounded-lg px-4 py-2 text-sm font-medium transition-colors shrink-0"
+          style={{
+            background: mirrorEnabled ? "transparent" : "var(--stoa-accent)",
+            border: `1px solid ${mirrorEnabled ? "var(--stoa-rule)" : "var(--stoa-accent)"}`,
+            color: mirrorEnabled ? "var(--stoa-muted)" : "var(--stoa-bg)",
+            minWidth: 120,
+          }}
+        >
+          {saving ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : mirrorEnabled ? "Turn off" : "Turn on Mirror"}
+        </button>
       </div>
+
+      {mirrorEnabled && (
+        <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--stoa-rule)" }}>
+          <div className="stoa-kicker mb-2" style={{ color: "var(--stoa-muted)", fontSize: 9 }}>
+            RISK PER TRADE
+          </div>
+          <div className="flex gap-1 overflow-x-auto">
+            {RISK_OPTIONS.map((p) => {
+              const active = Math.abs(p - riskPct) < 0.001;
+              return (
+                <button
+                  key={p}
+                  disabled={saving}
+                  onClick={() => persist(true, p)}
+                  className="rounded-lg px-3 py-1.5 stoa-mono shrink-0 transition-colors"
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    background: active ? "var(--stoa-accent)" : "var(--stoa-bg)",
+                    color: active ? "var(--stoa-bg)" : "var(--stoa-ink)",
+                    border: `1px solid ${active ? "var(--stoa-accent)" : "var(--stoa-rule)"}`,
+                  }}
+                >
+                  {p}%
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {confirming && (
         <div

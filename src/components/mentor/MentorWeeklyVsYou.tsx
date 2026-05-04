@@ -108,42 +108,80 @@ const MentorWeeklyVsYou = ({ mentorSlug = "sophos" }: { mentorSlug?: string }) =
       : mentorWins > userWins ? "Sophos is ahead. Study his journal — what is he refusing that you take?"
         : "Neck and neck. The next week of patience decides.";
 
+  const totalUserR = rows.reduce((s, r) => s + r.userR, 0);
+  const totalMentorR = rows.reduce((s, r) => s + r.mentorR, 0);
+  const youAheadOverall = totalUserR > totalMentorR;
+
   return (
     <div className="rounded-2xl p-5 mt-4" style={{ border: "1px solid var(--stoa-rule)", background: "var(--stoa-shine)" }}>
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div>
           <div className="stoa-kicker" style={{ color: "var(--stoa-accent)" }}>WEEKLY R-MULTIPLE</div>
-          <div className="stoa-greek" style={{ fontSize: 11, color: "var(--stoa-accent)", opacity: 0.7 }}>Ἀγών · The Contest</div>
+          <div className="stoa-greek" style={{ fontSize: 11, color: "var(--stoa-accent)", opacity: 0.75, marginTop: 2 }}>
+            Ἀγών · The Contest
+          </div>
         </div>
-        <div className="flex items-center gap-2 stoa-mono" style={{ fontSize: 12 }}>
-          <Trophy size={14} style={{ color: "var(--stoa-accent)" }} />
-          <span style={{ color: "var(--stoa-ink)" }}>You {userWins}</span>
+        <div
+          className="flex items-center gap-2 stoa-mono rounded-lg px-2.5 py-1"
+          style={{ fontSize: 12, background: "var(--stoa-bg)", border: "1px solid var(--stoa-rule)" }}
+        >
+          <Trophy size={14} style={{ color: youAheadOverall ? "var(--stoa-ink)" : "var(--stoa-accent)" }} />
+          <span style={{ color: "var(--stoa-ink)", fontWeight: 600 }}>You {userWins}</span>
           <span style={{ color: "var(--stoa-muted)" }}>·</span>
-          <span style={{ color: "var(--stoa-accent)" }}>Sophos {mentorWins}</span>
+          <span style={{ color: "var(--stoa-accent)", fontWeight: 600 }}>Sophos {mentorWins}</span>
         </div>
       </div>
 
-      <div className="space-y-3">
+      {/* Legend */}
+      <div className="flex items-center gap-4 mb-3 stoa-kicker" style={{ fontSize: 9, color: "var(--stoa-muted)" }}>
+        <div className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-sm" style={{ background: "var(--stoa-ink)" }} />
+          YOU · {totalUserR >= 0 ? "+" : ""}{totalUserR.toFixed(2)}R
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-sm" style={{ background: "var(--stoa-accent)" }} />
+          SOPHOS · {totalMentorR >= 0 ? "+" : ""}{totalMentorR.toFixed(2)}R
+        </div>
+      </div>
+
+      <div className="space-y-2.5">
         {rows.map((r) => {
           const userPct = (Math.abs(r.userR) / maxAbs) * 100;
           const mentorPct = (Math.abs(r.mentorR) / maxAbs) * 100;
           const youAhead = r.userR > r.mentorR;
+          const tied = r.userR === r.mentorR;
           return (
             <div key={r.weekKey}>
               <div className="flex items-center justify-between mb-1">
                 <span className="stoa-mono" style={{ fontSize: 11, color: "var(--stoa-muted)" }}>{r.label}</span>
-                <span className="stoa-mono" style={{ fontSize: 11, color: youAhead ? "#22c55e" : r.userR < r.mentorR ? "#ef4444" : "var(--stoa-muted)" }}>
-                  {youAhead ? "You ahead" : r.mentorR > r.userR ? "Sophos ahead" : "Tie"}
+                <span
+                  className="stoa-kicker"
+                  style={{
+                    fontSize: 9,
+                    color: tied ? "var(--stoa-muted)" : youAhead ? "#22c55e" : "var(--stoa-accent)",
+                  }}
+                >
+                  {tied ? "TIE" : youAhead ? "YOU AHEAD" : "SOPHOS AHEAD"}
                 </span>
               </div>
-              <BarRow label="YOU"    r={r.userR}   pct={userPct} accent="var(--stoa-ink)" />
+              <BarRow label="YOU"    r={r.userR}   pct={userPct}   accent="var(--stoa-ink)" />
               <BarRow label="SOPHOS" r={r.mentorR} pct={mentorPct} accent="var(--stoa-accent)" />
             </div>
           );
         })}
       </div>
 
-      <div style={{ fontSize: 13, color: "var(--stoa-muted)", marginTop: 14, fontStyle: "italic", lineHeight: 1.5 }}>
+      <div
+        className="rounded-lg p-3 mt-4"
+        style={{
+          background: "var(--stoa-bg)",
+          border: "1px solid var(--stoa-rule)",
+          fontSize: 13,
+          color: "var(--stoa-ink)",
+          fontStyle: "italic",
+          lineHeight: 1.5,
+        }}
+      >
         {verdict}
       </div>
     </div>
@@ -155,19 +193,33 @@ const BarRow = ({ label, r, pct, accent }: { label: string; r: number; pct: numb
   return (
     <div className="flex items-center gap-2 my-1">
       <span className="stoa-kicker shrink-0" style={{ width: 56, fontSize: 9, color: "var(--stoa-muted)" }}>{label}</span>
-      <div className="flex-1 h-5 rounded-md relative overflow-hidden" style={{ background: "var(--stoa-bg)", border: "1px solid var(--stoa-rule)" }}>
+      <div
+        className="flex-1 h-5 rounded-md relative overflow-hidden"
+        style={{ background: "var(--stoa-bg)", border: "1px solid var(--stoa-rule)" }}
+      >
+        {/* center axis */}
+        <div className="absolute top-0 bottom-0" style={{ left: "50%", width: 1, background: "var(--stoa-rule)", opacity: 0.7 }} />
         <div
           className="absolute top-0 bottom-0 transition-all"
           style={{
-            width: `${Math.max(2, pct)}%`,
+            width: `${Math.max(2, pct / 2)}%`,
             background: positive ? accent : "color-mix(in srgb, #ef4444 70%, var(--stoa-bg))",
-            opacity: positive ? 0.85 : 0.7,
-            left: positive ? 0 : "auto",
-            right: positive ? "auto" : 0,
+            opacity: positive ? 0.9 : 0.75,
+            left: positive ? "50%" : "auto",
+            right: positive ? "auto" : "50%",
           }}
         />
       </div>
-      <span className="stoa-mono shrink-0" style={{ width: 60, fontSize: 12, fontWeight: 600, textAlign: "right", color: positive ? "var(--stoa-ink)" : "#ef4444" }}>
+      <span
+        className="stoa-mono shrink-0"
+        style={{
+          width: 60,
+          fontSize: 12,
+          fontWeight: 600,
+          textAlign: "right",
+          color: positive ? "var(--stoa-ink)" : "#ef4444",
+        }}
+      >
         {positive ? "+" : ""}{r.toFixed(2)}R
       </span>
     </div>
