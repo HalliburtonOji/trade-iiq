@@ -85,6 +85,36 @@ const MentorIntentCard = ({ intent }: { intent: any }) => {
       {intent.thesis && (
         <p style={{ color: "var(--stoa-muted)", fontSize: 13, lineHeight: 1.5 }}>{intent.thesis}</p>
       )}
+
+      {intent.conviction != null && (
+        <div className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ background: "var(--stoa-bg)", border: "1px solid var(--stoa-rule)" }}>
+          <div className="flex items-center gap-1.5">
+            <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>CONVICTION</span>
+            <div className="flex gap-0.5">
+              {[1,2,3,4,5].map((n) => (
+                <span key={n} className="h-1.5 w-3 rounded-sm" style={{
+                  background: n <= Number(intent.conviction)
+                    ? (Number(intent.conviction) >= 4 ? "var(--stoa-secondary)" : Number(intent.conviction) >= 3 ? "var(--stoa-accent)" : "var(--stoa-signal)")
+                    : "var(--stoa-rule)",
+                }} />
+              ))}
+            </div>
+            <span className="stoa-mono" style={{ fontSize: 11, color: "var(--stoa-ink)", marginLeft: 4 }}>{intent.conviction}/5</span>
+          </div>
+        </div>
+      )}
+
+      {Array.isArray(intent.fail_reasons) && intent.fail_reasons.length > 0 && (
+        <div className="space-y-1">
+          <div className="stoa-kicker" style={{ color: "var(--stoa-signal)", opacity: 0.85 }}>HOW THIS COULD FAIL</div>
+          <ul className="space-y-0.5" style={{ color: "var(--stoa-muted)", fontSize: 12, lineHeight: 1.45 }}>
+            {intent.fail_reasons.slice(0,3).map((r: string, idx: number) => (
+              <li key={idx} className="flex gap-2"><span style={{ color: "var(--stoa-signal)" }}>·</span><span>{r}</span></li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {intent.invalidation_text && (
         <p className="stoa-kicker" style={{ color: "var(--stoa-signal)", opacity: 0.8 }}>
           INVALIDATE IF · {intent.invalidation_text}

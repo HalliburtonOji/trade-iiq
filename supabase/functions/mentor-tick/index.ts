@@ -54,6 +54,8 @@ async function aiPlan(opts: {
   const sys = `You are Σοφός (Sophos), a disciplined stoic swing trader publishing trade plans for students.
 You publish FORWARD-LOOKING INTENTS, not immediate trades. Each intent is a conditional plan with a clear trigger.
 Risk strictly ≤ 1% per trade. Mandatory stop-loss. Voice: stoic, second person, ≤ 3 sentences thesis.
+For every INTENT you must include a conviction score 1–5 and 1–3 specific fail_reasons — be honest about what could go wrong.
+For every SKIP you must include a SHORT specific skip_reason (e.g. "ATR too tight", "awaiting volume", "mid-range, no edge"). Never say "no setup earned its place".
 Return ONE intent OR a SKIP if nothing earns its place.`;
 
   const userMsg = `Current equity: £${opts.equity.toFixed(0)}.
@@ -88,8 +90,10 @@ Choose ONE candidate to publish a pending intent for, OR skip with a reason.`;
           size_pct: { type: "number", description: "Risk percent of equity, ≤ 1" },
           invalidation_text: { type: "string" },
           thesis: { type: "string", description: "≤ 3 sentence stoic rationale" },
+          conviction: { type: "integer", description: "1-5 confidence in this plan. 1=speculative, 5=textbook setup", minimum: 1, maximum: 5 },
+          fail_reasons: { type: "array", items: { type: "string" }, description: "1-3 specific ways this plan could fail (e.g. 'macro print Wed could spike volatility')" },
           valid_hours: { type: "number", description: "How many hours the intent stays valid" },
-          skip_reason: { type: "string" },
+          skip_reason: { type: "string", description: "If action=SKIP, ONE short specific reason (e.g. 'ATR too tight', 'awaiting volume confirmation', 'price mid-range — no edge')" },
         },
         required: ["action"],
         additionalProperties: false,
@@ -310,13 +314,15 @@ serve(async (req) => {
               size_pct: Math.min(Number(plan.size_pct||1), 1),
               invalidation_text: plan.invalidation_text || "",
               thesis: plan.thesis || "",
+              conviction: plan.conviction ? Math.max(1, Math.min(5, Math.round(Number(plan.conviction)))) : null,
+              fail_reasons: Array.isArray(plan.fail_reasons) ? plan.fail_reasons.slice(0,3) : [],
               valid_until: new Date(Date.now() + validHours * 3600_000).toISOString(),
               status: "pending",
             }).select().single();
             await sb.from("mentor_journal").insert({
               kind: "intent_published", intent_id: intentRow?.id, symbol: plan.symbol,
               body_text: `New plan on ${plan.symbol}: ${plan.trigger_condition_text}. ${plan.thesis}`,
-              payload: { trigger: plan.trigger_condition_text },
+              payload: { trigger: plan.trigger_condition_text, conviction: plan.conviction || null },
             });
             summary.planned++;
           }
