@@ -304,6 +304,8 @@ const Learn = () => {
         </div>
       )}
 
+      {!loading && <MentorCaseStudiesSection />}
+
       {loading && (
         <div className="stoa-kicker" style={{ color: "var(--stoa-muted)", padding: "20px 0" }}>
           LOADING · ΧΡΟΝΟΣ…
