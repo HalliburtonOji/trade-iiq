@@ -248,14 +248,21 @@ serve(async (req) => {
           body_text: `Opened ${i.symbol} ${i.direction} at ${price}. ${i.thesis}`,
           payload: { entry: price, sl, tp, qty, direction: i.direction },
         });
-        const { data: watchers } = await sb.from("mentor_intent_watchers").select("user_id").eq("intent_id", i.id);
-        if (watchers && watchers.length) {
-          await sb.from("notifications").insert(watchers.map((w: any) => ({
-            user_id: w.user_id,
+        // Notify both intent watchers AND general mentor followers about the open
+        const [{ data: watchers }, { data: followers }] = await Promise.all([
+          sb.from("mentor_intent_watchers").select("user_id").eq("intent_id", i.id),
+          sb.from("mentor_followers").select("user_id"),
+        ]);
+        const recipients = new Set<string>();
+        (watchers || []).forEach((w: any) => recipients.add(w.user_id));
+        (followers || []).forEach((f: any) => recipients.add(f.user_id));
+        if (recipients.size) {
+          await sb.from("notifications").insert(Array.from(recipients).map((uid) => ({
+            user_id: uid,
             type: "info",
             title: `Sophos opened ${i.symbol}`,
             body: `${i.direction.toUpperCase()} at ${price}. ${(i.thesis || "").slice(0,140)}`,
-            link: "/mentor",
+            link: `/mentor?missed=${encodeURIComponent(i.symbol)}&dir=${i.direction}&price=${price}`,
           })));
         }
         summary.triggered++;
@@ -324,6 +331,17 @@ serve(async (req) => {
               body_text: `New plan on ${plan.symbol}: ${plan.trigger_condition_text}. ${plan.thesis}`,
               payload: { trigger: plan.trigger_condition_text, conviction: plan.conviction || null },
             });
+            // Notify followers of new intent (low-frequency event — already throttled by MAX_INTENTS)
+            const { data: followers } = await sb.from("mentor_followers").select("user_id");
+            if (followers && followers.length) {
+              await sb.from("notifications").insert(followers.map((f: any) => ({
+                user_id: f.user_id,
+                type: "info",
+                title: `Sophos is watching ${plan.symbol}`,
+                body: `${plan.trigger_condition_text} · conviction ${plan.conviction ?? "?"}/5`,
+                link: "/mentor",
+              })));
+            }
             summary.planned++;
           }
         } else if (plan?.action === "SKIP") {

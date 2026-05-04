@@ -23,6 +23,7 @@ import TraderOSStrip from "@/components/demo/TraderOSStrip";
 import PerformanceStats from "@/components/demo/PerformanceStats";
 import TradeJournal from "@/components/demo/TradeJournal";
 import PositionAlerts from "@/components/demo/PositionAlerts";
+import MentorSymbolStrip from "@/components/mentor/MentorSymbolStrip";
 import { normalizeSymbol } from "@/lib/tv-symbol";
 
 type AssetTab = "stock" | "crypto" | "forex";
@@ -326,6 +327,9 @@ const DemoTrading = () => {
             </button>
           ))}
         </div>
+
+        {/* Sophos perspective on this symbol */}
+        <MentorSymbolStrip symbol={symbol} assetType={assetTab} />
 
         {/* Chart */}
         <div id="demo-chart" className="overflow-hidden" style={{ border: "1px solid var(--stoa-rule)", borderRadius: 2, background: "var(--stoa-shine)", height: "clamp(280px, 40vh, 450px)" }}>

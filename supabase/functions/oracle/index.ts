@@ -32,8 +32,8 @@ Deno.serve(async (req) => {
       session_id: sessionId, user_id: user.id, role: "user", content: message,
     });
 
-    // Gather context: recent trades, DNA, rules, codex progress, reflections, streak
-    const [trades, dna, rules, codex, refl, streak, profile, council] = await Promise.all([
+    // Gather context: recent trades, DNA, rules, codex progress, reflections, streak, mentor (Sophos)
+    const [trades, dna, rules, codex, refl, streak, profile, council, mentorOpen, mentorIntents, mentorJournal, mentorProf] = await Promise.all([
       supabase.from("paper_trades")
         .select("symbol,direction,entry_price,exit_price,pnl,pnl_percent,thesis,post_notes,opened_at,closed_at,status,emotion,stop_loss,take_profit")
         .eq("user_id", user.id).order("opened_at", { ascending: false }).limit(20),
@@ -46,6 +46,10 @@ Deno.serve(async (req) => {
       supabase.from("practice_streak").select("*").eq("user_id", user.id).maybeSingle(),
       supabase.from("profiles").select("display_name,xp_total,streak_count,trading_personality,experience_level,trading_goals,trading_level").eq("user_id", user.id).maybeSingle(),
       supabase.from("council_reviews").select("ai_summary,decree,week_starting").eq("user_id", user.id).order("week_starting", { ascending: false }).limit(1).maybeSingle(),
+      supabase.from("mentor_trades").select("symbol,direction,entry_price,stop_loss,take_profit,opened_at,thesis").eq("status","open").limit(10),
+      supabase.from("mentor_intents").select("symbol,direction,trigger_condition_text,thesis,conviction,fail_reasons,valid_until").eq("status","pending").limit(10),
+      supabase.from("mentor_journal").select("kind,symbol,body_text,created_at").order("created_at",{ascending:false}).limit(8),
+      supabase.from("mentor_profile").select("display_name,equity,starting_balance,bio").eq("slug","sophos").maybeSingle(),
     ]);
 
     // Load conversation history
@@ -61,9 +65,17 @@ Deno.serve(async (req) => {
       recentReflections: refl.data || [],
       completedCodex: (codex.data || []).length,
       latestCouncil: council.data,
+      mentorSophos: {
+        profile: mentorProf.data,
+        openPositions: mentorOpen.data || [],
+        pendingIntents: mentorIntents.data || [],
+        recentJournal: mentorJournal.data || [],
+      },
     };
 
-    const systemPrompt = `You are Manteion (Μαντεῖον), the personal Oracle of TradeIIQ — a wise, calm, deeply personal trading coach in the Stoic-Hellenic tradition. You have read everything about this trader. Speak with quiet authority. Use their actual data. Be specific. Cite real symbols, real numbers, real reflections. Never invent.
+    const systemPrompt = `You are Manteion (Μαντεῖον), the personal Oracle of TradeIIQ — a wise, calm, deeply personal trading coach in the Stoic-Hellenic tradition. You have read everything about this trader and you also see what Σοφός (Sophos), the in-app living mentor, is currently doing. Speak with quiet authority. Use their actual data. Cite real symbols, real numbers, real reflections. Never invent.
+
+When the trader asks about Sophos (their public mentor), answer from \`mentorSophos\` — his open positions, pending intents (with conviction 1–5 and fail_reasons) and the last journal entries. You speak ABOUT Sophos, not AS Sophos. When useful, contrast the trader's behaviour with Sophos's same-day decisions.
 
 Voice: thoughtful, sparing, occasionally invoking the Greek (ἀρετή, λόγος, ἕξις) when it adds weight — never decorative. Use markdown. Short paragraphs. Tables when helpful.
 

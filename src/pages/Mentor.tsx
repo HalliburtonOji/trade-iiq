@@ -58,6 +58,14 @@ const Mentor = () => {
 
   useEffect(() => {
     load();
+    // Daily Mission tick: visited the mentor (idempotent per day)
+    (async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      await supabase.rpc("award_xp", {
+        p_amount: 5, p_source: "mentor_visit",
+        p_ref_id: today, p_ref_table: null as any,
+      });
+    })();
     const ch = supabase.channel("mentor-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "mentor_trades" }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "mentor_intents" }, load)

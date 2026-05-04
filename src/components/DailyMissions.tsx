@@ -18,6 +18,8 @@ const defaultMissions: Omit<Mission, "completed">[] = [
   { id: "lesson", label: "Complete 1 lesson", icon: "📚" },
   { id: "watchlist", label: "Add to watchlist", icon: "⭐" },
   { id: "review", label: "Review a trade", icon: "🔄" },
+  { id: "mentor_visit", label: "Read Sophos's journal", icon: "🏛️" },
+  { id: "mentor_diff", label: "Diff a Sophos plan", icon: "⚖️" },
 ];
 
 interface DailyMissionsProps {
@@ -26,15 +28,19 @@ interface DailyMissionsProps {
   lessoned?: boolean;
   watchlisted?: boolean;
   reviewed?: boolean;
+  mentorVisited?: boolean;
+  mentorDiffed?: boolean;
 }
 
-const DailyMissions = ({ analysed = false, logged = false, lessoned = false, watchlisted = false, reviewed = false }: DailyMissionsProps) => {
+const DailyMissions = ({ analysed = false, logged = false, lessoned = false, watchlisted = false, reviewed = false, mentorVisited = false, mentorDiffed = false }: DailyMissionsProps) => {
   const completionMap: Record<string, boolean> = {
     analyse: analysed,
     decision: logged,
     lesson: lessoned,
     watchlist: watchlisted,
     review: reviewed,
+    mentor_visit: mentorVisited,
+    mentor_diff: mentorDiffed,
   };
 
   const missions = defaultMissions.map((m) => ({
