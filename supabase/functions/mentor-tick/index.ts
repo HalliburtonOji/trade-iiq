@@ -188,6 +188,17 @@ serve(async (req) => {
           body_text: `Closed ${t.symbol} ${t.direction} ${hitTP?"at target":"at stop"} for ${realized>=0?"+":""}£${realized.toFixed(0)}. ${reflection}`,
           payload: { exit: exitPrice, pnl: realized, hit: hitTP?"target":"stop" },
         });
+        // Fire-and-forget case-study generation. Don't await — keep tick snappy.
+        try {
+          fetch(`${SUPABASE_URL}/functions/v1/mentor-case-study`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${SERVICE_ROLE}`,
+            },
+            body: JSON.stringify({ trade_id: t.id }),
+          }).catch((e) => console.error("[mentor-tick] case-study trigger failed:", e));
+        } catch (e) { console.error("[mentor-tick] case-study trigger error:", e); }
         realizedDelta += realized;
         summary.closed++;
       } else {
