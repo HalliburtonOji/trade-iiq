@@ -28,32 +28,46 @@ const MentorCaseStudyCard = ({ cs }: Props) => {
   return (
     <Link
       to={`/learn/case/${cs.id}`}
-      className="block rounded-2xl p-5 transition-colors hover:opacity-95"
+      className="group relative block rounded-2xl p-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)]"
       style={{
-        border: "1px solid var(--stoa-rule)",
+        border: `1px solid ${isWin ? "var(--stoa-gold-rule)" : "var(--stoa-rule)"}`,
         background: "var(--stoa-shine)",
         color: "var(--stoa-ink)",
       }}
     >
+      {/* outcome ribbon */}
+      <div
+        aria-hidden
+        className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl"
+        style={{ background: color, opacity: 0.7 }}
+      />
+
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span
-            className="stoa-mono text-xs px-2 py-0.5 rounded"
-            style={{ background: "var(--stoa-bg)", color: "var(--stoa-ink)" }}
+            className="stoa-mono text-xs px-2 py-0.5 rounded font-semibold"
+            style={{ background: "var(--stoa-bg)", color: "var(--stoa-ink)", border: "1px solid var(--stoa-rule)" }}
           >
             {cs.symbol}
           </span>
-          <span className="stoa-kicker" style={{ color: "var(--stoa-muted)" }}>
+          <span className="stoa-kicker" style={{ color: "var(--stoa-muted)", fontSize: 9 }}>
             {cs.direction.toUpperCase()}
           </span>
         </div>
-        <div className="flex items-center gap-1" style={{ color }}>
-          <Icon size={14} />
-          <span className="stoa-mono text-xs">{r}</span>
+        <div
+          className="flex items-center gap-1 rounded-full px-2 py-0.5"
+          style={{
+            color,
+            background: `color-mix(in oklab, ${color} 12%, transparent)`,
+            border: `1px solid color-mix(in oklab, ${color} 30%, transparent)`,
+          }}
+        >
+          <Icon size={12} />
+          <span className="stoa-mono" style={{ fontSize: 11, fontWeight: 600 }}>{r}</span>
         </div>
       </div>
 
-      <div className="stoa-display mt-3" style={{ fontSize: 17, fontWeight: 600, lineHeight: 1.25 }}>
+      <div className="stoa-display mt-3" style={{ fontSize: 17, fontWeight: 600, lineHeight: 1.3 }}>
         {cs.title}
       </div>
       {cs.hook && (
@@ -63,10 +77,26 @@ const MentorCaseStudyCard = ({ cs }: Props) => {
             fontSize: 13,
             fontStyle: "italic",
             color: "var(--stoa-muted)",
-            marginTop: 6,
+            marginTop: 8,
+            lineHeight: 1.5,
           }}
         >
           {cs.hook}
+        </div>
+      )}
+
+      {cs.greek_phrase && (
+        <div
+          className="stoa-greek mt-3"
+          style={{
+            fontSize: 11,
+            color: "var(--stoa-accent)",
+            opacity: 0.85,
+            paddingLeft: 8,
+            borderLeft: "2px solid var(--stoa-gold-rule)",
+          }}
+        >
+          {cs.greek_phrase}
         </div>
       )}
 
