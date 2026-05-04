@@ -37,16 +37,14 @@ serve(async (req) => {
       });
     }
 
-    // gather week's data
+    // gather week's data (these tables are single-mentor; no slug filter needed)
     const [{ data: closed }, { data: intents }, { data: journal }] = await Promise.all([
-      sb.from("mentor_trades").select("symbol,direction,pnl_percent,closed_at,thesis,exit_reason")
-        .eq("mentor_slug", MENTOR).eq("status", "closed")
+      sb.from("mentor_trades").select("symbol,direction,pnl_percent,closed_at,thesis,close_reflection")
+        .eq("status", "closed")
         .gte("closed_at", weekStart.toISOString()).lt("closed_at", weekEnd.toISOString()),
       sb.from("mentor_intents").select("symbol,direction,thesis,status,created_at")
-        .eq("mentor_slug", MENTOR)
         .gte("created_at", weekStart.toISOString()).lt("created_at", weekEnd.toISOString()),
       sb.from("mentor_journal").select("kind,payload,created_at")
-        .eq("mentor_slug", MENTOR)
         .gte("created_at", weekStart.toISOString()).lt("created_at", weekEnd.toISOString())
         .limit(300),
     ]);
@@ -66,7 +64,7 @@ serve(async (req) => {
     const topSkips = Object.entries(skipReasons).sort((a, b) => b[1] - a[1]).slice(0, 3);
 
     const tradeLines = (closed || []).slice(0, 8).map((t) =>
-      `- ${t.symbol} ${t.direction} → ${Number(t.pnl_percent).toFixed(2)}% (${t.exit_reason || "manual"})`
+      `- ${t.symbol} ${t.direction} → ${Number(t.pnl_percent).toFixed(2)}% (${t.close_reflection ? "reflected" : "no note"})`
     ).join("\n") || "- (no trades closed)";
 
     const prompt = `You are Σοφός (Sophos), a stoic Greek trading mentor. Write a SHORT weekly letter to your followers reflecting on this week. Be calm, ancient-wise, and brutally honest. Reference Stoic philosophy (Epictetus, Marcus Aurelius, Seneca) sparingly.
@@ -142,7 +140,6 @@ Return ONLY valid JSON:
 
     // journal entry so the ticker can show "letter published"
     await sb.from("mentor_journal").insert({
-      mentor_slug: MENTOR,
       kind: "letter_published",
       payload: { letter_id: saved.id, title: saved.title, week_starting: weekStartStr, pnl_pct: pnlPct },
     });
