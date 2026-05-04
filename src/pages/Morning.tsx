@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ChevronRight } from "lucide-react";
 import StoaShell from "@/components/stoa/StoaShell";
 import PedimentCap from "@/components/stoa/PedimentCap";
+import MentorTodayStrip from "@/components/mentor/MentorTodayStrip";
 
 type Brief = {
   id: string;
@@ -110,6 +111,8 @@ export default function Morning() {
           </h1>
           <PedimentCap variant="rule" width={140} className="mx-auto" />
         </div>
+
+        <MentorTodayStrip />
 
         {loading && (
           <div style={{ ...PANEL, textAlign: "center", color: "var(--stoa-muted)", fontStyle: "italic", fontFamily: "Georgia, serif" }}>
