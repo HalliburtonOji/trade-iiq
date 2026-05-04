@@ -9,10 +9,11 @@ import MentorPulse from "@/components/mentor/MentorPulse";
 import MentorVsYou from "@/components/mentor/MentorVsYou";
 import MentorPastList from "@/components/mentor/MentorPastList";
 import MentorWatchlistRadar from "@/components/mentor/MentorWatchlistRadar";
+import MentorLetter from "@/components/mentor/MentorLetter";
 import { useMentorFocus } from "@/hooks/useMentorFocus";
 import { Loader2 } from "lucide-react";
 
-type Tab = "now" | "next" | "past" | "journal";
+type Tab = "now" | "next" | "past" | "journal" | "epistle";
 
 const Mentor = () => {
   const [tab, setTab] = useState<Tab>("now");
@@ -74,6 +75,7 @@ const Mentor = () => {
     { key: "next",    label: "NEXT",    greek: "Μέλλον",    count: intents.length },
     { key: "past",    label: "PAST",    greek: "Παρελθόν",  count: closed.length },
     { key: "journal", label: "JOURNAL", greek: "Βίβλος",    count: journal.length },
+    { key: "epistle", label: "EPISTLE", greek: "Ἐπιστολή",  count: 0 },
   ];
 
   return (
@@ -143,6 +145,8 @@ const Mentor = () => {
             {tab === "past" && <MentorPastList closed={closed} />}
 
             {tab === "journal" && <MentorJournalFeed entries={journal} />}
+
+            {tab === "epistle" && <MentorLetter />}
           </>
         )}
       </div>
