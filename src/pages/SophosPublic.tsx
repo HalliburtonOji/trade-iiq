@@ -20,6 +20,7 @@ const SophosPublic = () => {
   const [intents, setIntents] = useState<any[]>([]);
   const [journal, setJournal] = useState<any[]>([]);
   const [letters, setLetters] = useState<any[]>([]);
+  const [cases, setCases] = useState<any[]>([]);
   const [tab, setTab] = useState<Tab>("now");
   const [loading, setLoading] = useState(true);
 
