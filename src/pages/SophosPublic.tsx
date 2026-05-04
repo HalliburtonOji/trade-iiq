@@ -150,6 +150,13 @@ const SophosPublic = () => {
                       {closed.slice(0, 30).map(t => <MentorTradeCard key={t.id} trade={t} closed />)}
                     </div>
               )}
+              {tab === "cases" && (
+                cases.length === 0
+                  ? <Empty text="No case studies yet. Sophos writes one each time he closes a trade." />
+                  : <div className="grid gap-4 sm:grid-cols-2">
+                      {cases.map(c => <MentorCaseStudyCard key={c.id} cs={c} />)}
+                    </div>
+              )}
               {tab === "journal" && <MentorJournalFeed entries={journal} />}
               {tab === "epistle" && <MentorLetter />}
             </section>
