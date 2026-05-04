@@ -777,6 +777,295 @@ export type Database = {
         }
         Relationships: []
       }
+      mentor_copies: {
+        Row: {
+          created_at: string
+          id: string
+          paper_trade_id: string | null
+          source_id: string
+          source_kind: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          paper_trade_id?: string | null
+          source_id: string
+          source_kind: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          paper_trade_id?: string | null
+          source_id?: string
+          source_kind?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_copies_paper_trade_id_fkey"
+            columns: ["paper_trade_id"]
+            isOneToOne: false
+            referencedRelation: "paper_trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentor_followers: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mentor_intents: {
+        Row: {
+          asset_type: string
+          created_at: string
+          direction: string
+          entry_hint: number | null
+          id: string
+          invalidation_text: string
+          resolution_note: string | null
+          resolved_at: string | null
+          size_pct: number
+          status: string
+          stop_loss: number
+          symbol: string
+          take_profit: number
+          thesis: string
+          trigger_condition_text: string
+          trigger_kind: string
+          trigger_value: number | null
+          valid_until: string
+        }
+        Insert: {
+          asset_type?: string
+          created_at?: string
+          direction: string
+          entry_hint?: number | null
+          id?: string
+          invalidation_text?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          size_pct?: number
+          status?: string
+          stop_loss: number
+          symbol: string
+          take_profit: number
+          thesis?: string
+          trigger_condition_text: string
+          trigger_kind: string
+          trigger_value?: number | null
+          valid_until: string
+        }
+        Update: {
+          asset_type?: string
+          created_at?: string
+          direction?: string
+          entry_hint?: number | null
+          id?: string
+          invalidation_text?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          size_pct?: number
+          status?: string
+          stop_loss?: number
+          symbol?: string
+          take_profit?: number
+          thesis?: string
+          trigger_condition_text?: string
+          trigger_kind?: string
+          trigger_value?: number | null
+          valid_until?: string
+        }
+        Relationships: []
+      }
+      mentor_journal: {
+        Row: {
+          body_text: string
+          created_at: string
+          id: string
+          intent_id: string | null
+          kind: string
+          payload: Json
+          symbol: string | null
+          trade_id: string | null
+        }
+        Insert: {
+          body_text?: string
+          created_at?: string
+          id?: string
+          intent_id?: string | null
+          kind: string
+          payload?: Json
+          symbol?: string | null
+          trade_id?: string | null
+        }
+        Update: {
+          body_text?: string
+          created_at?: string
+          id?: string
+          intent_id?: string | null
+          kind?: string
+          payload?: Json
+          symbol?: string | null
+          trade_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_journal_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "mentor_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentor_journal_trade_id_fkey"
+            columns: ["trade_id"]
+            isOneToOne: false
+            referencedRelation: "mentor_trades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentor_locks: {
+        Row: {
+          id: number
+          locked_at: string | null
+          locked_by: string | null
+        }
+        Insert: {
+          id?: number
+          locked_at?: string | null
+          locked_by?: string | null
+        }
+        Update: {
+          id?: number
+          locked_at?: string | null
+          locked_by?: string | null
+        }
+        Relationships: []
+      }
+      mentor_profile: {
+        Row: {
+          bio: string
+          born_at: string
+          display_name: string
+          equity: number
+          id: string
+          name: string
+          slug: string
+          starting_balance: number
+          stats_json: Json
+          updated_at: string
+        }
+        Insert: {
+          bio?: string
+          born_at?: string
+          display_name?: string
+          equity?: number
+          id?: string
+          name?: string
+          slug?: string
+          starting_balance?: number
+          stats_json?: Json
+          updated_at?: string
+        }
+        Update: {
+          bio?: string
+          born_at?: string
+          display_name?: string
+          equity?: number
+          id?: string
+          name?: string
+          slug?: string
+          starting_balance?: number
+          stats_json?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      mentor_trades: {
+        Row: {
+          asset_type: string
+          close_reflection: string | null
+          closed_at: string | null
+          direction: string
+          entry_price: number
+          exit_price: number | null
+          id: string
+          intent_id: string | null
+          opened_at: string
+          pnl: number | null
+          pnl_percent: number | null
+          quantity: number
+          status: string
+          stop_loss: number
+          symbol: string
+          take_profit: number
+          thesis: string
+        }
+        Insert: {
+          asset_type?: string
+          close_reflection?: string | null
+          closed_at?: string | null
+          direction: string
+          entry_price: number
+          exit_price?: number | null
+          id?: string
+          intent_id?: string | null
+          opened_at?: string
+          pnl?: number | null
+          pnl_percent?: number | null
+          quantity: number
+          status?: string
+          stop_loss: number
+          symbol: string
+          take_profit: number
+          thesis?: string
+        }
+        Update: {
+          asset_type?: string
+          close_reflection?: string | null
+          closed_at?: string | null
+          direction?: string
+          entry_price?: number
+          exit_price?: number | null
+          id?: string
+          intent_id?: string | null
+          opened_at?: string
+          pnl?: number | null
+          pnl_percent?: number | null
+          quantity?: number
+          status?: string
+          stop_loss?: number
+          symbol?: string
+          take_profit?: number
+          thesis?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_trades_intent_id_fkey"
+            columns: ["intent_id"]
+            isOneToOne: false
+            referencedRelation: "mentor_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -1755,6 +2044,10 @@ export type Database = {
           new_streak: number
           new_xp: number
         }[]
+      }
+      mentor_source_copy_count: {
+        Args: { p_id: string; p_kind: string }
+        Returns: number
       }
       touch_practice_ritual: {
         Args: { p_kind: string }
